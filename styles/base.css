@@ -1,0 +1,61 @@
+html.cwn-active {
+  --cwn-bg:#f8f8f6; --cwn-surface:#fff; --cwn-ink:#292824;
+  --cwn-line:#dedbd3; --cwn-accent:#c96442; --cwn-rail:220px;
+  transform:none!important; perspective:none!important; overflow:hidden!important;
+  color-scheme:light;
+}
+html.cwn-active body {
+  --SmartThemeBodyColor:var(--cwn-ink);
+  --SmartThemeBlurTintColor:var(--cwn-surface);
+  --SmartThemeChatTintColor:transparent;
+  --SmartThemeUserMesBlurTintColor:var(--cwn-surface);
+  --SmartThemeBotMesBlurTintColor:transparent;
+  --SmartThemeBorderColor:var(--cwn-line);
+  margin:0!important; background:var(--cwn-bg)!important; color:var(--cwn-ink)!important;
+  transform:none!important; perspective:none!important; overflow:hidden!important;
+}
+.cwn-active #sheld {
+  position:fixed!important; box-sizing:border-box!important; margin:0!important;
+  display:flex!important; flex-direction:column!important; transform:none!important;
+  min-height:0!important; max-height:none!important; padding:0!important;
+  border:0!important; background:var(--cwn-bg)!important; overflow:hidden!important;
+}
+.cwn-active #chat {
+  position:relative!important; flex:1 1 0!important; min-height:0!important;
+  width:100%!important; height:auto!important; max-height:none!important;
+  overflow:auto!important; overscroll-behavior:contain; scroll-behavior:auto!important;
+  border:0!important; background:transparent!important; backdrop-filter:none!important;
+  padding:20px max(14px,calc((100% - 820px)/2))!important;
+}
+.cwn-active #form_sheld {
+  position:relative!important; inset:auto!important; flex:0 0 auto!important;
+  width:100%!important; max-width:840px!important; margin:0 auto!important;
+  padding:10px 14px max(12px,env(safe-area-inset-bottom))!important;
+  transform:none!important; background:transparent!important;
+}
+.cwn-active #send_form {
+  border:1px solid var(--cwn-line)!important; border-radius:24px!important;
+  background:var(--cwn-surface)!important; color:var(--cwn-ink)!important;
+  padding:12px!important; box-shadow:0 3px 16px #2928240a!important;
+}
+.cwn-active #send_textarea {color:var(--cwn-ink)!important;background:transparent!important;}
+.cwn-active #top-settings-holder {background:var(--cwn-bg)!important;color:var(--cwn-ink)!important;overflow:auto!important;overscroll-behavior:contain;}
+.cwn-active #top-settings-holder .drawer {flex:0 0 auto!important;width:100%!important;}
+.cwn-active #top-settings-holder .drawer > .drawer-toggle {height:44px;display:flex;align-items:center;justify-content:flex-start;padding:0 14px;}
+.cwn-active #top-settings-holder .drawer > .drawer-toggle .drawer-icon {font-size:22px!important;color:var(--cwn-ink)!important;}
+.cwn-active #top-settings-holder .drawer > .drawer-content {color:var(--cwn-ink)!important;background:var(--cwn-surface)!important;}
+/* Native drawers animate their height from the top bar. Our full-height panels
+   keep the same geometry while closed and switch visibility without collapsing. */
+.cwn-active #top-settings-holder .drawer > .drawer-content {
+  transition:none!important;animation:none!important;margin:0!important;
+  min-width:0!important;border-radius:0!important;box-sizing:border-box!important;
+}
+.cwn-active #top-settings-holder .drawer > .drawer-content:not(.openDrawer) {display:none!important;}
+.cwn-active #cwn-brand {padding:18px;font:30px Georgia,serif;color:var(--cwn-ink);}
+.cwn-active #cwn-backdrop {display:none;}
+html.cwn-active body #top-bar {background-color:var(--cwn-bg)!important;box-shadow:none!important;}
+html.cwn-active body #send_form {background-color:var(--cwn-surface)!important;}
+.cwn-active .cwn-nav-label {padding-left:14px;font:15px/1.3 system-ui,sans-serif;}
+.cwn-active .cwn-panel-actions {position:sticky;top:0;z-index:2;display:flex;justify-content:space-between;gap:12px;flex:0 0 auto;width:100%;padding:8px 0;background:var(--cwn-surface);border-bottom:1px solid var(--cwn-line);margin-bottom:12px;}
+.cwn-active .cwn-panel-actions button {min-height:40px;padding:8px 12px;border:1px solid var(--cwn-line);border-radius:10px;background:var(--cwn-bg);color:var(--cwn-ink);font:14px/1.3 system-ui;cursor:pointer;}
+.cwn-active .cwn-panel-actions button:focus-visible,.cwn-active #cwn-menu:focus-visible {outline:2px solid var(--cwn-accent);outline-offset:2px;}

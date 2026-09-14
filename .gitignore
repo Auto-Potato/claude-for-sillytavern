@@ -1,0 +1,13 @@
+node_modules/
+.env
+.env.*
+!.env.example
+config.yaml
+secrets.json
+data/
+*.log
+*.zip
+.DS_Store
+Thumbs.db
+.vscode/
+coverage/

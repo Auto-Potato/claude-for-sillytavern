@@ -1,0 +1,15 @@
+@import url("https://fonts.googleapis.com/css2?family=Arimo:wght@400;500;600;700&family=Hanken+Grotesk:wght@400;500;600&family=Newsreader:opsz,wght@6..72,400..600&family=Noto+Sans+SC:wght@400;500;700&family=Noto+Serif+SC:wght@300&display=swap");
+/* Original font files and stacks, shared by both layouts. */
+html.cwn-active {
+  --cwn-cjk:"PingFang SC","Microsoft YaHei","Hiragino Sans GB","Noto Sans CJK SC","Source Han Sans SC","Heiti SC",sans-serif;
+  --cwn-font-ui:"Hanken Grotesk",-apple-system,"Segoe UI",Roboto,Helvetica,Arial,var(--cwn-cjk);
+  --cwn-font-reading:"Newsreader",Georgia,"Times New Roman",Times,var(--cwn-cjk);
+  --cwn-font-hero:"Newsreader",Georgia,"Noto Serif SC",var(--cwn-cjk);
+}
+html.cwn-active body,
+html.cwn-active body :is(input,textarea,select,button:not(.fa):not(.fa-solid):not(.fa-regular):not(.fa-brands)),
+html.cwn-active body :is(.cwn-nav-label,.cwn-context-button,.cwn-composer-effort,.cwn-panel-actions button,.cwn-recent-item strong,.cwn-recent-item span,.cwn-profile-text strong,.cwn-profile-text span,.cwn-recent-heading h2,.cwn-recent-heading button,.cwn-recent-status) {font-family:var(--cwn-font-ui)!important;}
+html.cwn-active body #cwn-brand {font-family:var(--cwn-font-reading)!important;}
+html.cwn-active body #cwn-home h1 {font-family:var(--cwn-font-hero)!important;}
+html.cwn-active body #chat .mes_text {font-family:var(--cwn-font-reading)!important;}
+html.cwn-active body #chat :is(pre,code) {font-family:monospace!important;}

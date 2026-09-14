@@ -1,0 +1,11 @@
+{
+  "display_name": "Claude for SillyTavern",
+  "loading_order": 100,
+  "requires": [],
+  "optional": [],
+  "js": "index.js",
+  "css": "styles/theme.css",
+  "author": "Local development",
+  "version": "0.1.0-dev",
+  "auto_update": false
+}

@@ -1,0 +1,9 @@
+@media(min-width:701px) {
+  .cwn-active #cwn-menu,.cwn-active #cwn-backdrop {display:none;}
+  .cwn-active .cwn-panel-back {display:none;}
+  .cwn-active .cwn-panel-actions {justify-content:flex-end;}
+  .cwn-active #sheld {left:var(--cwn-rail)!important;right:0!important;top:0!important;bottom:0!important;width:calc(100% - var(--cwn-rail))!important;height:100dvh!important;}
+  .cwn-active #top-bar {position:fixed!important;inset:0 auto 0 0!important;width:var(--cwn-rail)!important;height:100dvh!important;background:var(--cwn-bg)!important;z-index:900!important;}
+  .cwn-active #top-settings-holder {position:fixed!important;inset:0 auto 0 0!important;width:var(--cwn-rail)!important;height:100dvh!important;max-height:none!important;display:flex!important;flex-direction:column!important;justify-content:flex-start!important;transform:none!important;z-index:1000!important;border-right:1px solid var(--cwn-line);}
+  .cwn-active #top-settings-holder .drawer > .drawer-content {position:fixed!important;left:var(--cwn-rail)!important;right:auto!important;top:0!important;bottom:0!important;width:min(620px,calc(100vw - var(--cwn-rail)))!important;max-width:none!important;height:100dvh!important;max-height:none!important;overflow:auto!important;transform:none!important;}
+}

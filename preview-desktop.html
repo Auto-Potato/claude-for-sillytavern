@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="zh-CN">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Claude Theme Next · 桌面预览</title>
+<style>
+  *{box-sizing:border-box}html,body{margin:0;height:100%;overflow:hidden;background:#292a2d;color:#eee;font:12px/1.4 system-ui}
+  header{height:36px;display:flex;align-items:center;justify-content:space-between;padding:0 12px;gap:8px}
+  header a{color:#ddd}main{height:calc(100% - 36px);display:grid;place-items:center;overflow:hidden}
+  #frame{position:relative;overflow:hidden;background:#faf9f5}
+  iframe{position:absolute;left:0;top:0;width:1280px;height:800px;border:0;transform-origin:top left;background:#faf9f5}
+</style>
+<header><span>桌面布局 · 1280 × 800</span><a href="/" target="_top">直接打开酒馆</a></header>
+<main><div id="frame"><iframe src="/" title="SillyTavern 桌面预览"></iframe></div></main>
+<script>
+  const main=document.querySelector('main'), frame=document.querySelector('#frame'), page=document.querySelector('iframe');
+  const observer=new ResizeObserver(([entry])=>{
+    const scale=Math.min(entry.contentRect.width/1280,entry.contentRect.height/800,1);
+    frame.style.width=`${1280*scale}px`;frame.style.height=`${800*scale}px`;
+    page.style.transform=`scale(${scale})`;
+  });
+  observer.observe(main);
+  window.addEventListener('pagehide',event=>{if(!event.persisted) observer.disconnect();});
+</script>
+<script type="module" src="./preview-header.js"></script>
+</html>
+
+

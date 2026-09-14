@@ -1,0 +1,37 @@
+<!doctype html><html><meta charset="utf-8"><title>可视区域键盘边界测试</title>
+<link rel="stylesheet" href="../styles/theme.css"><style>*{box-sizing:border-box}#result{position:fixed;z-index:9000;right:0;top:0;max-width:220px;background:white;font:12px monospace;white-space:pre-wrap}textarea{height:220px}</style>
+<body><pre id="result">运行中</pre><div id="top-bar"></div><div id="top-settings-holder"></div>
+<div id="sheld"><div id="chat">历史消息</div><div id="form_sheld"><div id="send_form"><div id="nonQRFormItems"><textarea id="send_textarea"></textarea><div id="leftSendForm">＋</div><div id="rightSendForm"><button id="send_but">↑</button></div></div></div></div></div>
+<script type="module">
+import {mountShell} from '../src/shell.js';
+const report=document.querySelector('#result'),results=[];
+const check=(condition,text)=>{if(!condition)throw new Error(text);results.push('通过：'+text);};
+const viewport=new EventTarget();Object.assign(viewport,{height:850,scale:1});
+const media=new EventTarget();media.matches=true;
+const environment=new EventTarget();Object.assign(environment,{innerHeight:850,visualViewport:viewport,matchMedia:()=>media,AbortController,MutationObserver});
+let requests=0;
+environment.requestAnimationFrame=fn=>{requests++;return requestAnimationFrame(fn);};
+environment.cancelAnimationFrame=id=>cancelAnimationFrame(id);
+const tick=()=>new Promise(resolve=>requestAnimationFrame(resolve));
+const shell=document.querySelector('#sheld'),input=document.querySelector('textarea');
+let dispose;
+try {
+ dispose=mountShell(document,environment,()=>{});
+ input.value=Array.from({length:12},(_,i)=>`输入第 ${i+1} 行`).join('\n');input.focus();await tick();
+ const before=requests;viewport.height=280;
+ for(let i=0;i<30;i++)viewport.dispatchEvent(new Event('resize'));
+ check(requests===before+1,'连续视口事件合并到一帧');await tick();
+ check(shell.style.getPropertyValue('--cwn-visible-height')==='280px','只改变可视区域时应用键盘高度');
+ check(shell.getBoundingClientRect().height===224,'测试确实处于手机布局');
+ check(document.querySelector('#send_but').getBoundingClientRect().bottom<=shell.getBoundingClientRect().bottom,'多行输入时发送按钮未被聊天外壳裁切');
+ const idle=requests;await tick();await tick();check(requests===idle,'空闲时无持续测量');
+ viewport.scale=2;viewport.dispatchEvent(new Event('resize'));await tick();
+ check(!shell.style.getPropertyValue('--cwn-visible-height'),'双指缩放不作为键盘高度');
+ viewport.scale=1;viewport.height=850;viewport.dispatchEvent(new Event('resize'));await tick();
+ check(shell.style.getPropertyValue('--cwn-visible-height')==='850px','收起键盘恢复原高度');
+ input.blur();input.dispatchEvent(new FocusEvent('focusout',{bubbles:true}));await tick();check(!shell.style.getPropertyValue('--cwn-visible-height'),'失焦清除临时高度（active='+document.activeElement.tagName+'，height='+shell.style.getPropertyValue('--cwn-visible-height')+'）');
+ dispose();const final=requests;viewport.dispatchEvent(new Event('resize'));await tick();
+ check(requests===final,'卸载后视口事件不再触发测量');
+ report.textContent=results.join('\n')+'\n全部通过';
+}catch(error){report.textContent=results.join('\n')+'\n失败：'+error.message;dispose?.();}
+</script></body></html>

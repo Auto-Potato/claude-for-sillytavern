@@ -1,0 +1,17 @@
+/* Original warm-paper / ink palette, shared by desktop and mobile. */
+html.cwn-active {
+ --cwn-bg:#f4f0e6;--cwn-surface:#efeadf;--cwn-ink:#232219;
+ --cwn-muted:#6e6857;--cwn-line:#d8cfbb;--cwn-hover:#e9e3d5;
+ --cwn-focus:#9b9280;--cwn-accent:#c8623c;--cwn-quote:#c8623c;--cwn-code:#e9e3d5;
+ --cwn-composer-bg:#efeadf;--cwn-composer-pill:#e9e3d5;--cwn-composer-text:#232219;--cwn-composer-ink:#232219;--cwn-composer-muted:#9b9280;--cwn-composer-accent:#c8623c;--cwn-composer-line:#d8cfbb;
+}
+html.cwn-active[data-cwn-theme="dark"] {
+ --cwn-bg:#1c1b19;--cwn-surface:#232220;--cwn-ink:#ede9df;
+ --cwn-muted:#a8a192;--cwn-line:#3b372f;--cwn-hover:#2a2825;
+ --cwn-focus:#8a8375;--cwn-accent:#d97757;--cwn-quote:#d97757;--cwn-code:#2a2825;
+ --cwn-composer-bg:#232220;--cwn-composer-pill:#2a2825;--cwn-composer-text:#ede9df;--cwn-composer-ink:#ede9df;--cwn-composer-muted:#8a8375;--cwn-composer-accent:#d97757;--cwn-composer-line:#3b372f;
+}
+html.cwn-active body #sheld #send_form {background:var(--cwn-surface)!important;border-color:var(--cwn-line)!important;}
+html.cwn-active body #sheld #rightSendForm :is(#send_but,#mes_stop) {background:var(--cwn-accent)!important;}
+html.cwn-active body .cwn-api-notice {color:var(--cwn-composer-muted);}
+html.cwn-active body {--SmartThemeBodyColor:var(--cwn-ink);--SmartThemeBlurTintColor:var(--cwn-bg);--SmartThemeChatTintColor:var(--cwn-bg);--SmartThemeBorderColor:var(--cwn-line);}

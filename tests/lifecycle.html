@@ -1,0 +1,44 @@
+<!doctype html><html><meta charset="utf-8"><title>Claude Theme Next 生命周期测试</title>
+<body><h1>生命周期测试</h1><pre id="result">运行中</pre>
+<div id="original-parent"><div id="sheld"><textarea></textarea></div></div>
+<div id="top-settings-holder"><div class="drawer"><div class="drawer-toggle"><button class="drawer-icon" title="测试面板">面板</button></div><div class="drawer-content closedDrawer"></div></div></div>
+<script type="module">
+import {mountShell} from '../src/shell.js';
+const results=[];
+function check(condition, message) { if (!condition) throw new Error(message); results.push('通过：'+message); }
+const tick=()=>new Promise(resolve=>requestAnimationFrame(resolve));
+try {
+ const shell=document.querySelector('#sheld'), rail=document.querySelector('#top-settings-holder');
+ const parent=shell.parentNode, original=parent.innerHTML;
+ const panel=rail.querySelector('.drawer-content');
+ let calls=0;
+ const toggle=()=>{calls++; panel.classList.toggle('openDrawer');panel.classList.toggle('closedDrawer');};
+ let dispose=mountShell(document,window,toggle);
+ check(shell.parentNode===document.body,'聊天外壳脱离原先包含块');
+ check(document.querySelectorAll('.cwn-panel-actions').length===1,'面板只有一个工具栏');
+ panel.classList.replace('closedDrawer','openDrawer');
+ await tick();
+ if (matchMedia('(max-width:700px)').matches) {
+   check(document.documentElement.classList.contains('cwn-menu-open') && !rail.inert && shell.inert,'原生入口打开面板时自动展开导航并隔离聊天');
+ }
+ document.querySelector('.cwn-panel-actions button:last-child').click();
+ await tick();
+ check(calls===1 && !panel.classList.contains('openDrawer'),'关闭入口调用宿主且不重复触发');
+ if (matchMedia('(max-width:700px)').matches) check(rail.inert && !shell.inert,'关闭面板恢复聊天并禁用屏幕外导航');
+ const oldButton=document.querySelector('.cwn-panel-actions button:last-child');
+ dispose();dispose();
+ check(shell.parentNode===parent && parent.innerHTML===original,'重复卸载恢复原 DOM 位置和内容');
+ check(!rail.inert && !shell.inert,'卸载恢复 inert 状态');
+ check(!document.querySelector('#cwn-menu,.cwn-nav-label,.cwn-panel-actions'),'卸载清除新增节点');
+ panel.classList.replace('closedDrawer','openDrawer');
+ oldButton.click(); await tick();
+ check(calls===1,'卸载后旧按钮监听已清除');
+ check(!document.documentElement.classList.contains('cwn-menu-open'),'卸载后观察器不再更改页面');
+ dispose=mountShell(document,window,toggle);
+ check(document.querySelectorAll('.cwn-panel-actions').length===1,'重新挂载没有重复工具栏');
+ document.querySelector('.cwn-panel-actions button:last-child').click(); await tick();
+ check(calls===2,'重新挂载只有一组有效监听');
+ dispose();
+ document.querySelector('#result').textContent=results.join('\n')+'\n全部通过';
+} catch(error) {document.querySelector('#result').textContent=results.join('\n')+'\n失败：'+error.stack;}
+</script></body></html>

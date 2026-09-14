@@ -1,0 +1,31 @@
+<!doctype html><html><meta charset="utf-8"><title>欢迎页异步状态测试</title><body>
+<h1>欢迎页异步状态测试</h1><pre id="result">运行中</pre>
+<div id="top-settings-holder"><div id="cwn-brand">Claude</div></div><div id="sheld"></div>
+<script type="module">
+import {mountHome} from '../src/home.js';
+const result=document.querySelector('#result'), checks=[];
+const check=(condition,text)=>{if(!condition)throw new Error(text);checks.push('通过：'+text);};
+const tick=()=>new Promise(resolve=>setTimeout(resolve,0));
+let callback,resolveFetch,rejectFetch,calls=0,unsubscribed=0,openCalls=0,resolveOpen;
+const host={isHome:()=>true,subscribe:fn=>{callback=fn;return()=>unsubscribed++;},recent:()=>{calls++;return new Promise((resolve,reject)=>{resolveFetch=resolve;rejectFetch=reject;});},openRecent:()=>{openCalls++;return new Promise(resolve=>resolveOpen=resolve);},newChat:async()=>{}};
+try {
+ const dispose=mountHome(document,window,host);
+ callback();callback();callback();
+ check(calls===1,'请求未完成时多个宿主事件不启动并行请求');
+ resolveFetch([{name:'<img src=x onerror=alert(1)>',file:'a',avatar:'test'}]);await tick();
+ check(calls===2,'期间发生变化只补一次刷新');
+ check(!document.querySelector('#cwn-recent img[onerror]') && document.querySelector('.cwn-recent-item > span').textContent==='<img src=x onerror=alert(1)>','聊天名称按文本渲染，不解释 HTML');
+ rejectFetch(new Error('模拟网络错误'));await tick();
+ check(document.querySelectorAll('.cwn-recent-item').length===1,'刷新失败保留可用列表');
+ const button=document.querySelector('.cwn-recent-item');button.click();button.click();
+ check(openCalls===1,'连续点击不会同时发起两次聊天切换');
+ resolveOpen();await tick();
+ callback();
+ const lateResolve=resolveFetch;
+ dispose();
+ lateResolve([{name:'迟到结果',file:'b'}]);await tick();
+ check(!document.querySelector('#cwn-recent,#cwn-home,#cwn-new-chat,#cwn-profile'),'卸载后迟到响应不会重新写入界面');
+ check(unsubscribed===1,'卸载取消宿主事件订阅');
+ result.textContent=checks.join('\n')+'\n全部通过';
+}catch(error){result.textContent=checks.join('\n')+'\n失败：'+error.stack;}
+</script></body></html>
