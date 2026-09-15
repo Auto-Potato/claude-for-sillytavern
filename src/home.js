@@ -1,3 +1,4 @@
+import { createComposerTransition } from './composer-transition.js';
 import {mountReadOnlyChat} from './readonly-chat.js';
 import { takeGreeting } from './greeting.js';
 import { chatLabel } from './chat-label.js';
@@ -112,10 +113,12 @@ export function mountHome(doc, win, host) {
     catch(error){if(!disposed)errorNode.textContent=error.message || '操作失败，请重试。';return false;}
     finally{mutating=false;if(!disposed)newChat.disabled=false;}
   }
-  let wasHome=false, greetingName;
+  const composerTransition=createComposerTransition(doc,win);
+  let wasHome=false, greetingName, returningHome=false;
   function syncHome() {
     if(disposed) return;
-    const isHome=host.isHome();
+    const isHome=returningHome || host.isHome();
+    const finishTransition=composerTransition.prepare(isHome);
     shell.classList.toggle('cwn-home-active',isHome);
     shell.classList.remove('cwn-show-welcome');
     const name=host.userName?.()?.trim() || '';
@@ -127,6 +130,7 @@ export function mountHome(doc, win, host) {
       greetingName=name;
     }
     wasHome=isHome;
+    finishTransition();
   }
   function closeNavigation() {
     if(doc.documentElement.classList.contains('cwn-menu-open')) doc.getElementById('cwn-menu')?.click();
@@ -175,7 +179,12 @@ export function mountHome(doc, win, host) {
       if(!disposed) {if(pending){pending=false;void refreshList();}}
     }
   }
-  listen(newChat,'click',()=>{if(host.isGenerating()){void preview.show(null);closeNavigation();return;}void action(async()=>{await host.newChat();preview.close();});});
+  listen(newChat,'click',()=>{if(host.isGenerating()){void preview.show(null);closeNavigation();return;}void action(async()=>{
+      // Show the destination before native clearChat removes messages and awaits I/O.
+      returningHome=true;syncHome();
+      try {await host.newChat();preview.close();}
+      finally {returningHome=false;syncHome();}
+    });});
   listen(list,'click',event=>{
     if(mutating || switching)return;
     const more=event.target.closest('.cwn-recent-more');
@@ -205,7 +214,7 @@ export function mountHome(doc, win, host) {
   const unsubscribe=host.subscribe((refresh=true)=>{syncHome();if(refresh) void refreshList();});
   syncHome();void refreshList();
   return ()=>{
-    disposed=true;preview.dispose();unsubscribeGeneration();themeObserver.disconnect();closeActions();dialogReturn=null;dialog.remove();actions.remove();abort.abort();unsubscribe();hero.remove();newChat.remove();recent.remove();profile.remove();
+    disposed=true;composerTransition.dispose();preview.dispose();unsubscribeGeneration();themeObserver.disconnect();closeActions();dialogReturn=null;dialog.remove();actions.remove();abort.abort();unsubscribe();hero.remove();newChat.remove();recent.remove();profile.remove();
     shell.classList.remove('cwn-home-active','cwn-show-welcome');
   };
 }

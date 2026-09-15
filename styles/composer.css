@@ -38,14 +38,8 @@
   html.cwn-active body #cwn-composer-context {order:3;flex:0 1 auto;max-width:210px;flex-wrap:nowrap;gap:5px;height:34px;padding:0 7px 0 10px;}
   html.cwn-active body .cwn-context-button {padding:0;min-height:34px;font:600 calc(13px * var(--fontScale,1))/1 "Hanken Grotesk",system-ui,sans-serif;color:var(--cwn-composer-text);}
   html.cwn-active body .cwn-context-button:nth-child(2) {max-width:80px;font-weight:400;color:var(--cwn-composer-muted);}
-  html.cwn-active body .cwn-home-active #form_sheld {padding-bottom:22px!important;transform:translateY(clamp(-128px,-10vh,-72px))!important;}
   html.cwn-active body .cwn-home-active #cwn-home {flex-direction:row;gap:12px;padding:20px 20px 28px;margin:0 auto 8px;transform:translateY(clamp(-128px,-10vh,-72px));}
   html.cwn-active body .cwn-home-active .cwn-star {width:34px;height:34px;flex-basis:34px;}
-  html.cwn-active body .cwn-home-active #send_form {display:block!important;min-height:126px;padding:12px 14px 10px!important;border-radius:20px!important;background:color-mix(in srgb,var(--cwn-bg) 82%,var(--cwn-composer-text) 7%)!important;box-shadow:0 4px 20px rgba(0,0,0,.035),0 0 0 .5px var(--cwn-composer-line)!important;}
-  html.cwn-active body .cwn-home-active #send_form #nonQRFormItems {display:grid!important;grid-template-columns:auto minmax(0,1fr) auto;grid-template-rows:minmax(56px,auto) 42px;column-gap:10px;row-gap:0;}
-  html.cwn-active body .cwn-home-active #send_textarea {grid-column:1 / -1;grid-row:1;align-self:start;width:100%!important;min-height:50px!important;height:50px;padding:7px!important;}
-  html.cwn-active body .cwn-home-active #leftSendForm {grid-column:1;grid-row:2;height:36px;}
-  html.cwn-active body .cwn-home-active #rightSendForm {grid-column:3;grid-row:2;}
   html.cwn-active body .cwn-home-active #cwn-composer-context {grid-column:2;grid-row:2;justify-self:end;}
 }
 @media(max-width:700px) {
@@ -54,12 +48,8 @@
   /* Values from day-mobile.css: welcome and conversation are separate layouts.
      Keep our flex shell so the native chat never needs fixed-position padding. */
   html.cwn-active body #form_sheld {padding:7px 10px max(7px,env(safe-area-inset-bottom))!important;}
-  html.cwn-active body .cwn-home-active #form_sheld {padding:0 12px max(10px,env(safe-area-inset-bottom))!important;}
   html.cwn-active body #send_form {box-sizing:border-box!important;padding:10px 10px 8px!important;min-height:108px;border:1px solid transparent!important;border-radius:18px!important;background:var(--cwn-composer-bg)!important;box-shadow:0 0 0 .5px var(--cwn-composer-line)!important;}
-  html.cwn-active body .cwn-home-active #send_form {display:grid!important;grid-template-columns:38px minmax(0,1fr) 42px;grid-template-rows:minmax(52px,auto) 40px;align-items:center;column-gap:4px;padding:10px 9px 8px!important;min-height:112px;border-radius:22px!important;box-shadow:0 10px 32px #00000024,0 0 0 .5px var(--cwn-composer-line)!important;}
   .cwn-active #send_form #nonQRFormItems {align-items:center;grid-template-columns:auto minmax(0,1fr) 42px;grid-template-rows:minmax(48px,auto) 42px;column-gap:6px;row-gap:0;}
-  .cwn-active .cwn-home-active #send_form #nonQRFormItems {display:contents!important;}
-  .cwn-active .cwn-home-active #send_form > :not(#nonQRFormItems) {grid-column:1 / -1;}
   .cwn-active #cwn-composer-context {display:none;}
   .cwn-active .cwn-home-active #cwn-composer-context {display:flex;justify-self:start;align-items:center;flex-wrap:nowrap;gap:5px;max-width:100%;height:36px;box-sizing:border-box;border-radius:999px;background:var(--cwn-composer-pill);padding:0 11px;color:var(--cwn-composer-ink);}
   .cwn-active .cwn-context-button {padding:0;font-family:"Hanken Grotesk",-apple-system,"Segoe UI",Roboto,Helvetica,Arial,"PingFang SC","Microsoft YaHei","Hiragino Sans GB","Noto Sans CJK SC","Source Han Sans SC","Heiti SC",sans-serif;font-size:calc(13px * var(--fontScale,1));line-height:1;min-height:36px;flex:0 1 auto;color:inherit;}
@@ -69,15 +59,11 @@
   .cwn-active .cwn-home-active .cwn-composer-effort {display:block;flex:0 0 auto;font:400 calc(13px * var(--fontScale,1))/1 "Hanken Grotesk",-apple-system,"Segoe UI",Roboto,Helvetica,Arial,"PingFang SC","Microsoft YaHei","Hiragino Sans GB","Noto Sans CJK SC","Source Han Sans SC","Heiti SC",sans-serif;opacity:.58;}
   .cwn-active #send_textarea {align-self:start;box-sizing:border-box;min-height:44px!important;margin:0!important;padding:5px 7px!important;font-size:15px!important;line-height:1.35!important;font-family:"Hanken Grotesk",-apple-system,"Segoe UI",Roboto,Helvetica,Arial,"PingFang SC","Microsoft YaHei","Hiragino Sans GB","Noto Sans CJK SC","Source Han Sans SC","Heiti SC",sans-serif!important;color:var(--cwn-composer-ink)!important;}
   .cwn-active #send_textarea::placeholder {color:var(--cwn-composer-muted)!important;}
-  .cwn-active .cwn-home-active #send_textarea {min-height:46px!important;}
   .cwn-active #leftSendForm {gap:3px;align-self:center;margin:0 2px 0 0;padding:0;}
-  .cwn-active .cwn-home-active #leftSendForm {width:38px;height:38px;justify-content:center;margin:0;}
   .cwn-active #leftSendForm #options_button,.cwn-active #leftSendForm #extensionsMenuButton {flex:0 0 32px;width:32px;height:38px;padding:0;background:transparent;color:var(--cwn-composer-ink);}
-  .cwn-active .cwn-home-active #leftSendForm #options_button {flex:0 0 36px;width:36px;height:38px;background:var(--cwn-composer-pill);}
   .cwn-active #options_button::before {content:'';display:block;width:19px;height:19px;background:currentColor;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round'%3E%3Cpath d='M12 5v14M5 12h14'/%3E%3C/svg%3E") center/contain no-repeat;}
   .cwn-active #leftSendForm #extensionsMenuButton {font-size:19px;opacity:.82;}
   .cwn-active #rightSendForm {align-self:center;justify-content:flex-end;width:42px;min-width:42px;min-height:40px;padding:0;margin:0;}
-  .cwn-active .cwn-home-active #rightSendForm {justify-content:flex-start;}
   .cwn-active #rightSendForm #send_but,.cwn-active #rightSendForm #mes_stop {flex:0 0 38px;width:38px;height:38px;line-height:38px;padding:0;background:#c96442;border:0;box-shadow:none;}
   .cwn-active #sheld:not(.cwn-home-active) #rightSendForm #send_but,.cwn-active #rightSendForm #mes_stop {background:var(--cwn-composer-accent);}
   .cwn-active #send_but::before {content:'';display:block;width:18px;height:18px;background:white;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 19V5M6.5 10.5 12 5l5.5 5.5'/%3E%3C/svg%3E") center/contain no-repeat;}
@@ -107,7 +93,6 @@ html.cwn-active body #options a {min-height:36px;padding:8px 10px!important;bord
 html.cwn-active body #options a:hover {background:var(--cwn-hover)!important;}
 html.cwn-active body #options a :is(.fa-solid,.fa-regular,.fa-brands) {width:16px!important;min-width:16px;color:var(--cwn-muted)!important;font-size:14px!important;}
 
-html.cwn-active body .cwn-home-active #send_but::before {transform:rotate(90deg);}
 html.cwn-active body .cwn-start-error:empty {display:none;}
 html.cwn-active body .cwn-start-error {color:var(--cwn-accent);font-size:12px;grid-column:1 / -1;}
 html.cwn-active body #send_but[aria-busy="true"] {opacity:.6;cursor:wait;}
@@ -117,7 +102,6 @@ html.cwn-active body .cwn-home-active .cwn-composer-effort {display:block;flex:0
 
 /* Rotate the welcome arrow into the send direction when a chat opens. */
 html.cwn-active body #send_but::before {transform:rotate(0deg);transform-origin:center;transition:transform 280ms cubic-bezier(.22,.61,.36,1);}
-html.cwn-active body .cwn-home-active #send_but::before {transform:rotate(90deg);}
 @media(prefers-reduced-motion:reduce){html.cwn-active body #send_but::before {transition:none;}}
 /* Original crab opens the native script/quick-reply bar without cloning buttons. */
 html.cwn-active body #cwn-script-crab {position:absolute;right:22px;top:-23px;width:44px;height:30px;min-height:0;padding:0;margin:0;border:0;background:transparent;cursor:pointer;z-index:2;}
@@ -164,17 +148,16 @@ html.cwn-active body #send_form {position:relative!important;}
 html.cwn-active body #qr--bar.cwn-script-panel.cwn-panel-open {position:absolute;z-index:4;}
 
 /* Welcome action creates a local chat and must remain available offline. */
-html.cwn-active body .cwn-home-active #rightSendForm #send_but {display:flex!important;align-items:center;justify-content:center;}
 /* Conversation composer: original neutral toolbar and white day surface. */
-html.cwn-active body #sheld:not(.cwn-home-active) #send_form {background:var(--cwn-surface)!important;border:1px solid var(--cwn-line)!important;}
-html.cwn-active body #sheld:not(.cwn-home-active) #leftSendForm :is(#options_button,#cwn-regenerate,#extensionsMenuButton) {display:inline-flex;align-items:center;justify-content:center;flex:0 0 30px;width:30px!important;min-width:30px;height:30px!important;min-height:30px;padding:0;margin:0 1px;border:0;border-radius:9px;background:transparent;color:var(--cwn-muted)!important;opacity:.82!important;font-size:17px;line-height:1;box-shadow:none;}
-html.cwn-active body #sheld:not(.cwn-home-active) #options_button::before {content:'\f0c9';font-family:'Font Awesome 6 Free';font-weight:900;font-size:16px;line-height:1;mask:none;background:none;width:auto;height:auto;}
-html.cwn-active body #sheld:not(.cwn-home-active) #leftSendForm :is(#options_button,#cwn-regenerate,#extensionsMenuButton):hover {background:var(--cwn-hover);}
+html.cwn-active body #sheld #send_form {background:var(--cwn-surface)!important;border:1px solid var(--cwn-line)!important;}
+html.cwn-active body #sheld #leftSendForm :is(#options_button,#cwn-regenerate,#extensionsMenuButton) {display:inline-flex;align-items:center;justify-content:center;flex:0 0 30px;width:30px!important;min-width:30px;height:30px!important;min-height:30px;padding:0;margin:0 1px;border:0;border-radius:9px;background:transparent;color:var(--cwn-muted)!important;opacity:.82!important;font-size:17px;line-height:1;box-shadow:none;}
+html.cwn-active body #sheld #options_button::before {content:'\f0c9';font-family:'Font Awesome 6 Free';font-weight:900;font-size:16px;line-height:1;mask:none;background:none;width:auto;height:auto;}
+html.cwn-active body #sheld #leftSendForm :is(#options_button,#cwn-regenerate,#extensionsMenuButton):hover {background:var(--cwn-hover);}
 html.cwn-active body .cwn-home-active #cwn-regenerate {display:none!important;}
 /* The offline send control retains its space; native connection checks remain. */
 html.cwn-active body #send_form.no-connection #send_but {display:flex!important;align-items:center;justify-content:center;}
 html.cwn-active body #sheld:not(.cwn-home-active) #send_but {background:#d97757!important;}
-html.cwn-active body #sheld:not(.cwn-home-active) #send_form.no-connection #cwn-regenerate {cursor:not-allowed;}
+html.cwn-active body #sheld #send_form.no-connection #cwn-regenerate {cursor:not-allowed;}
 html.cwn-active body #extensionsMenu {border:1px solid var(--cwn-line)!important;border-radius:16px!important;background:var(--cwn-surface)!important;color:var(--cwn-ink)!important;box-shadow:0 14px 38px rgba(43,40,34,.11)!important;}
 html.cwn-active body #extensionsMenu > .options-content {background:transparent!important;border:0!important;border-radius:inherit!important;box-shadow:none!important;backdrop-filter:none!important;}
 html.cwn-active body #extensionsMenu > div {min-height:36px;padding:8px 10px!important;border:0!important;border-radius:10px!important;color:var(--cwn-ink)!important;background:transparent!important;font-family:var(--cwn-font-ui)!important;font-size:13.5px!important;font-weight:450;line-height:1.35;gap:9px;box-shadow:none!important;transition:background 130ms ease,color 130ms ease;}
@@ -184,8 +167,8 @@ html.cwn-active body #extensionsMenu > div :is(.fa-solid,.fa-regular,.fa-brands)
 html.cwn-active body #leftSendForm #options_button {order:0!important;}
 html.cwn-active body #leftSendForm #cwn-regenerate {order:1!important;}
 html.cwn-active body #leftSendForm #extensionsMenuButton {order:2!important;}
-html.cwn-active body #sheld:not(.cwn-home-active) #leftSendForm :is(#options_button,#cwn-regenerate,#extensionsMenuButton):hover {background:transparent!important;}
-html.cwn-active body #sheld:not(.cwn-home-active) #send_form.no-connection #send_but::before {mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round'%3E%3Cpath d='m6 6 12 12M18 6 6 18'/%3E%3C/svg%3E") center/contain no-repeat;transform:none;}
+html.cwn-active body #sheld #leftSendForm :is(#options_button,#cwn-regenerate,#extensionsMenuButton):hover {background:transparent!important;}
+html.cwn-active body #sheld #send_form.no-connection #send_but::before {mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round'%3E%3Cpath d='m6 6 12 12M18 6 6 18'/%3E%3C/svg%3E") center/contain no-repeat;transform:none;}
 html.cwn-active body .cwn-api-notice {position:absolute;right:58px;top:8px;z-index:2;font:12px/1.5 var(--cwn-font-ui);color:var(--cwn-accent);background:var(--cwn-surface);border-radius:5px;pointer-events:none;}
 .cwn-api-notice:empty {display:none;}
 .cwn-reject {animation:cwn-reject 300ms ease!important;}
@@ -208,15 +191,92 @@ html.cwn-active[data-cwn-theme="dark"] body .cwn-api-notice {color:#97958c;}
 }
 
 /* Original single hairline; avoid stacking a border and an outline. */
-html.cwn-active body #sheld:not(.cwn-home-active) #send_form {
+html.cwn-active body #sheld #send_form {
   border:1px solid transparent!important;
   box-shadow:0 0 0 .5px rgba(0,0,0,.22)!important;
 }
-html.cwn-active[data-cwn-theme="dark"] body #sheld:not(.cwn-home-active) #send_form {
+html.cwn-active[data-cwn-theme="dark"] body #sheld #send_form {
   box-shadow:0 0 0 .5px rgba(255,255,255,.2)!important;
 }
 html.cwn-active body #sheld #rightSendForm :is(#send_but,#mes_stop) {
   background:var(--cwn-accent)!important;
   opacity:1!important;
   filter:none!important;
+}
+
+/* One composer position and surface in welcome and conversation views. */
+html.cwn-active body #sheld.cwn-home-active {justify-content:flex-start!important;}
+html.cwn-active body #sheld.cwn-home-active #cwn-home {
+  flex:1 1 0;min-height:0;justify-content:center;transform:none;
+  margin:0;box-sizing:border-box;
+}
+html.cwn-active body #sheld #form_sheld {transform:none!important;flex-shrink:0;}
+@media(min-width:701px) {
+  html.cwn-active body #sheld.cwn-home-active #cwn-composer-context {max-width:180px;}
+}
+
+/* Restore the requested raised desktop welcome composer. */
+@media(min-width:701px) {
+  html.cwn-active body #sheld.cwn-home-active #form_sheld {
+    padding-bottom:22px!important;
+    transform:translateY(clamp(-128px,-10vh,-72px))!important;
+  }
+}
+@media(max-width:700px) {
+  html.cwn-active body #sheld #nonQRFormItems {align-items:center!important;}
+  html.cwn-active body #sheld #leftSendForm,
+  html.cwn-active body #sheld #cwn-composer-context {align-self:center!important;}
+  html.cwn-active body #sheld #leftSendForm {height:36px;min-height:36px;align-items:center;}
+  html.cwn-active body #sheld #cwn-composer-context {
+    opacity:0;transition:opacity 200ms ease,display 200ms allow-discrete;
+  }
+  html.cwn-active body #sheld.cwn-home-active #cwn-composer-context {opacity:1;}
+  html.cwn-active body #sheld #leftSendForm :is(#cwn-regenerate,#extensionsMenuButton) {
+    transition:opacity 200ms ease,display 200ms allow-discrete;
+  }
+  html.cwn-active body #sheld.cwn-home-active #leftSendForm :is(#cwn-regenerate,#extensionsMenuButton) {opacity:0!important;}
+  @starting-style {
+    html.cwn-active body #sheld.cwn-home-active #cwn-composer-context {opacity:0;}
+    html.cwn-active body #sheld:not(.cwn-home-active) #leftSendForm :is(#cwn-regenerate,#extensionsMenuButton) {opacity:0!important;}
+  }
+  html.cwn-active body #sheld.cwn-home-active #options_button {animation:cwn-menu-home-fade 240ms ease;}
+  html.cwn-active body #sheld:not(.cwn-home-active) #options_button {animation:cwn-menu-chat-fade 240ms ease;}
+}
+@keyframes cwn-menu-home-fade {0%{filter:opacity(1)}45%{filter:opacity(0)}100%{filter:opacity(1)}}
+@keyframes cwn-menu-chat-fade {0%{filter:opacity(1)}45%{filter:opacity(0)}100%{filter:opacity(1)}}
+@media(prefers-reduced-motion:reduce) {
+  html.cwn-active body #sheld :is(#options_button,#cwn-regenerate,#extensionsMenuButton,#cwn-composer-context) {animation:none!important;transition:none!important;}
+}
+
+/* Desktop: two-row composer, welcome heading and form form one compact group. */
+@media(min-width:701px) {
+  html.cwn-active body #sheld #send_form {
+    min-height:126px;padding:12px 14px 10px!important;border-radius:20px!important;
+  }
+  html.cwn-active body #sheld #send_form #nonQRFormItems {
+    display:grid!important;grid-template-columns:auto minmax(0,1fr) auto;
+    grid-template-rows:minmax(56px,auto) 42px;column-gap:10px;row-gap:0;align-items:center;
+  }
+  html.cwn-active body #sheld #send_textarea {
+    grid-column:1 / -1;grid-row:1;align-self:start;
+    width:100%!important;min-height:50px!important;height:50px;padding:7px!important;
+  }
+  html.cwn-active body #sheld #leftSendForm {grid-column:1;grid-row:2;}
+  html.cwn-active body #sheld #rightSendForm {grid-column:3;grid-row:2;}
+  html.cwn-active body #sheld #cwn-composer-context {grid-column:2;grid-row:2;justify-self:end;}
+  html.cwn-active body #sheld.cwn-home-active {
+    justify-content:center!important;padding-bottom:clamp(72px,10vh,128px)!important;
+  }
+  html.cwn-active body #sheld.cwn-home-active #cwn-home {
+    flex:0 0 auto!important;padding:0 20px!important;margin:0 0 48px!important;
+    transform:none!important;
+  }
+  html.cwn-active body #sheld.cwn-home-active #form_sheld {
+    transform:none!important;padding-top:0!important;padding-bottom:0!important;
+  }
+}
+
+/* State changes are animated by the shared composer transition controller. */
+html.cwn-active body #sheld :is(#options_button,#cwn-regenerate,#extensionsMenuButton,#cwn-composer-context) {
+  animation:none!important;transition:none!important;
 }
