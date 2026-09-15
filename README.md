@@ -22,14 +22,14 @@ SillyTavern 的 Claude 风格主题扩展，提供桌面与手机布局、暖纸
 
 ## 开发与预览
 
-使用 Node.js 24+ 在仓库根目录执行 `npm test`。本快照的 7 项 Node 测试通过；这不代表所有第三方脚本和真机键盘场景均已覆盖。
+使用 Node.js 24+ 在仓库根目录执行 `npm test`。本快照的 11 项 Node 测试通过；这不代表所有第三方脚本和真机键盘场景均已覆盖。
 
 主题加载后访问：
 
 - `/scripts/extensions/third-party/claude-theme-next/preview.html`：480 × 1040 手机预览。
 - `/scripts/extensions/third-party/claude-theme-next/preview-desktop.html`：1280 × 800 桌面预览。
 
-预览页保留标题排版对比工具；它不保存为主题偏好。浏览器测试页面位于 `tests/`。
+预览页用于检查手机和桌面布局。浏览器测试页面位于 `tests/`。
 
 ## 文件结构
 
@@ -39,7 +39,7 @@ SillyTavern 的 Claude 风格主题扩展，提供桌面与手机布局、暖纸
 - `icons/`：界面素材。
 - `tests/`：自动化及浏览器检查页面。
 
-字体通过 Google Fonts 加载，并保留系统中文字体回退；本仓库没有捆绑字体二进制文件。离线或字体服务不可达时，显示效果会受系统字体影响。
+字体在 `fonts/` 中以 WOFF2 分片本地提供，无需连接 Google Fonts；保留系统中文字体回退，中文正文的显示仍会随设备系统字体而变化。
 
 本仓库不含聊天记录、角色卡、API 密钥、酒馆配置或个人代理设置。
 

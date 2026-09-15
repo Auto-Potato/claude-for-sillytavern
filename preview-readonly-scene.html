@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="zh-CN">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>只读聊天 · 原场景预览</title>
+<style>
+  *{box-sizing:border-box}html,body{margin:0;height:100%;overflow:hidden;background:#292a2d;color:#eee;font:12px/1.4 system-ui}
+  header{height:36px;display:flex;align-items:center;justify-content:space-between;padding:0 12px;gap:8px}
+  header a{color:#ddd}main{height:calc(100% - 36px);display:grid;place-items:center;overflow:hidden}
+  #frame{position:relative;overflow:hidden;background:#faf9f5}
+  iframe{position:absolute;left:0;top:0;width:480px;height:1040px;border:0;transform-origin:top left;background:#faf9f5}
+</style>
+<header><span>手机布局 · 480 × 1040</span><a href="/" target="_top">直接打开酒馆</a></header>
+<main><div id="frame"><iframe src="/?cwn-readonly-demo=1" title="SillyTavern 手机预览"></iframe></div></main>
+<script>
+  const main=document.querySelector('main'), frame=document.querySelector('#frame'), page=document.querySelector('iframe');
+  const observer=new ResizeObserver(([entry])=>{
+    const scale=Math.min(entry.contentRect.width/480,entry.contentRect.height/1040,1);
+    frame.style.width=`${480*scale}px`;frame.style.height=`${1040*scale}px`;
+    page.style.transform=`scale(${scale})`;
+  });
+  observer.observe(main);
+  window.addEventListener('pagehide',event=>{if(!event.persisted) observer.disconnect();});
+</script>
+
+</html>
+
+

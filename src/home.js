@@ -1,9 +1,11 @@
+import {mountReadOnlyChat} from './readonly-chat.js';
 import { takeGreeting } from './greeting.js';
 import { chatLabel } from './chat-label.js';
 
 export function mountHome(doc, win, host) {
   const shell = doc.getElementById('sheld'), rail = doc.getElementById('top-settings-holder');
   const abort = new win.AbortController();
+  const preview=mountReadOnlyChat(doc,win,host);
   let disposed=false, loading=false, pending=false, switching=false;
   const listen=(node,type,fn)=>node.addEventListener(type,fn,{signal:abort.signal});
   const hero=doc.createElement('section');
@@ -39,6 +41,17 @@ export function mountHome(doc, win, host) {
   profileText.append(profileName,profileHint);identity.append(face,profileText);profile.append(identity,theme);rail.append(profile);
   listen(identity,'click',()=>rail.querySelector('#persona-management-button .drawer-icon')?.click());
   const rows=new WeakMap();
+  let generatingChat=null;
+  function syncGeneration(){
+    for(const button of list.querySelectorAll('.cwn-recent-item')){
+      const row=rows.get(button);
+      const active=!!generatingChat && row.file===generatingChat.file && (row.group?String(row.group)===String(generatingChat.group):!generatingChat.group && row.avatar===generatingChat.avatar);
+      button.parentElement.classList.toggle('cwn-generating',active);
+      const spinner=button.parentElement.querySelector('.cwn-generation-spinner');
+      if(spinner)spinner.hidden=!active;
+    }
+  }
+  const unsubscribeGeneration=host.subscribeGeneration(chat=>{generatingChat=chat;syncGeneration();});
   const actions=doc.createElement('div');actions.id='cwn-chat-actions';actions.setAttribute('popover','auto');
   actions.setAttribute('role','menu');actions.setAttribute('aria-label','聊天操作');
   for(const [icon,label] of [['M8 3h8l-1 6 3 3v2h-5v7l-1-2-1 2v-7H6v-2l3-3-1-6Z','置顶'],['m4 16 12-12 4 4-12 12H4v-4Z M14 6l4 4','重命名'],['M4 6h16 M9 6V3h6v3 M6 6l1 15h10l1-15 M10 10v7 M14 10v7','删除']]) {
@@ -150,16 +163,19 @@ export function mountHome(doc, win, host) {
         const more=doc.createElement('button');more.type='button';more.className='cwn-recent-more';more.textContent='⋯';
         more.setAttribute('aria-label',`更多操作：${label.title}`);
         more.title='更多操作';
-        rows.set(more,row);rowWrap.append(button,more);fragment.append(rowWrap);
+        rows.set(more,row);rowWrap.append(button,more);
+        const spinner=doc.createElement('span');spinner.className='cwn-generation-spinner';spinner.hidden=true;
+        spinner.setAttribute('role','status');spinner.setAttribute('aria-label','正在生成');spinner.title='正在生成';
+        rowWrap.append(spinner);fragment.append(rowWrap);
       }
-      closeActions();list.replaceChildren(fragment);status.textContent=data.length ? '' : '还没有最近聊天';
+      closeActions();list.replaceChildren(fragment);syncGeneration();status.textContent=data.length ? '' : '还没有最近聊天';
     } catch(error) {if(!disposed && error.name!=='AbortError') status.textContent=error.message;}
     finally {
       loading=false;
       if(!disposed) {if(pending){pending=false;void refreshList();}}
     }
   }
-  listen(newChat,'click',()=>void action(()=>host.newChat()));
+  listen(newChat,'click',()=>{if(host.isGenerating()){void preview.show(null);closeNavigation();return;}void action(async()=>{await host.newChat();preview.close();});});
   listen(list,'click',event=>{
     if(mutating || switching)return;
     const more=event.target.closest('.cwn-recent-more');
@@ -177,13 +193,19 @@ export function mountHome(doc, win, host) {
     }
     closeActions();
     const row=rows.get(event.target.closest('.cwn-recent-item'));
-    if(row) void action(()=>host.openRecent(row));
+    if(row){
+      if(host.isGenerating()){
+        if(host.isCurrentChat(row))preview.close();else void preview.show(row);
+        closeNavigation();return;
+      }
+      void action(async()=>{await host.openRecent(row);preview.close();});
+    }
   });
   listen(edit,'click',()=>{const active=recent.classList.toggle('cwn-editing');edit.setAttribute('aria-pressed',String(active));edit.setAttribute('aria-label',active?'结束编辑最近聊天':'编辑最近聊天');});
   const unsubscribe=host.subscribe((refresh=true)=>{syncHome();if(refresh) void refreshList();});
   syncHome();void refreshList();
   return ()=>{
-    disposed=true;themeObserver.disconnect();closeActions();dialogReturn=null;dialog.remove();actions.remove();abort.abort();unsubscribe();hero.remove();newChat.remove();recent.remove();profile.remove();
+    disposed=true;preview.dispose();unsubscribeGeneration();themeObserver.disconnect();closeActions();dialogReturn=null;dialog.remove();actions.remove();abort.abort();unsubscribe();hero.remove();newChat.remove();recent.remove();profile.remove();
     shell.classList.remove('cwn-home-active','cwn-show-welcome');
   };
 }

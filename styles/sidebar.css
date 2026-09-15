@@ -280,3 +280,167 @@ html.cwn-active[data-cwn-theme="dark"] body #cwn-theme-toggle .cwn-moon {opacity
 html.cwn-active body #cwn-profile-identity:focus-visible,html.cwn-active body #cwn-theme-toggle:focus-visible {outline:2px solid var(--cwn-accent);outline-offset:2px;}
 @media(max-width:700px){html.cwn-active body #cwn-profile-identity img {flex-basis:34px;width:34px;height:34px;}}
 @media(prefers-reduced-motion:reduce){html.cwn-active body #cwn-theme-toggle .cwn-sun,html.cwn-active body #cwn-theme-toggle .cwn-moon {transition:none;}}
+
+/* Sidebar toggle: retain only the three-line icon in every pointer state. */
+html.cwn-active body #cwn-menu,
+html.cwn-active body #cwn-menu:is(:hover,:active,:focus),
+html.cwn-active.cwn-menu-open body #cwn-menu {
+  background:transparent!important;
+  border:0!important;
+  box-shadow:none!important;
+}
+/* Fade the mobile backdrop alongside the rail instead of switching display. */
+@media(max-width:700px) {
+  html.cwn-active body #cwn-backdrop {
+    display:block!important;
+    position:fixed;inset:0;width:100%;height:100%;
+    margin:0;padding:0;border:0;border-radius:0;
+    background:#0005;z-index:950;
+    opacity:0;visibility:hidden;pointer-events:none;
+    transition:opacity 210ms cubic-bezier(.22,.8,.3,1),visibility 0s linear 210ms;
+  }
+  html.cwn-active.cwn-menu-open body #cwn-backdrop {
+    opacity:1;visibility:visible;pointer-events:auto;
+    transition-delay:0s;
+  }
+}
+@media(max-width:700px) and (prefers-reduced-motion:reduce) {
+  html.cwn-active body #cwn-backdrop {transition:none;}
+}
+#cwn-desktop-rail-icon {display:none;}
+@media(min-width:701px) {
+  html.cwn-active body #top-settings-holder {padding:18px 8px 14px;}
+  html.cwn-active body #cwn-brand {
+    height:auto;min-height:30px;margin:0 0 7px;padding:0 0 3px;
+    font:300 23px/1 "Newsreader",Georgia,"Times New Roman",Times,var(--cwn-cjk);
+    letter-spacing:-.01em;transform:translateY(-6px);
+  }
+  html.cwn-active body #cwn-desktop-rail-icon {
+    position:absolute;top:13px;right:12px;z-index:3;
+    display:grid;place-items:center;width:22px;height:22px;
+    color:#77756f;background:transparent;pointer-events:none;
+  }
+  html.cwn-active body #cwn-desktop-rail-icon svg {
+    width:19px;height:19px;fill:none;stroke:currentColor;
+    stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;
+  }
+}
+@media(min-width:701px) {
+  html.cwn-active body #top-settings-holder {padding:18px 8px 14px!important;}
+  html.cwn-active body #top-settings-holder > #cwn-brand {
+    height:30px!important;min-height:30px!important;
+    margin:0 0 7px!important;padding:0 0 3px!important;
+    font-family:var(--cwn-font-reading)!important;
+    font-size:23px!important;font-weight:300!important;line-height:23px!important;
+    letter-spacing:-.01em!important;transform:translateY(-6px)!important;
+  }
+}
+#cwn-rail-grip {display:none;}
+@media(min-width:701px) {
+  html.cwn-active body #cwn-rail-grip {
+    display:block;position:fixed;top:0;bottom:0;left:calc(var(--cwn-rail) - 4px);
+    width:8px;z-index:1201;cursor:col-resize;touch-action:none;background:transparent;
+  }
+  html.cwn-active body #cwn-rail-grip:focus-visible {outline:1px solid var(--cwn-focus);outline-offset:-3px;}
+  html.cwn-rail-resizing,html.cwn-rail-resizing * {cursor:col-resize!important;user-select:none!important;}
+  html.cwn-rail-resizing iframe {pointer-events:none!important;}
+}
+/* Desktop rail toggle remains reachable when the rail is fully hidden. */
+@media(min-width:701px) {
+  html.cwn-active body #cwn-desktop-rail-icon {
+    position:fixed;left:calc(var(--cwn-rail) - 34px);right:auto;
+    z-index:1202;border:0;padding:0;margin:0;border-radius:4px;
+    pointer-events:auto;cursor:pointer;
+  }
+  html.cwn-active body #cwn-desktop-rail-icon:focus-visible {outline:2px solid var(--cwn-accent);outline-offset:3px;}
+  html.cwn-active.cwn-rail-hidden body #cwn-rail-grip {display:none!important;}
+  html.cwn-active.cwn-rail-hidden body #sheld {left:0!important;right:0!important;width:100%!important;}
+  html.cwn-active.cwn-rail-hidden body #cwn-desktop-rail-icon {left:12px;}
+}
+/* Animate the desktop rail and the reading surface together. */
+@media(min-width:701px) {
+  html.cwn-active body :is(#top-settings-holder,#top-bar) {
+    transform:translateX(0)!important;
+    visibility:visible;
+    transition:transform 240ms cubic-bezier(.22,.61,.36,1),visibility 0s!important;
+  }
+  html.cwn-active.cwn-rail-hidden body :is(#top-settings-holder,#top-bar) {
+    transform:translateX(-100%)!important;
+    visibility:hidden;pointer-events:none;
+    transition:transform 240ms cubic-bezier(.22,.61,.36,1),visibility 0s 240ms!important;
+  }
+  html.cwn-active body #sheld {
+    transition:none!important;
+  }
+  html.cwn-active body #cwn-desktop-rail-icon {
+    transition:left 240ms cubic-bezier(.22,.61,.36,1)!important;
+  }
+  html.cwn-rail-resizing body :is(#sheld,#top-settings-holder,#top-bar,#cwn-desktop-rail-icon) {transition:none!important;}
+}
+@media(min-width:701px) and (prefers-reduced-motion:reduce) {
+  html.cwn-active body :is(#sheld,#top-settings-holder,#top-bar,#cwn-desktop-rail-icon) {transition:none!important;}
+}
+/* Generation status belongs to the matching chat row only. */
+html.cwn-active body .cwn-recent-row {position:relative;}
+html.cwn-active body .cwn-generation-spinner:not([hidden]) {
+  display:block;position:absolute;right:10px;top:50%;
+  width:14px;height:14px;margin-top:-7px;box-sizing:border-box;
+  border:2px solid var(--cwn-line);border-top-color:var(--cwn-muted);
+  border-radius:50%;animation:cwn-generation-spin .8s linear infinite;
+  pointer-events:none;
+}
+html.cwn-active body .cwn-generating .cwn-recent-more {visibility:hidden;}
+html.cwn-active body .cwn-generating .cwn-recent-item {padding-right:32px;}
+@keyframes cwn-generation-spin {to{transform:rotate(360deg);}}
+@media(prefers-reduced-motion:reduce) {
+  html.cwn-active body .cwn-generation-spinner:not([hidden]) {animation:none;}
+}
+/* Match the original mobile navigation rhythm and softer label contrast. */
+@media (max-width: 700px) {
+  html.cwn-active body .cwn-nav-pane > .drawer {margin-top:4px!important;}
+
+  html.cwn-active body #top-settings-holder .cwn-nav-label {
+    font-weight:400;
+    line-height:1.2;
+    color:color-mix(in srgb, var(--cwn-ink) 84%, var(--cwn-bg));
+  }
+}
+
+/* Desktop rail entries match the original; all entries use equal spacing. */
+@media(min-width:701px) {
+  html.cwn-active body .cwn-nav-pane > .drawer {margin-top:1px!important;}
+  html.cwn-active body #top-settings-holder .drawer > .drawer-toggle {
+    height:34px;min-height:34px;padding:0;
+  }
+  html.cwn-active body #top-settings-holder .cwn-nav-label {
+    padding-left:70.5px;font-size:15px;font-weight:400;line-height:1.25;letter-spacing:0;
+    color:color-mix(in srgb, var(--cwn-ink) 76%, var(--cwn-bg));
+  }
+  html.cwn-active body #top-settings-holder .drawer > .drawer-toggle > .drawer-icon {
+    padding-left:7.75px!important;
+  }
+}
+/* New chat shares the navigation entries' icon and text columns. */
+html.cwn-active body #cwn-new-chat {
+  position:relative;box-sizing:border-box;justify-content:flex-start;
+  font-family:var(--cwn-font-ui)!important;font-size:15px;font-weight:400;
+  letter-spacing:0;text-align:left;
+}
+html.cwn-active body #cwn-new-chat .cwn-new-icon {
+  position:absolute;top:50%;transform:translateY(-50%);
+  width:22px;height:22px;
+}
+@media(max-width:700px) {
+  html.cwn-active body #cwn-new-chat {
+    height:38px;min-height:38px;padding:0 10px 0 46px;line-height:1.2;
+    color:color-mix(in srgb,var(--cwn-ink) 84%,var(--cwn-bg));
+  }
+  html.cwn-active body #cwn-new-chat .cwn-new-icon {left:10px;}
+}
+@media(min-width:701px) {
+  html.cwn-active body #cwn-new-chat {
+    height:34px;min-height:34px;padding:0 0 0 70.5px;line-height:1.25;
+    color:color-mix(in srgb,var(--cwn-ink) 76%,var(--cwn-bg));
+  }
+  html.cwn-active body #cwn-new-chat .cwn-new-icon {left:7.75px;}
+}

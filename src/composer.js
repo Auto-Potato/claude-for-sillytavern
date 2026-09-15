@@ -19,6 +19,7 @@ export function mountComposer(doc, host) {
   }
   const character = shortcut(null, '选择角色');
   let selectedAvatar=null, starting=false, disposed=false;
+  let welcomeRevision=host.welcomeRevision();
   const pickerHost={
     characterChoices:()=>host.characterChoices().map(item=>({...item,active:host.isHome()?item.avatar===selectedAvatar:item.active})),
     async chooseCharacter(avatar){
@@ -40,10 +41,12 @@ export function mountComposer(doc, host) {
   doc.addEventListener('click',event=>{
     if(!host.isHome()&&event.target.closest('#send_but')&&doc.getElementById('send_form')?.classList.contains('no-connection')){event.preventDefault();event.stopImmediatePropagation();rejectOffline(send);}
   },{capture:true,signal:abort.signal});
-  regenerate.addEventListener('click',()=>{
+  regenerate.addEventListener('click',async event=>{
+    event.preventDefault();event.stopPropagation();
     if(host.isHome())return;
     if(doc.getElementById('send_form')?.classList.contains('no-connection')){rejectOffline(regenerate);return;}
-    doc.getElementById('option_regenerate')?.click();
+    regenerate.disabled=true;
+    try{await host.rerollLastReply();}catch(cause){notice.textContent=cause.message;}finally{regenerate.disabled=false;}
   },{signal:abort.signal});
   const originalLabel=send?.getAttribute('aria-label');
   const error=doc.createElement('div');error.className='cwn-start-error';error.setAttribute('role','status');controls.after(error);
@@ -79,6 +82,8 @@ export function mountComposer(doc, host) {
   effort.setAttribute('aria-hidden', 'true');
   controls.append(effort);
   function render() {
+    const revision=host.welcomeRevision();
+    if(revision!==welcomeRevision){selectedAvatar=null;welcomeRevision=revision;}
     const info = host.composerInfo();
     const welcome=host.isHome();
     const chosen=welcome?host.characterChoices().find(item=>item.avatar===selectedAvatar)?.name:info.character;

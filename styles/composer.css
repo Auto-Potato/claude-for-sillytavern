@@ -1,4 +1,3 @@
-@import url("https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600&display=swap");
 .cwn-active #send_form {padding:14px!important;border-radius:24px!important;}
 .cwn-active #send_textarea {text-align:left!important;padding:8px 6px 14px!important;min-height:76px!important;}
 .cwn-active #leftSendForm,.cwn-active #rightSendForm {gap:6px;flex-wrap:wrap;min-width:0;}
@@ -180,7 +179,8 @@ html.cwn-active body #extensionsMenu {border:1px solid var(--cwn-line)!important
 html.cwn-active body #extensionsMenu > .options-content {background:transparent!important;border:0!important;border-radius:inherit!important;box-shadow:none!important;backdrop-filter:none!important;}
 html.cwn-active body #extensionsMenu > div {min-height:36px;padding:8px 10px!important;border:0!important;border-radius:10px!important;color:var(--cwn-ink)!important;background:transparent!important;font-family:var(--cwn-font-ui)!important;font-size:13.5px!important;font-weight:450;line-height:1.35;gap:9px;box-shadow:none!important;transition:background 130ms ease,color 130ms ease;}
 html.cwn-active body #extensionsMenu > div:hover {background:var(--cwn-hover)!important;}
-html.cwn-active body #extensionsMenu > div :is(.fa-solid,.fa-regular,.fa-brands) {width:16px!important;min-width:16px;color:var(--cwn-muted)!important;font-size:14px!important;}
+html.cwn-active body #extensionsMenu > div :is(.fa-solid,.fa-regular,.fa-brands) {width:16px!important;min-width:16px;color:var(--cwn-muted)!important;font-size:14px!important;}
+
 html.cwn-active body #leftSendForm #options_button {order:0!important;}
 html.cwn-active body #leftSendForm #cwn-regenerate {order:1!important;}
 html.cwn-active body #leftSendForm #extensionsMenuButton {order:2!important;}
@@ -196,3 +196,27 @@ html.cwn-active body .cwn-api-notice {font-family:"Hanken Grotesk",system-ui,san
 /* Match the original centered, muted connection placeholder. */
 html.cwn-active body .cwn-api-notice {left:50%;right:auto;top:50%;transform:translate(-50%,-50%);font:400 16px/1.4 "Hanken Grotesk",system-ui,sans-serif;color:#9b9a94;background:transparent;border-radius:0;white-space:nowrap;text-align:center;}
 html.cwn-active[data-cwn-theme="dark"] body .cwn-api-notice {color:#97958c;}
+
+/* Let the composer wrapper alone provide the gap above and below the input. */
+@media(max-width:700px) {
+  html.cwn-active body #sheld:not(.cwn-home-active) #chat {padding-bottom:0!important;top:0!important;bottom:auto!important;}
+}
+
+/* Desktop: cancel the host's relative chat offset, keeping the 8px composer gap. */
+@media(min-width:701px) {
+  html.cwn-active body #sheld:not(.cwn-home-active) #chat {top:0!important;bottom:auto!important;}
+}
+
+/* Original single hairline; avoid stacking a border and an outline. */
+html.cwn-active body #sheld:not(.cwn-home-active) #send_form {
+  border:1px solid transparent!important;
+  box-shadow:0 0 0 .5px rgba(0,0,0,.22)!important;
+}
+html.cwn-active[data-cwn-theme="dark"] body #sheld:not(.cwn-home-active) #send_form {
+  box-shadow:0 0 0 .5px rgba(255,255,255,.2)!important;
+}
+html.cwn-active body #sheld #rightSendForm :is(#send_but,#mes_stop) {
+  background:var(--cwn-accent)!important;
+  opacity:1!important;
+  filter:none!important;
+}

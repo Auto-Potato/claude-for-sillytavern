@@ -1,8 +1,8 @@
 /* Reading layout. Keep native message controls and avatar handlers intact. */
-html.cwn-active body #chat > .mes[is_user="false"] > .mesAvatarWrapper {position:absolute!important;top:12px;left:0;}
-html.cwn-active body #chat > .mes[is_user="false"] > .mesAvatarWrapper .avatar,
-html.cwn-active body #chat > .mes[is_user="false"] > .mesAvatarWrapper .avatar img {width:42px!important;height:42px!important;}
-html.cwn-active body #chat > .mes[is_user="false"] > .mes_block {width:100%!important;margin:0!important;padding-left:0!important;}
+html.cwn-active body #chat > .mes:is([is_user="false"],[is_user="true"]) > .mesAvatarWrapper {position:absolute!important;top:12px;left:0;}
+html.cwn-active body #chat > .mes:is([is_user="false"],[is_user="true"]) > .mesAvatarWrapper .avatar,
+html.cwn-active body #chat > .mes:is([is_user="false"],[is_user="true"]) > .mesAvatarWrapper .avatar img {width:42px!important;height:42px!important;}
+html.cwn-active body #chat > .mes:is([is_user="false"],[is_user="true"]) > .mes_block {width:100%!important;margin:0!important;padding-left:0!important;}
 html.cwn-active body #chat > .mes {
   position:relative!important; border:0!important; background:transparent!important;
   padding:12px 0 22px!important; box-shadow:none!important;
@@ -45,20 +45,20 @@ html.cwn-active body #chat > .mes .mes_button {
 html.cwn-active body #chat > .mes:has(.edit_textarea) > .mes_block {padding-bottom:0!important;}
 @media(max-width:700px) {
   html.cwn-active body #chat > .mes :is(.mes_text,.mes_reasoning) {font-size:calc(.9rem * var(--fontScale,1))!important;}
-  html.cwn-active body #chat > .mes[is_user="false"] > .mesAvatarWrapper {position:absolute!important;top:12px;left:0;}
-  html.cwn-active body #chat > .mes[is_user="false"] > .mesAvatarWrapper .avatar,
-  html.cwn-active body #chat > .mes[is_user="false"] > .mesAvatarWrapper .avatar img {width:42px!important;height:42px!important;}
-  html.cwn-active body #chat > .mes[is_user="false"] > .mes_block {width:100%!important;margin:0!important;padding-left:0!important;}
-  html.cwn-active body #chat > .mes[is_user="false"] .ch_name {min-height:50px;padding-left:52px;}
+  html.cwn-active body #chat > .mes:is([is_user="false"],[is_user="true"]) > .mesAvatarWrapper {position:absolute!important;top:12px;left:0;}
+  html.cwn-active body #chat > .mes:is([is_user="false"],[is_user="true"]) > .mesAvatarWrapper .avatar,
+  html.cwn-active body #chat > .mes:is([is_user="false"],[is_user="true"]) > .mesAvatarWrapper .avatar img {width:42px!important;height:42px!important;}
+  html.cwn-active body #chat > .mes:is([is_user="false"],[is_user="true"]) > .mes_block {width:100%!important;margin:0!important;padding-left:0!important;}
+  html.cwn-active body #chat > .mes:is([is_user="false"],[is_user="true"]) .ch_name {min-height:50px;padding-left:52px;}
 }
 /* One visual header row, bounded by the avatar's 42px height. */
-html.cwn-active body #chat > .mes[is_user="false"] .ch_name {
+html.cwn-active body #chat > .mes:is([is_user="false"],[is_user="true"]) .ch_name {
   height:42px!important;min-height:42px!important;padding:0 0 0 52px!important;margin-bottom:16px;
 }
-html.cwn-active body #chat > .mes[is_user="false"] .ch_name > .flex1,
-html.cwn-active body #chat > .mes[is_user="false"] .ch_name > .flex1 > .alignItemsBaseline {height:100%;}
-html.cwn-active body #chat > .mes[is_user="false"] .name_text {align-self:center;}
-html.cwn-active body #chat > .mes[is_user="false"] .timestamp {align-self:flex-end;line-height:1.4!important;}
+html.cwn-active body #chat > .mes:is([is_user="false"],[is_user="true"]) .ch_name > .flex1,
+html.cwn-active body #chat > .mes:is([is_user="false"],[is_user="true"]) .ch_name > .flex1 > .alignItemsBaseline {height:100%;}
+html.cwn-active body #chat > .mes:is([is_user="false"],[is_user="true"]) .name_text {align-self:center;}
+html.cwn-active body #chat > .mes:is([is_user="false"],[is_user="true"]) .timestamp {align-self:flex-end;line-height:1.4!important;}
 /* Optional original typography comparison, selected only by preview controls. */
 html.cwn-active:is([data-cwn-header-font="original"],[data-cwn-header-font="original-inline"],[data-cwn-header-font="original-bottom"]) body #chat > .mes .name_text {
   font-family:var(--cwn-font-reading)!important;font-size:.96em!important;line-height:1.2!important;
@@ -70,7 +70,7 @@ html.cwn-active:is([data-cwn-header-font="original"],[data-cwn-header-font="orig
 }
 html.cwn-active[data-cwn-header-font="original-inline"] body #chat > .mes .timestamp {white-space:nowrap!important;}
 html.cwn-active[data-cwn-header-font="original-bottom"] body #chat > .mes .timestamp {white-space:nowrap!important;}
-html.cwn-active[data-cwn-header-font="original-bottom"] body #chat > .mes[is_user="false"] .name_text {align-self:flex-end!important;}
+html.cwn-active[data-cwn-header-font="original-bottom"] body #chat > .mes:is([is_user="false"],[is_user="true"]) .name_text {align-self:flex-end!important;}
 /* Desktop follows the original portrait-and-reading-column composition. */
 @media(min-width:701px) {
   html.cwn-active body #chat > .mes[is_user="true"] > .mesAvatarWrapper {flex:0 0 50.4px!important;width:50.4px!important;}
@@ -81,25 +81,25 @@ html.cwn-active[data-cwn-header-font="original-bottom"] body #chat > .mes[is_use
   }
   html.cwn-active body #chat > .mes[is_user="true"] .name_text {font-weight:500!important;}
   html.cwn-active body #sheld #chat {padding-top:52px!important;scroll-padding-top:52px;}
-  html.cwn-active body #chat > .mes[is_user="false"] .ch_name,
-  html.cwn-active body #chat > .mes[is_user="false"] .ch_name > .flex1,
-  html.cwn-active body #chat > .mes[is_user="false"] .ch_name > .flex1 > .alignItemsBaseline {overflow:visible!important;}
-  html.cwn-active body #chat > .mes[is_user="false"] {padding:8px!important;align-items:flex-start!important;}
-  html.cwn-active body #chat > .mes[is_user="false"] > .mesAvatarWrapper {position:static!important;flex:0 0 50.4px!important;width:50.4px!important;}
-  html.cwn-active body #chat > .mes[is_user="false"] > .mesAvatarWrapper .avatar,
-  html.cwn-active body #chat > .mes[is_user="false"] > .mesAvatarWrapper .avatar img {
+  html.cwn-active body #chat > .mes:is([is_user="false"],[is_user="true"]) .ch_name,
+  html.cwn-active body #chat > .mes:is([is_user="false"],[is_user="true"]) .ch_name > .flex1,
+  html.cwn-active body #chat > .mes:is([is_user="false"],[is_user="true"]) .ch_name > .flex1 > .alignItemsBaseline {overflow:visible!important;}
+  html.cwn-active body #chat > .mes:is([is_user="false"],[is_user="true"]) {padding:8px!important;align-items:flex-start!important;}
+  html.cwn-active body #chat > .mes:is([is_user="false"],[is_user="true"]) > .mesAvatarWrapper {position:static!important;flex:0 0 50.4px!important;width:50.4px!important;}
+  html.cwn-active body #chat > .mes:is([is_user="false"],[is_user="true"]) > .mesAvatarWrapper .avatar,
+  html.cwn-active body #chat > .mes:is([is_user="false"],[is_user="true"]) > .mesAvatarWrapper .avatar img {
     width:50.4px!important;height:75.6px!important;max-height:none!important;max-width:none!important;
     border-radius:10px!important;object-fit:cover!important;box-shadow:none!important;
   }
-  html.cwn-active body #chat > .mes[is_user="false"] > .mes_block {flex:1 1 0!important;width:0!important;padding:0 0 40px 8px!important;overflow:visible!important;}
-  html.cwn-active body #chat > .mes[is_user="false"] .ch_name {height:auto!important;min-height:20px!important;padding:0!important;margin-bottom:3px!important;}
-  html.cwn-active body #chat > .mes[is_user="false"] .ch_name > .flex1,
-  html.cwn-active body #chat > .mes[is_user="false"] .ch_name > .flex1 > .alignItemsBaseline {height:auto!important;align-items:baseline!important;}
-  html.cwn-active[data-cwn-header-font] body #chat > .mes[is_user="false"] .name_text,
-  html.cwn-active body #chat > .mes[is_user="false"] .name_text {align-self:auto!important;font:500 .96em/1.2 var(--cwn-font-reading)!important;letter-spacing:-.016em;}
-  html.cwn-active body #chat > .mes[is_user="false"] .timestamp {align-self:auto!important;white-space:nowrap!important;font:400 .62em/1.4 var(--cwn-font-ui)!important;letter-spacing:.01em;opacity:.64;}
-  html.cwn-active body #chat > .mes[is_user="false"] .mes_text {padding:5px 30px 5px 0!important;}
-  html.cwn-active body #chat > .mes[is_user="false"] .mes_buttons {left:8px!important;}
+  html.cwn-active body #chat > .mes:is([is_user="false"],[is_user="true"]) > .mes_block {flex:1 1 0!important;width:0!important;padding:0 0 40px 8px!important;overflow:visible!important;}
+  html.cwn-active body #chat > .mes:is([is_user="false"],[is_user="true"]) .ch_name {height:auto!important;min-height:20px!important;padding:0!important;margin-bottom:3px!important;}
+  html.cwn-active body #chat > .mes:is([is_user="false"],[is_user="true"]) .ch_name > .flex1,
+  html.cwn-active body #chat > .mes:is([is_user="false"],[is_user="true"]) .ch_name > .flex1 > .alignItemsBaseline {height:auto!important;align-items:baseline!important;}
+  html.cwn-active[data-cwn-header-font] body #chat > .mes:is([is_user="false"],[is_user="true"]) .name_text,
+  html.cwn-active body #chat > .mes:is([is_user="false"],[is_user="true"]) .name_text {align-self:auto!important;font:500 .96em/1.2 var(--cwn-font-reading)!important;letter-spacing:-.016em;}
+  html.cwn-active body #chat > .mes:is([is_user="false"],[is_user="true"]) .timestamp {align-self:auto!important;white-space:nowrap!important;font:400 .62em/1.4 var(--cwn-font-ui)!important;letter-spacing:.01em;opacity:.64;}
+  html.cwn-active body #chat > .mes:is([is_user="false"],[is_user="true"]) .mes_text {padding:5px 30px 5px 0!important;}
+  html.cwn-active body #chat > .mes:is([is_user="false"],[is_user="true"]) .mes_buttons {left:8px!important;}
   html.cwn-active body #chat > .mes[is_user="false"] > .swipe_left {position:absolute!important;left:0!important;top:50%!important;bottom:auto!important;transform:translateY(-50%);}
   /* Match the left arrow's 49.4px center-to-text gap (portrait column minus text padding). */
   html.cwn-active body #chat > .mes[is_user="false"] > .swipeRightBlock {position:absolute!important;right:-28.4px!important;left:auto!important;top:50%!important;bottom:auto!important;transform:translateY(-50%);}
@@ -109,3 +109,212 @@ html.cwn-active[data-cwn-header-font="original-bottom"] body #chat > .mes[is_use
   html.cwn-active body #chat > .mes[is_user="false"] > .swipe_left {width:34px!important;height:48px!important;line-height:48px!important;text-align:center;}
   html.cwn-active body #chat > .mes[is_user="false"] .swipes-counter {display:none!important;}
 }
+
+/* Share the desktop character-name face and weight without changing mobile geometry. */
+@media(max-width:700px) {
+  html.cwn-active body #sheld #chat > .mes:is([is_user="false"],[is_user="true"]) .name_text {font-family:var(--cwn-font-reading)!important;font-weight:500!important;}
+}
+
+/* Native message editing, styled after the original theme. */
+html.cwn-active body #sheld #chat .mes_edit_buttons {display:none!important;}
+html.cwn-active body #sheld #chat > .mes:has(.edit_textarea) .mes_buttons {display:none!important;}
+html.cwn-active body #sheld #chat > .mes:has(.edit_textarea) > .mes_block {padding-bottom:42px!important;overflow:visible!important;}
+html.cwn-active body #sheld #chat > .mes:has(.edit_textarea) .mes_edit_buttons {
+  position:absolute!important;inset:auto 4px 5px auto!important;z-index:4;
+  display:flex!important;align-items:center;justify-content:flex-end;gap:2px!important;
+  width:auto!important;height:28px!important;margin:0!important;padding:0!important;
+  background:transparent!important;border:0!important;box-shadow:none!important;
+  opacity:1!important;visibility:visible!important;pointer-events:auto!important;
+}
+html.cwn-active body #sheld #chat .mes_edit_buttons > .menu_button {
+  display:inline-flex!important;align-items:center;justify-content:center;flex:0 0 26px;
+  width:26px!important;min-width:26px!important;height:26px!important;min-height:26px!important;
+  margin:0!important;padding:0!important;border:0!important;border-radius:8px!important;
+  background:transparent!important;color:var(--cwn-muted)!important;box-shadow:none!important;
+  font-size:12px!important;opacity:.68;
+}
+html.cwn-active body #sheld #chat .mes_edit_buttons > .menu_button:hover {background:var(--cwn-hover)!important;color:var(--cwn-ink)!important;opacity:1;}
+html.cwn-active body #sheld #chat .edit_textarea {
+  width:100%!important;max-width:100%;box-sizing:border-box;min-height:72px;
+  background:var(--cwn-surface)!important;color:var(--cwn-ink)!important;
+  border:1px solid var(--cwn-line)!important;border-radius:12px!important;
+  font-family:var(--cwn-font-reading)!important;font-weight:430!important;
+}
+html.cwn-active body #sheld #chat > .mes[is_user="true"]:has(.edit_textarea) .edit_textarea {
+  min-height:54px!important;padding:2px 0!important;margin:0!important;
+  background:transparent!important;border:0!important;border-radius:0!important;box-shadow:none!important;
+  font-size:.94em!important;line-height:1.55!important;max-height:40dvh!important;overflow-y:auto!important;resize:none;
+}
+html.cwn-active body #sheld #chat > .mes[is_user="true"]:has(.edit_textarea) .ch_name > .flex1 {visibility:hidden;}
+html.cwn-active body #sheld #chat .mes_edit {border-radius:8px;transition:background 130ms,color 130ms;}
+html.cwn-active body #sheld #chat .mes_edit:hover {background:var(--cwn-hover)!important;color:var(--cwn-ink)!important;}
+@media(max-width:700px) {
+  html.cwn-active body #sheld #chat > .mes:has(.edit_textarea) > .mes_block {padding-bottom:48px!important;}
+  html.cwn-active body #sheld #chat > .mes:has(.edit_textarea) .mes_edit_buttons {right:2px!important;bottom:4px!important;height:38px!important;gap:3px!important;}
+  html.cwn-active body #sheld #chat .mes_edit_buttons > .menu_button {flex-basis:36px;width:36px!important;min-width:36px!important;height:36px!important;min-height:36px!important;font-size:14px!important;}
+  html.cwn-active body #sheld #chat > .mes[is_user="true"]:has(.edit_textarea) .edit_textarea {min-height:64px!important;font-size:1em!important;}
+}
+
+/* Match the reading column while editing; textarea remains plain text. */
+html.cwn-active body #sheld #chat > .mes:is([is_user="true"],[is_user="false"]):has(.edit_textarea) .edit_textarea {
+  font-size:calc(.94em * var(--fontScale,1))!important;
+  line-height:1.76!important;letter-spacing:0!important;
+  padding:0!important;margin:0!important;
+  font-optical-sizing:auto;font-kerning:normal;
+}
+@media(max-width:700px) {
+  html.cwn-active body #sheld #chat > .mes:is([is_user="true"],[is_user="false"]):has(.edit_textarea) .edit_textarea {font-size:calc(.9rem * var(--fontScale,1))!important;}
+}
+@media(min-width:701px) {
+  html.cwn-active body #sheld #chat > .mes:is([is_user="true"],[is_user="false"]):has(.edit_textarea) .edit_textarea {padding:5px 30px 5px 0!important;}
+}
+
+/* Original plugin: clear the native edit toolbar's shadow/filter chain. */
+html.cwn-active body #sheld #chat .mes_edit_buttons,
+html.cwn-active body #sheld #chat .mes_edit_buttons > .menu_button {
+  filter:none!important;
+  text-shadow:none!important;
+  box-shadow:none!important;
+}
+/* Original mobile swipe controls: fixed midway down the viewport. */
+@media(max-width:700px) {
+  html.cwn-active body #chat > .mes[is_user="false"] > :is(.swipe_left,.swipeRightBlock) {
+    position:fixed!important;top:50%!important;bottom:auto!important;
+    width:38px!important;min-width:38px!important;height:54px!important;
+    margin:0!important;padding:0!important;z-index:118;
+    transform:translateY(-50%)!important;
+  }
+  html.cwn-active body #chat > .mes[is_user="false"] > .swipe_left {left:5px!important;right:auto!important;}
+  html.cwn-active body #chat > .mes[is_user="false"] > .swipeRightBlock {right:5px!important;left:auto!important;}
+  html.cwn-active body #chat > .mes[is_user="false"] :is(.swipe_left,.swipe_right) {
+    box-sizing:border-box!important;width:38px!important;height:54px!important;
+    align-items:center;justify-content:center;text-align:center;line-height:52px!important;
+    color:var(--cwn-ink)!important;
+    background:color-mix(in srgb,var(--cwn-bg) 82%,transparent)!important;
+    border:1px solid var(--cwn-line)!important;border-radius:10px!important;
+    font-size:18px!important;opacity:.74!important;
+    box-shadow:none!important;text-shadow:none!important;filter:none!important;
+    backdrop-filter:none!important;padding:0!important;margin:0!important;
+  }
+  html.cwn-active body #chat > .mes[is_user="false"] .swipe_left::before {content:'\f053'!important;}
+  html.cwn-active body #chat > .mes[is_user="false"] .swipe_right::before {content:'\f054'!important;}
+  html.cwn-active body #chat > .mes[is_user="false"] .swipes-counter {display:none!important;}
+  html.cwn-active body #chat > .mes:not(.last_mes.cwn-swipe-visible) > :is(.swipe_left,.swipeRightBlock),
+  html.cwn-active body #chat > .mes:has(.edit_textarea) > :is(.swipe_left,.swipeRightBlock) {visibility:hidden!important;pointer-events:none!important;}
+}
+/* Candidate arrows only navigate existing alternatives, on both layouts. */
+html.cwn-active body #sheld #chat > .mes:not(.cwn-has-candidates) > :is(.swipe_left,.swipeRightBlock) {
+  display:none!important;pointer-events:none!important;
+}
+html.cwn-active body #sheld #chat > .mes.last_mes.cwn-has-candidates:not(:has(.edit_textarea)) > :is(.swipe_left,.swipeRightBlock),
+html.cwn-active body #sheld #chat > .mes.last_mes.cwn-has-candidates:not(:has(.edit_textarea)) > .swipeRightBlock > .swipe_right {
+  display:flex!important;
+}
+html.cwn-active body:is([data-generating="true"],[data-swiping="true"]) #sheld #chat > .mes > :is(.swipe_left,.swipeRightBlock) {
+  pointer-events:none!important;
+}
+/* Keep reading scrollable without scrollbar tracks changing the swipe viewport. */
+html.cwn-active body #sheld #chat {
+  overflow-x:hidden!important;
+  overflow-y:auto!important;
+  scrollbar-width:none!important;
+  scrollbar-gutter:auto!important;
+}
+html.cwn-active body #sheld #chat :is(.mes,.mes_block,.mes_text,.mes_reasoning,.edit_textarea) {
+  scrollbar-width:none!important;
+  scrollbar-gutter:auto!important;
+}
+html.cwn-active body #sheld #chat::-webkit-scrollbar,
+html.cwn-active body #sheld #chat :is(.mes,.mes_block,.mes_text,.mes_reasoning,.edit_textarea)::-webkit-scrollbar {
+  display:none!important;
+  width:0!important;
+  height:0!important;
+}
+/* Ease desktop arrow tracking as the visible reading area moves. */
+@media(min-width:701px) {
+  html.cwn-active body #chat > .mes[is_user="false"] > :is(.swipe_left,.swipeRightBlock) {
+    transition:top 360ms cubic-bezier(.22,.61,.36,1),opacity 140ms ease!important;
+  }
+}
+@media(min-width:701px) and (prefers-reduced-motion:reduce) {
+  html.cwn-active body #chat > .mes[is_user="false"] > :is(.swipe_left,.swipeRightBlock) {
+    transition:none!important;
+  }
+}
+
+/* Keep the avatar above the full-width transparent message header. */
+html.cwn-active body #sheld #chat > .mes > .mesAvatarWrapper {
+  z-index:2;
+  pointer-events:auto;
+}
+html.cwn-active body #sheld #chat > .mes > .mesAvatarWrapper .avatar {
+  position:relative;
+  cursor:pointer;
+  pointer-events:auto;
+}
+/* Gray backdrop for the host's original card-art viewer. */
+html.cwn-active body #cwn-avatar-shade {
+  display:none;position:fixed;inset:0;z-index:2000;
+  width:100%;height:100%;margin:0;padding:0;border:0;border-radius:0;
+  background:rgba(48,48,48,.58);box-shadow:none;cursor:default;
+}
+html.cwn-active body:has(> .zoomed_avatar) #cwn-avatar-shade {display:block;}
+html.cwn-active body > .zoomed_avatar {z-index:2001!important;}
+/* Center desktop card art in the viewport, independent of sidebar width. */
+@media(min-width:701px) {
+  html.cwn-active body > .zoomed_avatar {
+    position:fixed!important;
+    top:50%!important;left:50%!important;right:auto!important;bottom:auto!important;
+    transform:translate(-50%,-50%)!important;
+    margin:0!important;
+  }
+}
+/* Original plugin code-block header, separator and warm-paper surface. */
+html.cwn-active body #chat .mes_text pre:has(> .cwn-code-bar) {
+  padding-top:0!important;background:transparent!important;
+}
+html.cwn-active body #chat .cwn-code-bar {
+  display:flex;align-items:center;justify-content:space-between;
+  gap:12px;margin:0 0 8px;padding:6px 10px;
+  border-bottom:1px solid var(--cwn-line);
+  font:400 11px/1.4 var(--cwn-font-ui);letter-spacing:.03em;
+  color:var(--cwn-focus);text-transform:lowercase;user-select:none;
+}
+html.cwn-active body #chat .cwn-code-copy {
+  border:0;background:transparent;padding:2px 4px;margin:0;
+  color:var(--cwn-focus);font:inherit;cursor:pointer;box-shadow:none;
+}
+html.cwn-active body #chat .cwn-code-copy:hover {color:var(--cwn-ink);}
+html.cwn-active body #chat .mes_text pre > code {
+  display:block;padding:14px!important;
+  border:1px solid var(--cwn-line)!important;border-radius:12px!important;
+  background:var(--cwn-code)!important;color:var(--cwn-quote)!important;
+}
+/* Code blocks retain their language header without copy controls. */
+html.cwn-active body #chat .mes_text pre :is(.code-copy,.cwn-code-copy) {
+  display:none!important;
+}
+/* Saved-history preview does not replace the host's active generation DOM. */
+html.cwn-active body #sheld.cwn-reading-history > :not(#cwn-readonly-chat) {display:none!important;}
+html.cwn-active body #cwn-readonly-chat:not([hidden]) {
+  display:flex;flex-direction:column;flex:1;min-height:0;height:100%;
+  background:var(--cwn-bg);color:var(--cwn-ink);
+}
+.cwn-readonly-bar {display:flex;align-items:center;flex-wrap:wrap;gap:8px;padding:16px 44px;border-bottom:1px solid var(--cwn-line);font:13px var(--cwn-font-ui);}
+.cwn-readonly-bar > span {flex:1;}
+.cwn-readonly-bar button {border:1px solid var(--cwn-line);border-radius:8px;padding:6px 10px;background:var(--cwn-surface);color:var(--cwn-ink);cursor:pointer;}
+.cwn-readonly-content {flex:1;min-height:0;overflow:auto;padding:24px max(20px,calc((100% - 850px)/2));}
+.cwn-readonly-content article {margin:0 0 28px;}
+.cwn-readonly-content h3 {font:500 17px var(--cwn-font-reading);}
+.cwn-readonly-text {white-space:pre-wrap;overflow-wrap:anywhere;font:430 16px/1.76 var(--cwn-font-reading);}
+html.cwn-active body .cwn-readonly-bar button {
+  display:inline-flex;align-items:center;justify-content:center;
+  width:34px;height:34px;padding:6px;border:0;background:transparent;
+  color:var(--cwn-muted);box-shadow:none;
+}
+html.cwn-active body .cwn-readonly-bar button[hidden] {display:none;}
+html.cwn-active body .cwn-readonly-bar button svg {
+  width:22px;height:22px;fill:none;stroke:currentColor;
+  stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;
+}
+html.cwn-active body .cwn-readonly-bar button:hover {color:var(--cwn-ink);background:var(--cwn-hover);}

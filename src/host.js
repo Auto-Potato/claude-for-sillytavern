@@ -1,3 +1,5 @@
+import { createOperationLock } from './operation-lock.js';
+import { SWIPE_DIRECTION } from '../../../../constants.js';
 import { accountStorage } from '../../../../util/AccountStorage.js';
 import { createChatActions } from './chat-actions.js';
 import * as st from '../../../../../script.js';
@@ -5,9 +7,52 @@ import * as group from '../../../../group-chats.js';
 import { getChatCompletionModel } from '../../../../openai.js';
 
 const chatActions = createChatActions(st, group, accountStorage);
-let startingWelcome=false, newlyOpened=null;
+let startingWelcome=false, newlyOpened=null, welcomeRevision=0;
 const localRefresh=new Set();
 export const host = {
+  isGenerating:()=>st.isGenerating(),
+  isCurrentChat(row){return st.getCurrentChatId()===row.file && (row.group?String(group.selected_group)===String(row.group):!group.selected_group&&st.characters[st.this_chid]?.avatar===row.avatar);},
+  async readChat(row,signal){
+    const response=await fetch(row.group?'/api/chats/group/get':'/api/chats/get',{
+      method:'POST',headers:st.getRequestHeaders(),signal,
+      body:JSON.stringify(row.group?{id:row.file}:{ch_name:row.name,file_name:row.file,avatar_url:row.avatar})
+    });
+    if(!response.ok)throw new Error('历史聊天读取失败，请重试。');
+    const data=await response.json();
+    if(!Array.isArray(data))throw new Error('历史聊天格式异常。');
+    return data.filter(message=>typeof message?.mes==='string').map(message=>({name:message.name||'',text:message.mes,isUser:!!message.is_user}));
+  },
+  subscribeGeneration(callback){
+    const current=()=>({file:st.getCurrentChatId(),avatar:group.selected_group?null:st.characters[st.this_chid]?.avatar,group:group.selected_group || null});
+    const started=(_type,_options,dryRun)=>{if(!dryRun)callback(current());};
+    const ended=()=>callback(null);
+    st.eventSource.on(st.event_types.GENERATION_STARTED,started);
+    st.eventSource.on(st.event_types.GENERATION_ENDED,ended);
+    st.eventSource.on(st.event_types.GENERATION_STOPPED,ended);
+    callback(st.isGenerating()?current():null);
+    return ()=>{
+      st.eventSource.removeListener(st.event_types.GENERATION_STARTED,started);
+      st.eventSource.removeListener(st.event_types.GENERATION_ENDED,ended);
+      st.eventSource.removeListener(st.event_types.GENERATION_STOPPED,ended);
+    };
+  },
+  welcomeRevision:()=>welcomeRevision,
+  candidateCount(id){return st.chat[id]?.swipes?.length || 0;},
+  async cycleCandidate(id,direction){
+    if(st.isGenerating() || st.isChatSaving || document.querySelector('#chat .edit_textarea'))return;
+    const message=st.chat[id], count=message?.swipes?.length || 0;
+    if(!message || message.is_user || count<2)return;
+    const current=Number(message.swipe_id)||0;
+    const target=((current+(direction<0?-1:1))%count+count)%count;
+    await st.swipe(null,direction<0?SWIPE_DIRECTION.LEFT:SWIPE_DIRECTION.RIGHT,{message,forceMesId:id,forceSwipeId:target});
+  },
+  async rerollLastReply(){
+    if(st.isGenerating() || st.isChatSaving)throw new Error('请等待当前生成或保存完成。');
+    const message=st.chat.at(-1);
+    if(!message || message.is_user || message.is_system)throw new Error('最后一条消息不是角色回复，无法重新生成。');
+    if(document.querySelector('#chat .edit_textarea'))throw new Error('请先结束消息编辑。');
+    await st.swipe(null, SWIPE_DIRECTION.RIGHT, {message,forceSwipeId:message.swipes?.length || 1});
+  },
   async startCharacterChat(avatar){
     if(startingWelcome || st.isGenerating() || st.isChatSaving)throw new Error("请等待当前操作完成。");
     startingWelcome=true;
@@ -39,7 +84,7 @@ export const host = {
   },
   pinChat: chatActions.pin, renameChat: chatActions.rename, deleteChat: chatActions.remove,
   userName: () => st.name1,
-  userAvatar: () => st.user_avatar ? st.getUserAvatar(st.user_avatar) : st.default_user_avatar,
+  userAvatar: () => st.user_avatar ? `${st.getUserAvatar(st.user_avatar)}?cwn-avatar=${avatarRevision}` : st.default_user_avatar,
   composerInfo: () => ({
     character: group.selected_group ? group.groups.find(g => String(g.id) === String(group.selected_group))?.name : st.characters[st.this_chid]?.name,
     model: st.main_api === 'openai' ? getChatCompletionModel() : null,
@@ -55,11 +100,16 @@ export const host = {
     const events = ['CHAT_CHANGED', 'CHAT_CREATED', 'CHAT_DELETED', 'CHAT_RENAMED', 'GROUP_CHAT_CREATED', 'GROUP_CHAT_DELETED'];
     const changed=()=>callback(true), rendered=()=>callback(false);
     localRefresh.add(changed);
-    const renderEvents=['USER_MESSAGE_RENDERED','CHARACTER_MESSAGE_RENDERED','MESSAGE_DELETED','SETTINGS_UPDATED','PERSONA_CHANGED','PERSONA_RENAMED'];
+    const renderEvents=['USER_MESSAGE_RENDERED','CHARACTER_MESSAGE_RENDERED','MESSAGE_DELETED','SETTINGS_UPDATED','PERSONA_CHANGED','PERSONA_RENAMED','PERSONA_UPDATED'];
+    // Overwrite uploads rebuild the native persona list without PERSONA_CHANGED.
+    const avatars = document.getElementById('user_avatar_block');
+    const avatarObserver = new MutationObserver(() => { avatarRevision++; rendered(); });
+    if (avatars) avatarObserver.observe(avatars, { childList:true, subtree:true });
     for (const key of events) st.eventSource.on(st.event_types[key], changed);
     for (const key of renderEvents) st.eventSource.on(st.event_types[key], rendered);
     return () => {
       localRefresh.delete(changed);
+      avatarObserver.disconnect();
       for (const key of events) st.eventSource.removeListener(st.event_types[key], changed);
       for (const key of renderEvents) st.eventSource.removeListener(st.event_types[key], rendered);
     };
@@ -102,5 +152,16 @@ export const host = {
     if (st.isGenerating() || st.isChatSaving) throw new Error('请等待当前生成或保存完成后再开始新对话。');
     newlyOpened=null;
     if(!await st.closeCurrentChat())throw new Error('返回欢迎页未完成，请稍后重试。');
+    welcomeRevision++;
+    for(const refresh of localRefresh)refresh();
   },
 };
+
+let avatarRevision = Date.now();
+
+// All theme entry points that change chat state share the same lock.
+const runChatOperation=createOperationLock();
+for(const name of ['startCharacterChat','chooseCharacter','openRecent','newChat','pinChat','renameChat','deleteChat','cycleCandidate','rerollLastReply']) {
+  const operation=host[name];
+  host[name]=(...args)=>runChatOperation(()=>operation(...args));
+}
