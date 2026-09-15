@@ -280,3 +280,17 @@ html.cwn-active body #sheld #form_sheld {transform:none!important;flex-shrink:0;
 html.cwn-active body #sheld :is(#options_button,#cwn-regenerate,#extensionsMenuButton,#cwn-composer-context) {
   animation:none!important;transition:none!important;
 }
+
+/* Override the host's narrow mobile toolbar (1.15em + wrapping). */
+@media(max-width:700px) {
+  html.cwn-active body #sheld #leftSendForm {
+    display:flex!important;flex-flow:row nowrap!important;
+    width:max-content!important;min-width:max-content!important;max-width:none;
+    height:36px!important;min-height:36px;align-items:center!important;
+    justify-content:flex-start;gap:3px;grid-column:1;grid-row:2;
+  }
+  html.cwn-active body #sheld #rightSendForm {
+    display:flex!important;flex-flow:row nowrap!important;
+    width:42px!important;min-width:42px!important;align-items:center!important;
+  }
+}
