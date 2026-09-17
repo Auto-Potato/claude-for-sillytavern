@@ -16,6 +16,17 @@ export function mountMessages(doc, host) {
   doc.addEventListener('click',closeAvatarOutside,true);
   const originals = new Map();
   const win = doc.defaultView;
+  // Keep mobile controls outside transformed message ancestors.
+  const mobileArrows=doc.createElement('div');
+  mobileArrows.id='cwn-mobile-candidates';mobileArrows.hidden=true;
+  for(const [direction,label,path] of [['left','上一个候选','M15 5 8 12l7 7'],['right','下一个候选','m9 5 7 7-7 7']]){
+    const button=doc.createElement('button');button.type='button';button.setAttribute('aria-label',label);
+    button.innerHTML=`<svg viewBox="0 0 24 24" aria-hidden="true"><path d="${path}"/></svg>`;
+    button.addEventListener('click',()=>chat.querySelector(`:scope > .mes.last_mes[is_user="false"] .swipe_${direction}`)?.click());
+    mobileArrows.append(button);
+  }
+  doc.body.append(mobileArrows);
+
   let frame = 0, switching = false;
   let cancelledMessage = null;
   let editAnchor = null;
@@ -79,6 +90,8 @@ export function mountMessages(doc, host) {
   function placeArrows() {
     frame = 0;
 
+    const last=chat.querySelector(':scope > .mes.last_mes[is_user="false"]');
+    mobileArrows.hidden=!last || !last.classList.contains('cwn-has-candidates') || !!last.querySelector('.edit_textarea');
     const viewport = chat.getBoundingClientRect();
     chat.querySelectorAll(':scope > .mes.last_mes[is_user="false"]').forEach(message => {
       const rect = message.getBoundingClientRect();
@@ -153,6 +166,7 @@ export function mountMessages(doc, host) {
     chat.querySelectorAll('.cwn-code-bar').forEach(bar=>bar.remove());
     doc.removeEventListener('click',closeAvatarOutside,true);
     avatarShade.remove();
+    mobileArrows.remove();
     chat.removeEventListener('click',rememberEditAnchor,true);
     editAnchor=null;
     readingPositions = new WeakMap();

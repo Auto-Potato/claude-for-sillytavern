@@ -295,22 +295,20 @@ html.cwn-active body #sheld :is(#options_button,#cwn-regenerate,#extensionsMenuB
   }
 }
 
-/* Mobile toolbar glyphs must not inherit host font scaling or text autosizing. */
+/* Use equal vector canvases: font glyph metrics and Android text sizing differ. */
 @media(max-width:700px) {
-  html.cwn-active body #sheld #leftSendForm :is(#options_button,#cwn-regenerate,#extensionsMenuButton) {
-    font-size:18px!important;line-height:1!important;
-    text-size-adjust:none;-webkit-text-size-adjust:none;
-  }
   html.cwn-active body #sheld #leftSendForm :is(#options_button,#cwn-regenerate,#extensionsMenuButton)::before {
-    display:flex!important;align-items:center;justify-content:center;
-    width:20px!important;height:20px!important;flex:0 0 20px;
-    font-family:'Font Awesome 6 Free'!important;font-weight:900!important;
-    font-size:18px!important;line-height:20px!important;
-    text-size-adjust:none;-webkit-text-size-adjust:none;
+    content:''!important;display:block!important;
+    width:20px!important;height:20px!important;flex:0 0 20px!important;
+    padding:0!important;margin:0!important;background:currentColor!important;
+    font-size:0!important;line-height:0!important;
+    mask:var(--cwn-toolbar-icon) center/contain no-repeat!important;
+    -webkit-mask:var(--cwn-toolbar-icon) center/contain no-repeat!important;
   }
-  html.cwn-active body #sheld #leftSendForm #extensionsMenuButton :is(i,svg) {
-    font-size:18px!important;width:20px!important;height:20px!important;line-height:20px!important;
-  }
+  html.cwn-active body #sheld #leftSendForm #extensionsMenuButton :is(i,svg) {display:none!important;}
+  html.cwn-active body #sheld #options_button { --cwn-toolbar-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222.2%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M4%205h16M4%2012h16M4%2019h16%22%2F%3E%3C%2Fsvg%3E"); }
+  html.cwn-active body #sheld #cwn-regenerate { --cwn-toolbar-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222.2%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M20%204v6h-6M20%2010a8%208%200%201%200-.7%207%22%2F%3E%3C%2Fsvg%3E"); }
+  html.cwn-active body #sheld #extensionsMenuButton { --cwn-toolbar-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222.2%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22m4%2020%2011-11%203%203L7%2023z%22%20transform%3D%22translate%280%20-3%29%22%2F%3E%3Cpath%20d%3D%22m12%209%203%203M5%203v4M3%205h4M19%203v4M17%205h4M19%2016v4M17%2018h4%22%2F%3E%3C%2Fsvg%3E"); }
 }
 
 /* Anchor every inline notice to the form, not its responsive control row. */

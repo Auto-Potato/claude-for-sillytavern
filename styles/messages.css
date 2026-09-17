@@ -322,3 +322,25 @@ html.cwn-active body .cwn-readonly-bar button:hover {color:var(--cwn-ink);backgr
 html.cwn-active body #chat .mes :is(.mesIDDisplay,.mes_timer) {
   display:none!important;
 }
+
+/* A single viewport layer prevents transformed messages and native right-button
+   offsets from moving mobile candidate controls independently. */
+#cwn-mobile-candidates {display:none;}
+@media(max-width:700px) {
+  html.cwn-active body #sheld #chat#chat > .mes > :is(.swipe_left,.swipeRightBlock) {display:none!important;}
+  html.cwn-active body > #cwn-mobile-candidates:not([hidden]) {
+    display:flex;position:fixed;inset:50% 5px auto;transform:translateY(-50%);
+    align-items:center;justify-content:space-between;pointer-events:none;z-index:118;
+  }
+  html.cwn-active body > #cwn-mobile-candidates button {
+    display:flex;align-items:center;justify-content:center;box-sizing:border-box;
+    flex:0 0 38px;width:38px;height:54px;margin:0;padding:0;
+    color:var(--cwn-ink);background:color-mix(in srgb,var(--cwn-bg) 82%,transparent);
+    border:1px solid var(--cwn-line);border-radius:10px;opacity:.74;
+    box-shadow:none;filter:none;pointer-events:auto;
+  }
+  #cwn-mobile-candidates svg {width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;}
+  html.cwn-active.cwn-menu-open body > #cwn-mobile-candidates,
+  html.cwn-active body:has(.cwn-home-active) > #cwn-mobile-candidates {display:none;}
+  html.cwn-active body:is([data-generating="true"],[data-swiping="true"]) > #cwn-mobile-candidates button {pointer-events:none;}
+}
