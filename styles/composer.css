@@ -294,3 +294,33 @@ html.cwn-active body #sheld :is(#options_button,#cwn-regenerate,#extensionsMenuB
     width:42px!important;min-width:42px!important;align-items:center!important;
   }
 }
+
+/* Mobile toolbar glyphs must not inherit host font scaling or text autosizing. */
+@media(max-width:700px) {
+  html.cwn-active body #sheld #leftSendForm :is(#options_button,#cwn-regenerate,#extensionsMenuButton) {
+    font-size:18px!important;line-height:1!important;
+    text-size-adjust:none;-webkit-text-size-adjust:none;
+  }
+  html.cwn-active body #sheld #leftSendForm :is(#options_button,#cwn-regenerate,#extensionsMenuButton)::before {
+    display:flex!important;align-items:center;justify-content:center;
+    width:20px!important;height:20px!important;flex:0 0 20px;
+    font-family:'Font Awesome 6 Free'!important;font-weight:900!important;
+    font-size:18px!important;line-height:20px!important;
+    text-size-adjust:none;-webkit-text-size-adjust:none;
+  }
+  html.cwn-active body #sheld #leftSendForm #extensionsMenuButton :is(i,svg) {
+    font-size:18px!important;width:20px!important;height:20px!important;line-height:20px!important;
+  }
+}
+
+/* Anchor every inline notice to the form, not its responsive control row. */
+html.cwn-active body #sheld #send_form > :is(.cwn-api-notice,.cwn-start-error) {
+  position:absolute!important;inset:50% auto auto 50%!important;
+  transform:translate(-50%,-50%)!important;translate:none;
+  box-sizing:border-box;width:max-content;max-width:calc(100% - 32px);
+  margin:0!important;padding:4px 8px;z-index:6;
+  font:400 14px/1.4 var(--cwn-font-ui);text-align:center;
+  white-space:normal;overflow-wrap:anywhere;
+  color:var(--cwn-muted);background:var(--cwn-surface);border-radius:6px;
+  pointer-events:none;
+}

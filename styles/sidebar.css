@@ -360,7 +360,7 @@ html.cwn-active.cwn-menu-open body #cwn-menu {
 /* Animate the desktop rail and the reading surface together. */
 @media(min-width:701px) {
   html.cwn-active body :is(#top-settings-holder,#top-bar) {
-    transform:translateX(0)!important;
+    transform:none!important;
     visibility:visible;
     transition:transform 240ms cubic-bezier(.22,.61,.36,1),visibility 0s!important;
   }

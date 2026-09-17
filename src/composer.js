@@ -1,9 +1,11 @@
 import { mountScriptPanel } from './script-panel.js';
 import { mountCharacterPicker } from './character-picker.js';
+import { createComposerNotice } from './composer-notice.js';
 // Keep sending, attachments and generation controls owned by SillyTavern.
 export function mountComposer(doc, host) {
   const row = doc.getElementById('nonQRFormItems');
   if (!row) return () => {};
+  const form = doc.getElementById('send_form') || row;
   const abort = new doc.defaultView.AbortController();
   const disposeScripts=mountScriptPanel(doc,doc.defaultView);
   const controls = doc.createElement('div');
@@ -31,12 +33,12 @@ export function mountComposer(doc, host) {
   const input=doc.getElementById('send_textarea'), send=doc.getElementById('send_but');
   const regenerate=doc.createElement('button');regenerate.id='cwn-regenerate';regenerate.type='button';regenerate.className='fa-solid fa-rotate-right';regenerate.setAttribute('aria-label','重新生成');regenerate.title='重新生成';
   doc.getElementById('extensionsMenuButton')?.before(regenerate);
-  let noticeTimer,shakeTimer;
-  const notice=doc.createElement('span');notice.className='cwn-api-notice';notice.setAttribute('role','status');row.append(notice);
+  let shakeTimer;
+  const feedback=createComposerNotice();
+  const notice=doc.createElement('span');notice.className='cwn-api-notice';notice.setAttribute('role','status');form.append(notice);
   function rejectOffline(target){
-    clearTimeout(noticeTimer);clearTimeout(shakeTimer);target.classList.remove('cwn-reject');void target.offsetWidth;target.classList.add('cwn-reject');shakeTimer=setTimeout(()=>target.classList.remove('cwn-reject'),320);
-    const text='未连接到API!';let index=0;notice.textContent='';
-    function type(){notice.textContent=text.slice(0,++index);if(index<text.length)noticeTimer=setTimeout(type,35);else noticeTimer=setTimeout(()=>notice.textContent='',2200);}type();
+    clearTimeout(shakeTimer);target.classList.remove('cwn-reject');void target.offsetWidth;target.classList.add('cwn-reject');shakeTimer=setTimeout(()=>target.classList.remove('cwn-reject'),320);
+    feedback.show(notice,'未连接到API!');
   }
   doc.addEventListener('click',event=>{
     if(!host.isHome()&&event.target.closest('#send_but')&&doc.getElementById('send_form')?.classList.contains('no-connection')){event.preventDefault();event.stopImmediatePropagation();rejectOffline(send);}
@@ -46,7 +48,7 @@ export function mountComposer(doc, host) {
     if(host.isHome())return;
     if(doc.getElementById('send_form')?.classList.contains('no-connection')){rejectOffline(regenerate);return;}
     regenerate.disabled=true;
-    try{await host.rerollLastReply();}catch(cause){notice.textContent=cause.message;}finally{regenerate.disabled=false;}
+    try{await host.rerollLastReply();}catch(cause){if(!disposed)feedback.show(notice,cause.message || '重新生成失败，请重试。');}finally{regenerate.disabled=false;}
   },{signal:abort.signal});
   const originalLabel=send?.getAttribute('aria-label');
   const error=doc.createElement('div');error.className='cwn-start-error';error.setAttribute('role','status');controls.after(error);
@@ -54,11 +56,11 @@ export function mountComposer(doc, host) {
     if(starting)return;
     if(!selectedAvatar){character.click();return;}
     const draft=input?.value || '';
-    starting=true;character.disabled=true;error.textContent='';
+    starting=true;character.disabled=true;feedback.clear();
     if(input)input.readOnly=true;
     send?.setAttribute('aria-busy','true');
     try{await host.startCharacterChat(selectedAvatar);}
-    catch(reason){if(!disposed)error.textContent=reason.message || '创建聊天失败，请重试。';}
+    catch(reason){if(!disposed)feedback.show(error,reason.message || '创建聊天失败，请重试。');}
     finally{
       starting=false;
       if(!disposed){
@@ -93,10 +95,10 @@ export function mountComposer(doc, host) {
     model.textContent = info.model || 'API 设置';
     model.title = `配置模型与 API：${info.model || '打开连接设置'}`;
   }
-  row.append(controls,error);
+  row.append(controls);form.append(error);
   const unsubscribe = host.subscribeComposer(render);
   render();
-  return () => { clearTimeout(noticeTimer);clearTimeout(shakeTimer);notice.remove();disposeScripts(); regenerate.remove(); disposed=true;error.remove();if(input)input.readOnly=false;if(send){send.removeAttribute('aria-busy');if(originalLabel===null)send.removeAttribute('aria-label');else send.setAttribute('aria-label',originalLabel);}disposePicker(); abort.abort(); unsubscribe(); controls.remove(); };
+  return () => { feedback.clear();clearTimeout(shakeTimer);notice.remove();disposeScripts(); regenerate.remove(); disposed=true;error.remove();if(input)input.readOnly=false;if(send){send.removeAttribute('aria-busy');if(originalLabel===null)send.removeAttribute('aria-label');else send.setAttribute('aria-label',originalLabel);}disposePicker(); abort.abort(); unsubscribe(); controls.remove(); };
 }
 
 

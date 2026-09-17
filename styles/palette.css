@@ -15,3 +15,25 @@ html.cwn-active body #sheld #send_form {background:var(--cwn-surface)!important;
 html.cwn-active body #sheld #rightSendForm :is(#send_but,#mes_stop) {background:var(--cwn-accent)!important;}
 html.cwn-active body .cwn-api-notice {color:var(--cwn-composer-muted);}
 html.cwn-active body {--SmartThemeBodyColor:var(--cwn-ink);--SmartThemeBlurTintColor:var(--cwn-bg);--SmartThemeChatTintColor:var(--cwn-bg);--SmartThemeBorderColor:var(--cwn-line);}
+
+/* Native disabled prompts use translucent white, unsuitable for warm paper. */
+html.cwn-active body #completion_prompt_manager #completion_prompt_manager_list .completion_prompt_manager_prompt_name,
+html.cwn-active body #completion_prompt_manager #completion_prompt_manager_list .prompt-manager-inspect-action {
+  color:var(--cwn-ink)!important;text-shadow:none!important;
+}
+html.cwn-active body #completion_prompt_manager #completion_prompt_manager_list .completion_prompt_manager_prompt_disabled .completion_prompt_manager_prompt_name,
+html.cwn-active body #completion_prompt_manager #completion_prompt_manager_list .completion_prompt_manager_prompt_disabled .prompt-manager-inspect-action {
+  color:var(--cwn-muted)!important;opacity:1!important;
+}
+html.cwn-active body #completion_prompt_manager #completion_prompt_manager_list .completion_prompt_manager_prompt_disabled {
+  border-color:var(--cwn-line)!important;
+}
+
+/* Readable preset headings, token totals and marker glyphs in both palettes. */
+html.cwn-active body #completion_prompt_manager .completion_prompt_manager_header,
+html.cwn-active body #completion_prompt_manager .completion_prompt_manager_header * {
+  color:var(--cwn-muted)!important;text-shadow:none!important;filter:none!important;
+}
+html.cwn-active body #completion_prompt_manager #completion_prompt_manager_list .completion_prompt_manager_prompt .completion_prompt_manager_prompt_name .fa-solid {
+  color:var(--cwn-muted)!important;text-shadow:none!important;filter:none!important;
+}
