@@ -413,7 +413,7 @@ html.cwn-active body .cwn-generating .cwn-recent-item {padding-right:32px;}
     height:34px;min-height:34px;padding:0;
   }
   html.cwn-active body #top-settings-holder .cwn-nav-label {
-    padding-left:70.5px;font-size:15px;font-weight:400;line-height:1.25;letter-spacing:0;
+    padding-left:38.5px;font-size:15px;font-weight:400;line-height:1.25;letter-spacing:0;
     color:color-mix(in srgb, var(--cwn-ink) 76%, var(--cwn-bg));
   }
   html.cwn-active body #top-settings-holder .drawer > .drawer-toggle > .drawer-icon {
@@ -439,8 +439,21 @@ html.cwn-active body #cwn-new-chat .cwn-new-icon {
 }
 @media(min-width:701px) {
   html.cwn-active body #cwn-new-chat {
-    height:34px;min-height:34px;padding:0 0 0 70.5px;line-height:1.25;
+    height:34px;min-height:34px;padding:0 0 0 38.5px;line-height:1.25;
     color:color-mix(in srgb,var(--cwn-ink) 76%,var(--cwn-bg));
   }
   html.cwn-active body #cwn-new-chat .cwn-new-icon {left:7.75px;}
+}
+
+/* Optical alignment of navigation text with the icon artwork. */
+@media(min-width:701px) {
+  html.cwn-active body #top-settings-holder .cwn-nav-label,
+  html.cwn-active body #cwn-new-chat > span:not(.cwn-new-icon) {
+    position:relative;top:1px;
+  }
+}
+
+/* Omit formatting and background entries from the themed navigation. */
+html.cwn-active body #top-settings-holder .cwn-nav-pane > :is(#advanced-formatting-button,#logo_block,#backgrounds-button) {
+  display:none!important;
 }

@@ -70,7 +70,7 @@ export function mountShell(doc, win, toggleDrawer) {
   });
   listen(media,'change',syncRailToggle);
   const labels = [];
-  const navNames = {'ai-config-button':'预设','sys-settings-button':'API 连接','advanced-formatting-button':'格式化','WI-SP-button':'世界书','user-settings-button':'偏好设置','logo_block':'背景','backgrounds-button':'背景','extensions-settings-button':'扩展','persona-management-button':'用户设定','rightNavHolder':'角色卡'};
+  const navNames = {'ai-config-button':'预设','sys-settings-button':'API 连接','advanced-formatting-button':'格式化','WI-SP-button':'世界书','user-settings-button':'偏好','logo_block':'背景','backgrounds-button':'背景','extensions-settings-button':'扩展','persona-management-button':'用户设定','rightNavHolder':'角色卡'};
   for (const toggle of rail.querySelectorAll(':scope > .drawer > .drawer-toggle')) {
     const icon = toggle.querySelector('.drawer-icon');
     const title = icon?.getAttribute('title') || toggle.getAttribute('title');
