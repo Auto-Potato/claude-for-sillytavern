@@ -3,56 +3,60 @@
 @import url('./mobile.css');
 @import url('./home.css');
 @import url('./appearance.css');
-@import url('./composer.css');
+@import url('./composer.css?v=20260918-icons2');
 @import url('./sidebar.css');
 @import url('./fonts.css');
 @import url('./palette.css');
 @import url('./messages.css');
 
 /* Crisp vector icons for compact success and info notifications. */
-html.cwn-active #toast-container > .toast-success,
-html.cwn-active #toast-container > .toast-info {
+html:is(.cwn-active,.cwn-toasts-active) #toast-container > .toast-success,
+html:is(.cwn-active,.cwn-toasts-active) #toast-container > .toast-info {
   background-image: none !important;
   position: relative;
 }
-html.cwn-active #toast-container > .toast-success::before,
-html.cwn-active #toast-container > .toast-info::before,
-html.cwn-active #toast-container > .toast-warning::before,
-html.cwn-active #toast-container > .toast-error::before {
+html:is(.cwn-active,.cwn-toasts-active) #toast-container > .toast-success::before,
+html:is(.cwn-active,.cwn-toasts-active) #toast-container > .toast-info::before,
+html:is(.cwn-active,.cwn-toasts-active) #toast-container > .toast-warning::before,
+html:is(.cwn-active,.cwn-toasts-active) #toast-container > .toast-error::before {
   content: ''; position: absolute; left: 15px; top: 50%;
   width: 24px; height: 24px; transform: translateY(-50%);
   background: white; filter: none;
   mask: var(--cwn-toast-icon) center / contain no-repeat;
 }
-html.cwn-active #toast-container > .toast-success {
+html:is(.cwn-active,.cwn-toasts-active) #toast-container > .toast-success {
   --cwn-toast-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='m4 12 5 5L20 6' fill='none' stroke='black' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
 }
-html.cwn-active #toast-container > .toast-info {
+html:is(.cwn-active,.cwn-toasts-active) #toast-container > .toast-info {
   --cwn-toast-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='9' fill='none' stroke='black' stroke-width='2'/%3E%3Cpath d='M12 11v6' stroke='black' stroke-width='2' stroke-linecap='round'/%3E%3Ccircle cx='12' cy='7' r='1.2'/%3E%3C/svg%3E");
-}html.cwn-active #toast-container > .toast-warning {
+}html:is(.cwn-active,.cwn-toasts-active) #toast-container > .toast-warning {
   --cwn-toast-icon:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 3 2 21h20Z M12 9v5' fill='none' stroke='black' stroke-width='2' stroke-linejoin='round' stroke-linecap='round'/%3E%3Ccircle cx='12' cy='17.5' r='1'/%3E%3C/svg%3E");
 }
-html.cwn-active #toast-container > .toast-error {
+html:is(.cwn-active,.cwn-toasts-active) #toast-container > .toast-error {
   --cwn-toast-icon:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='9' fill='none' stroke='black' stroke-width='2'/%3E%3Cpath d='m8 8 8 8m0-8-8 8' stroke='black' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E");
 }
 /* Warm-paper notification colors, shared by day and night. */
-html.cwn-active #toast-container > :is(.toast-success,.toast-info,.toast-warning,.toast-error) {
+html:is(.cwn-active,.cwn-toasts-active) #toast-container > :is(.toast-success,.toast-info,.toast-warning,.toast-error) {
   color:#fffaf0;
   opacity:1;
 }
-html.cwn-active #toast-container > :is(.toast-success,.toast-info,.toast-warning,.toast-error)::before {background:#fffaf0;}
-html.cwn-active #toast-container > .toast-success {background-color:#65765B;}
-html.cwn-active #toast-container > .toast-info {background-color:#5D7880;}
-html.cwn-active #toast-container > .toast-warning {background-color:#98703D;}
-html.cwn-active #toast-container > .toast-error {background-color:#A65F4D;}
+html:is(.cwn-active,.cwn-toasts-active) #toast-container > :is(.toast-success,.toast-info,.toast-warning,.toast-error)::before {background:#fffaf0;}
+html:is(.cwn-active,.cwn-toasts-active) #toast-container > .toast-success {background-color:#65765B;}
+html:is(.cwn-active,.cwn-toasts-active) #toast-container > .toast-info {background-color:#5D7880;}
+html:is(.cwn-active,.cwn-toasts-active) #toast-container > .toast-warning {background-color:#98703D;}
+html:is(.cwn-active,.cwn-toasts-active) #toast-container > .toast-error {background-color:#A65F4D;}
 
 /* Notifications also sit above native modal dialogs in the browser top layer. */
-html.cwn-active #toast-container[popover] {
+html:is(.cwn-active,.cwn-toasts-active) #toast-container {
   position:fixed!important;inset:auto 0 auto 0!important;top:12px!important;
   width:100%!important;max-width:none;max-height:none;height:auto;
   margin:0!important;padding:0;border:0;background:transparent;
   overflow:visible;pointer-events:none;z-index:2147483647!important;
 }
-html.cwn-active #toast-container[popover]::backdrop {background:transparent;pointer-events:none;}
-html.cwn-active #toast-container[popover] > .toast {pointer-events:auto;margin-left:auto;margin-right:auto;}
-html.cwn-active #toast-container > :is(.toast-warning,.toast-error) {background-image:none!important;position:relative;}
+html:is(.cwn-active,.cwn-toasts-active) #toast-container[popover]::backdrop {background:transparent;pointer-events:none;}
+html:is(.cwn-active,.cwn-toasts-active) #toast-container[popover] > .toast {pointer-events:auto;margin-left:auto;margin-right:auto;}
+html:is(.cwn-active,.cwn-toasts-active) #toast-container > :is(.toast-warning,.toast-error) {background-image:none!important;position:relative;}
+
+/* Hide detail text even for notifications created before the wrapper loads. */
+html:is(.cwn-active,.cwn-toasts-active) #toast-container .toast-title:not(:empty) ~ .toast-message {display:none!important;}
+html:is(.cwn-active,.cwn-toasts-active) #toast-container > .toast {margin-left:auto!important;margin-right:auto!important;float:none!important;}

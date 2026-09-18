@@ -322,3 +322,15 @@ html.cwn-active body #sheld #send_form > :is(.cwn-api-notice,.cwn-start-error) {
   color:var(--cwn-muted);background:var(--cwn-surface);border-radius:6px;
   pointer-events:none;
 }
+
+/* Do not let native button or third-party icon transforms scale one glyph. */
+@media(max-width:700px) {
+  html.cwn-active body #sheld #leftSendForm :is(#options_button,#cwn-regenerate,#extensionsMenuButton) {
+    transform:none!important;scale:1!important;zoom:1!important;
+  }
+  html.cwn-active body #sheld #leftSendForm :is(#options_button,#cwn-regenerate,#extensionsMenuButton)::before {
+    transform:none!important;scale:1!important;zoom:1!important;
+    min-width:20px!important;max-width:20px!important;
+    min-height:20px!important;max-height:20px!important;
+  }
+}

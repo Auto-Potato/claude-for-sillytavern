@@ -18,3 +18,11 @@ test('all notification types keep callbacks and use compact one-second options',
  for(const kind of ['success','info','warning','error']){api[kind]('detail','title',{timeOut:0,onHidden:callback});assert.equal(received[0],'');assert.equal(received[1],'title');assert.equal(received[2].timeOut,1000);assert.equal(received[2].onHidden,callback);}
  dispose();
 });
+test('startup notices lose details and expire after adoption',()=>{
+ let cleared=false, removed=false, scheduled;
+ const toast={querySelector:selector=>selector==='.toast-title'?{textContent:'Loaded'}:{replaceChildren(){removed=true;}}};
+ const api={clear(target,options){assert.equal(target,toast);assert.equal(options.force,true);cleared=true;}};
+ for(const kind of ['success','info','warning','error'])api[kind]=()=>{};
+ const dispose=mountToasts({toastr:api,jQuery:x=>x,setTimeout(fn,ms){assert.equal(ms,1000);scheduled=fn;return 1;},clearTimeout(){},document:{querySelectorAll:()=>[toast],getElementById:()=>null,addEventListener(){},removeEventListener(){}}});
+ assert.equal(removed,true);scheduled();assert.equal(cleared,true);dispose();
+});

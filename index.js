@@ -1,3 +1,4 @@
+import { mountSiteIcons } from './src/site-icons.js';
 import { mountToasts } from './src/toasts.js';
 import { eventSource, event_types, doNavbarIconClick, saveSettingsDebounced } from '../../../../script.js';
 import { extension_settings } from '../../../extensions.js';
@@ -10,15 +11,28 @@ import { mountMessages } from './src/messages.js';
 
 // The host initializes its widgets first. No polling, DOM-wide observer or reload.
 let dispose;
+let disposeToasts;
+function startToasts() {
+  if (!disposeToasts) {
+    document.documentElement.classList.add('cwn-toasts-active');
+    disposeToasts = mountToasts(window);
+  }
+}
+function stopToasts() {
+  disposeToasts?.();disposeToasts=undefined;
+  document.documentElement.classList.remove('cwn-toasts-active');
+}
+if (extension_settings.claude_for_sillytavern?.enabled !== false) startToasts();
 function start() {
   dispose?.();
+  const disposeIcons = mountSiteIcons(document);
   const disposeShell = mountShell(document, window, toggle => doNavbarIconClick.call(toggle));
   const disposeHome = mountHome(document, window, host);
   const disposeAppearance = mountAppearance(document, window);
   const disposeComposer = mountComposer(document, host);
   const disposeMessages = mountMessages(document, host);
-  const disposeToasts = mountToasts(window);
-  dispose = () => { disposeToasts(); disposeMessages(); disposeComposer(); disposeAppearance(); disposeHome(); disposeShell(); };
+  startToasts();
+  dispose = () => { disposeIcons(); stopToasts(); disposeMessages(); disposeComposer(); disposeAppearance(); disposeHome(); disposeShell(); };
 }
 eventSource.once(event_types.APP_READY, () => {
   const settings = extension_settings.claude_for_sillytavern ??= { enabled: true };

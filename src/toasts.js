@@ -23,6 +23,16 @@ export function mountToasts(win) {
     if (event.target.id !== 'toast-container' && event.newState === 'open') raiseToasts();
   }
   doc.addEventListener('toggle', onToggle, true);
+  // Adopt notifications that were emitted before extension initialization.
+  const pendingTimers=[];
+  for(const toast of doc.querySelectorAll?.('#toast-container > .toast') || []) {
+    const title=toast.querySelector('.toast-title');
+    if(title?.textContent.trim())toast.querySelector('.toast-message')?.replaceChildren();
+    pendingTimers.push(win.setTimeout(()=>{
+      if(win.jQuery && api.clear)api.clear(win.jQuery(toast),{force:true});
+    },1000));
+  }
+  raiseToasts();
   const originals = new Map();
   const wrappers = new Map();
   for (const kind of ['success', 'info', 'warning', 'error']) {
@@ -40,6 +50,7 @@ export function mountToasts(win) {
     api[kind] = wrapper;
   }
   return () => {
+    for(const timer of pendingTimers)win.clearTimeout(timer);
     doc.removeEventListener('toggle', onToggle, true);
     for (const container of promoted) {
       if (container.matches(':popover-open')) container.hidePopover();
