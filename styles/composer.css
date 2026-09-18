@@ -334,3 +334,18 @@ html.cwn-active body #sheld #send_form > :is(.cwn-api-notice,.cwn-start-error) {
     min-height:20px!important;max-height:20px!important;
   }
 }
+
+/* Tavern Helper creates one group per script. Keep groups on one horizontal rail. */
+html.cwn-active body #qr--bar.cwn-script-panel.cwn-panel-open {
+  flex-direction:row!important;flex-wrap:nowrap!important;
+  align-items:center!important;justify-content:flex-start!important;
+  overflow-x:auto!important;overflow-y:hidden!important;
+}
+html.cwn-active body #qr--bar.cwn-script-panel .qr--buttons {
+  display:flex!important;flex-direction:row!important;flex-wrap:nowrap!important;
+  flex:0 0 auto!important;width:max-content!important;max-width:none!important;
+  justify-content:flex-start!important;align-items:center!important;
+}
+html.cwn-active body #qr--bar.cwn-script-panel .qr--button {
+  white-space:nowrap!important;overflow-wrap:normal!important;max-width:none!important;
+}

@@ -97,7 +97,11 @@ export function mountMessages(doc, host) {
       const rect = message.getBoundingClientRect();
       const top = Math.max(rect.top, viewport.top), bottom = Math.min(rect.bottom, viewport.bottom);
       message.classList.toggle('cwn-swipe-visible', bottom > top && rect.bottom > viewport.top + 8 && rect.top < viewport.bottom - 8);
-      if (bottom > top) message.style.setProperty('--cwn-swipe-top', `${(top + bottom) / 2 - rect.top}px`);
+      // Iframe content can shrink after rendering. Never retain an old arrow
+      // offset outside the message: absolute controls would extend scrollHeight.
+      const center = bottom > top ? (top + bottom) / 2 - rect.top : rect.height / 2;
+      const inset = Math.min(24, rect.height / 2);
+      message.style.setProperty('--cwn-swipe-top', `${Math.max(inset, Math.min(center, rect.height - inset))}px`);
     });
   }
   function queueArrows() { if (!frame) frame = win.requestAnimationFrame(placeArrows); }

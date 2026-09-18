@@ -344,3 +344,10 @@ html.cwn-active body #chat .mes :is(.mesIDDisplay,.mes_timer) {
   html.cwn-active body:has(.cwn-home-active) > #cwn-mobile-candidates {display:none;}
   html.cwn-active body:is([data-generating="true"],[data-swiping="true"]) > #cwn-mobile-candidates button {pointer-events:none;}
 }
+
+/* Bound eased desktop offsets too, while embedded frontends change height. */
+@media(min-width:701px) {
+  html.cwn-active body #chat > .mes[is_user="false"] > :is(.swipe_left,.swipeRightBlock) {
+    top:clamp(24px,var(--cwn-swipe-top,50%),calc(100% - 24px))!important;
+  }
+}
