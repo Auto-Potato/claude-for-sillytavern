@@ -70,7 +70,7 @@ export function mountCharacterLibrary(doc,win,host) {
     controls();editActions();restoreHeight();
   }
   async function canLeave(){if(!changed())return true;return !!await confirm('是否舍弃当前修改？');}
-  async function open(key){const stamp=++revision;const [loaded]=await Promise.all([data.read(key),updateWorldInfoList()]);if(disposed||stamp!==revision)return;avatar=key;card=loaded;opening=0;draft=null;render();drawer.scrollTop=0;}
+  async function open(key){const stamp=++revision;await host.chooseCharacter(key);const [loaded]=await Promise.all([data.read(key),updateWorldInfoList()]);if(disposed||stamp!==revision)return;avatar=key;card=loaded;opening=0;draft=null;render();drawer.scrollTop=0;}
   pane.addEventListener('input',event=>{const el=event.target;if(el.matches('.library-search')){query=el.value;drawCards();}if(el.dataset.field){beginDraft();if(el.dataset.field==='description')draft.description=el.value;if(el.dataset.field==='opening'){if(opening<draft.openings.length||el.value)draft.openings[opening]=el.value;}editActions();controls();}},{signal:abort.signal});
   pane.addEventListener('click',event=>{
     const button=event.target.closest('button');if(!button||busy)return;
@@ -95,7 +95,7 @@ export function mountCharacterLibrary(doc,win,host) {
       if(st.isGenerating()||st.isChatSaving)throw new Error('请等待生成或聊天保存完成');
       if(!await canLeave())return;
       const message=doc.createElement('p');message.textContent=`删除「${card.name}」？此操作删除角色卡，保留聊天记录。`;
-      if(await confirm('删除角色卡',message)){if(await st.deleteCharacter(avatar,{deleteChats:false})){await st.getCharacters();list();win.toastr.success('角色卡已删除');}}
+      if(await confirm('删除角色卡',message)){if(await st.deleteCharacter(avatar,{deleteChats:false})){list();win.toastr.success('角色卡已删除');}}
     });
     if(action==='chat')run(async()=>{if(!await canLeave())return;await host.chooseCharacter(avatar);discard();render();if(win.innerWidth<=700&&doc.documentElement.classList.contains('cwn-menu-open'))doc.getElementById('cwn-backdrop')?.click();else if(drawer.classList.contains('openDrawer'))doc.querySelector('#rightNavHolder > .drawer-toggle')?.click();});
   },{signal:abort.signal});

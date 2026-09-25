@@ -1,3 +1,4 @@
+import { resolveRecentRows } from './recent-chats.js';
 import { createOperationLock } from './operation-lock.js';
 import { SWIPE_DIRECTION } from '../../../../constants.js';
 import { accountStorage } from '../../../../util/AccountStorage.js';
@@ -97,7 +98,7 @@ export const host = {
   },
   isHome: () => startingWelcome || (!(newlyOpened && !group.selected_group && newlyOpened.avatar===st.characters[st.this_chid]?.avatar && newlyOpened.file===st.getCurrentChatId()) && (st.getCurrentChatId() === undefined || st.chat.length === 0 || st.chat.every(message => message.is_system))),
   subscribe(callback) {
-    const events = ['CHAT_CHANGED', 'CHAT_CREATED', 'CHAT_DELETED', 'CHAT_RENAMED', 'GROUP_CHAT_CREATED', 'GROUP_CHAT_DELETED'];
+    const events = ['CHARACTER_PAGE_LOADED', 'CHAT_CHANGED', 'CHAT_CREATED', 'CHAT_DELETED', 'CHAT_RENAMED', 'GROUP_CHAT_CREATED', 'GROUP_CHAT_DELETED'];
     const changed=()=>callback(true), rendered=()=>callback(false);
     localRefresh.add(changed);
     const renderEvents=['USER_MESSAGE_RENDERED','CHARACTER_MESSAGE_RENDERED','MESSAGE_DELETED','SETTINGS_UPDATED','PERSONA_CHANGED','PERSONA_RENAMED','PERSONA_UPDATED'];
@@ -115,19 +116,17 @@ export const host = {
     };
   },
   async recent(signal) {
+    const knownCharacters=st.characters.map(c=>({avatar:c.avatar,name:c.name}));
+    const knownGroups=group.groups.map(g=>({id:g.id,name:g.name}));
     const response = await fetch('/api/chats/recent', {
       method:'POST', headers:st.getRequestHeaders(), body:JSON.stringify({max:20,pinned:[...chatActions.pins().values()].map(r=>({avatar:r.avatar,group:r.group,file_name:r.file+'.jsonl'}))}), signal,
     });
     if (!response.ok) throw new Error('最近聊天读取失败，请点击刷新重试。');
     const rows = await response.json();
     if (!Array.isArray(rows)) throw new Error('最近聊天返回格式异常。');
-    return rows.flatMap(row => {
-      if (typeof row.file_name !== 'string') return [];
-      const entity = row.group ? group.groups.find(g => String(g.id) === String(row.group)) : st.characters.find(c => c.avatar === row.avatar);
-      if (!entity) return [];
-      return [{pinned:chatActions.isPinned({avatar:row.avatar,group:row.group,file:row.file_name.replace(/\.jsonl$/, '')}), avatar:row.avatar, group:row.group, file:row.file_name.replace(/\.jsonl$/, ''), name:entity.name,
-        image:!row.group && row.avatar ? `/characters/${encodeURIComponent(row.avatar)}` : '/img/five.png'}];
-    });
+    return resolveRecentRows(rows,
+      [...st.characters,...knownCharacters], [...group.groups,...knownGroups],
+      row=>chatActions.isPinned(row));
   },
   async openRecent(row) {
     if (st.isGenerating() || st.isChatSaving) throw new Error('请等待当前生成或保存完成后再切换聊天。');
