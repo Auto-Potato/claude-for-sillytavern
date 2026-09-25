@@ -11,10 +11,11 @@ export function mountScriptPanel(doc,win){
   function leave(event){if(event.pointerType==='mouse'&&win.matchMedia('(min-width:701px)').matches){cancelLeave();leaveTimer=win.setTimeout(close,220);}}
   function close(){cancelLeave();if(bar?.classList.contains('cwn-panel-open'))bar.classList.remove('cwn-panel-open');button.setAttribute('aria-expanded','false');}
   function position(){
-    if(!bar)return;const r=button.getBoundingClientRect(),width=Math.min(340,win.innerWidth-24);
+    if(!bar)return;const desktop=win.matchMedia('(min-width:701px)').matches;
+    const r=button.getBoundingClientRect(),width=Math.min(desktop?480:340,win.innerWidth-24);
     bar.style.width='max-content';bar.style.maxWidth=width+'px';bar.style.left='auto';bar.style.right='70px';bar.style.maxWidth=Math.min(width,Math.max(80,r.left-16))+'px';
     bar.style.top='auto';bar.style.bottom='calc(100% + 31px)';
-    bar.style.maxHeight=Math.max(80,Math.min(180,r.top-24))+'px';
+    bar.style.maxHeight=Math.max(80,Math.min(desktop?280:180,r.top-24))+'px';
   }
   function restore(){if(!bar)return;close();bar.removeEventListener('toggle',toggle);bar.removeEventListener('pointerenter',cancelLeave);bar.removeEventListener('pointerleave',leave);bar.classList.remove('cwn-script-panel','cwn-panel-open');for(const [key,value]of Object.entries(saved)){if(value===null)bar.removeAttribute(key);else bar.setAttribute(key,value);}bar=null;}
   function toggle(){button.setAttribute('aria-expanded',String(bar?.classList.contains('cwn-panel-open')||false));}

@@ -335,17 +335,20 @@ html.cwn-active body #sheld #send_form > :is(.cwn-api-notice,.cwn-start-error) {
   }
 }
 
-/* Tavern Helper creates one group per script. Keep groups on one horizontal rail. */
+/* Flatten script groups visually so all buttons share the bounded wrapping grid.
+   Keep native nodes and event handlers intact. */
 html.cwn-active body #qr--bar.cwn-script-panel.cwn-panel-open {
-  flex-direction:row!important;flex-wrap:nowrap!important;
-  align-items:center!important;justify-content:flex-start!important;
-  overflow-x:auto!important;overflow-y:hidden!important;
+  flex-direction:row!important;flex-wrap:wrap!important;
+  align-items:flex-start!important;align-content:flex-start!important;
+  justify-content:flex-start!important;gap:6px!important;
+  overflow-x:hidden!important;overflow-y:auto!important;
+  scrollbar-width:none;
 }
 html.cwn-active body #qr--bar.cwn-script-panel .qr--buttons {
-  display:flex!important;flex-direction:row!important;flex-wrap:nowrap!important;
-  flex:0 0 auto!important;width:max-content!important;max-width:none!important;
-  justify-content:flex-start!important;align-items:center!important;
+  display:contents!important;
 }
 html.cwn-active body #qr--bar.cwn-script-panel .qr--button {
-  white-space:nowrap!important;overflow-wrap:normal!important;max-width:none!important;
+  box-sizing:border-box;white-space:normal!important;
+  overflow-wrap:anywhere!important;max-width:100%!important;
+  flex:0 0 auto!important;
 }
