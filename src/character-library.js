@@ -1,3 +1,4 @@
+import { importCharacterResources } from './character-resources.js';
 import * as st from '../../../../../script.js';
 import { world_names, updateWorldInfoList } from '../../../../world-info.js';
 import { Popup, POPUP_TYPE } from '../../../../popup.js';
@@ -63,14 +64,14 @@ export function mountCharacterLibrary(doc,win,host) {
     const fields=draft||characterFields(card),items=fields.openings;opening=Math.min(opening,items.length);
     const book=card.data?.extensions?.world || '';
     const missingBook=!!book&&!world_names.includes(book);
-    pane.innerHTML=`<div class="detail-view">${back('back','返回角色卡列表')}<div class="detail-hero"><img class="detail-cover" src="${esc(image(avatar))}" alt=""><div><h1 class="cwn-type-title">${esc(card.name||card.data?.name)}</h1><div class="library-edit" ${changed()?'':'hidden'}><button class="edit-confirm" data-action="save" aria-label="保存修改">✓ 保存</button><button class="edit-confirm" data-action="cancel" aria-label="取消编辑">× 取消</button></div></div></div>
+    pane.innerHTML=`<div class="detail-view">${back('back','返回角色卡列表')}<div class="detail-hero"><img class="detail-cover" src="${esc(image(avatar))}" alt=""><div class="detail-identity"><div class="detail-title-row"><h1 class="cwn-type-title">${esc(card.name||card.data?.name)}</h1><button type="button" class="detail-resources" data-action="resources" aria-label="导入角色卡资源" title="导入角色卡资源">${icon('M12 5v14M5 12h14')}</button></div><div class="library-edit" ${changed()?'':'hidden'}><button class="edit-confirm" data-action="save" aria-label="保存修改">✓ 保存</button><button class="edit-confirm" data-action="cancel" aria-label="取消编辑">× 取消</button></div></div></div>
     <section class="detail-section"><h2 class="cwn-type-section">角色描述</h2><textarea class="library-editor" data-field="description" aria-label="角色描述" placeholder="暂无角色描述">${esc(fields.description)}</textarea></section>
     <section class="detail-section"><div class="detail-section-head"><h2 class="cwn-type-section">开场白</h2><span class="library-muted" aria-live="polite">${opening+1} / ${characterFields(card).openings.length}${opening>=characterFields(card).openings.length?' · 新开场白':''}</span></div><div class="opening-switch"><button class="opening-arrow" data-action="prev" aria-label="上一个开场白" >${icon('m14 6-6 6 6 6')}</button><div class="detail-opening"><textarea class="library-editor" data-field="opening" aria-label="开场白" placeholder="输入新的开场白">${esc(items[opening]||'')}</textarea></div><button class="opening-arrow" data-action="next" aria-label="下一个开场白" >${icon('m10 6 6 6-6 6')}</button></div></section>
-    <section class="detail-section"><h2 class="cwn-type-section">角色世界书</h2><div class="detail-world"><div><strong>${esc(book||'尚未绑定世界书')}</strong><small>${missingBook?'绑定的世界书未找到，请导入或重新选择':'跟随此角色用于各条聊天'}</small></div><button class="detail-link" data-action="world">${book?'更换':'绑定'}</button></div></section><div class="library-footer"><button class="detail-delete" data-action="delete">删除角色卡</button><button class="library-chat" data-action="chat">开始聊天</button></div></div>`;
+    <section class="detail-section"><h2 class="cwn-type-section">角色世界书</h2><div class="detail-world"><div><strong>${esc(book||'尚未绑定世界书')}</strong><small>${missingBook?'绑定的世界书未找到，请导入或重新选择':'跟随此角色用于各条聊天'}</small></div><button class="detail-link" data-action="world">${book?'更换':'绑定'}</button></div></section><div class="library-footer"><button class="detail-delete" data-action="delete">删除角色卡</button><button class="library-chat" data-action="chat">开始新聊天</button></div></div>`;
     controls();editActions();restoreHeight();
   }
   async function canLeave(){if(!changed())return true;return !!await confirm('是否舍弃当前修改？');}
-  async function open(key){const stamp=++revision;await host.chooseCharacter(key);const [loaded]=await Promise.all([data.read(key),updateWorldInfoList()]);if(disposed||stamp!==revision)return;avatar=key;card=loaded;opening=0;draft=null;render();drawer.scrollTop=0;}
+  async function open(key){const stamp=++revision;const [loaded]=await Promise.all([data.read(key),updateWorldInfoList()]);if(disposed||stamp!==revision)return;avatar=key;card=loaded;opening=0;draft=null;render();drawer.scrollTop=0;}
   pane.addEventListener('input',event=>{const el=event.target;if(el.matches('.library-search')){query=el.value;drawCards();}if(el.dataset.field){beginDraft();if(el.dataset.field==='description')draft.description=el.value;if(el.dataset.field==='opening'){if(opening<draft.openings.length||el.value)draft.openings[opening]=el.value;}editActions();controls();}},{signal:abort.signal});
   pane.addEventListener('click',event=>{
     const button=event.target.closest('button');if(!button||busy)return;
@@ -82,6 +83,7 @@ export function mountCharacterLibrary(doc,win,host) {
     if(action==='prev'||action==='next'){const count=(draft||characterFields(card)).openings.length;opening=Math.max(0,Math.min(count,opening+(action==='next'?1:-1)));const y=drawer.scrollTop;render();drawer.scrollTop=y;return;}
     if(action==='back')run(async()=>{if(await canLeave())list();});
     if(action==='save')run(async()=>{if(!changed()||!await confirm('是否保存当前修改？'))return;card=await data.save(avatar,draft,baseline);discard();render();win.toastr.success('角色详情已保存');});
+    if(action==='resources')run(async()=>{const fresh=await data.read(avatar);await importCharacterResources(fresh,{doc,win,bind:(key,name)=>data.bind(key,name)});card=await data.read(avatar);render();});
     if(action==='world')run(async()=>{
       if(!await canLeave())return;draft=null;[card]=await Promise.all([data.read(avatar),updateWorldInfoList()]);render();
       const body=doc.createElement('div');const label=doc.createElement('label');label.textContent='角色世界书';const select=doc.createElement('select');select.className='text_pole';select.setAttribute('aria-label','角色世界书');
@@ -97,7 +99,7 @@ export function mountCharacterLibrary(doc,win,host) {
       const message=doc.createElement('p');message.textContent=`删除「${card.name}」？此操作删除角色卡，保留聊天记录。`;
       if(await confirm('删除角色卡',message)){if(await st.deleteCharacter(avatar,{deleteChats:false})){list();win.toastr.success('角色卡已删除');}}
     });
-    if(action==='chat')run(async()=>{if(!await canLeave())return;await host.chooseCharacter(avatar);discard();render();if(win.innerWidth<=700&&doc.documentElement.classList.contains('cwn-menu-open'))doc.getElementById('cwn-backdrop')?.click();else if(drawer.classList.contains('openDrawer'))doc.querySelector('#rightNavHolder > .drawer-toggle')?.click();});
+    if(action==='chat')run(async()=>{if(!await canLeave())return;await host.startCharacterChat(avatar);discard();render();if(win.innerWidth<=700&&doc.documentElement.classList.contains('cwn-menu-open'))doc.getElementById('cwn-backdrop')?.click();else if(drawer.classList.contains('openDrawer'))doc.querySelector('#rightNavHolder > .drawer-toggle')?.click();});
   },{signal:abort.signal});
   const observer=new win.MutationObserver(()=>{if(drawer.classList.contains('openDrawer')&&!card)list();});observer.observe(drawer,{attributes:true,attributeFilter:['class']});
   const refresh=()=>{if(!disposed&&!card)list();};

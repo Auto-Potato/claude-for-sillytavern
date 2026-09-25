@@ -98,3 +98,11 @@ html.cwn-active body .cwn-character-dialog .popup-button-ok {
 }
 #cwn-character-library .opening-switch:focus-within {border-color:var(--cwn-accent);}
 #cwn-character-library.phone .opening-switch .library-editor {min-height:250px;}
+
+#cwn-character-library .detail-identity {min-width:0;flex:1;}
+#cwn-character-library .detail-title-row {display:flex;align-items:center;gap:12px;}
+#cwn-character-library .detail-title-row h1 {min-width:0;overflow-wrap:anywhere;}
+#cwn-character-library .detail-resources {display:inline-flex;align-items:center;justify-content:center;flex:0 0 34px;width:34px;height:34px;padding:6px;border:1px solid var(--cwn-line);border-radius:8px;background:var(--cwn-surface);color:var(--cwn-ink);}
+#cwn-character-library .detail-resources svg {width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;}
+#cwn-character-library .detail-resources:hover {color:var(--cwn-accent);border-color:var(--cwn-accent);}
+html.cwn-active body .cwn-character-dialog .cwn-resource-bind {display:flex;align-items:center;gap:8px;}

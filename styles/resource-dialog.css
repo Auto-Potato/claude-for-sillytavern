@@ -1,0 +1,36 @@
+html.cwn-active {--cwn-check:#ae4d2c;--cwn-check-border:#918874;}
+html.cwn-active[data-cwn-theme="dark"] {--cwn-check:#b65534;--cwn-check-border:#a8a192;}
+/* Preserve each native control's visibility and dimensions, including hidden inputs. */
+html.cwn-active body input[type="checkbox"] {
+  --SmartThemeCheckboxTickColor:#fff;
+  background:var(--cwn-bg)!important;border:1.5px solid var(--cwn-check-border)!important;
+  border-radius:5px;box-shadow:none!important;filter:none!important;outline:none;
+  accent-color:var(--cwn-check);color:#fff!important;
+}
+html.cwn-active body input[type="checkbox"]:is(:checked,:indeterminate) {background:var(--cwn-check)!important;border-color:var(--cwn-check)!important;}
+html.cwn-active body input[type="checkbox"]::before {box-shadow:inset 1em 1em #fff!important;}
+html.cwn-active body input[type="checkbox"]:indeterminate::before {clip-path:none;width:10px;height:2px;transform:scale(1);}
+html.cwn-active body input[type="checkbox"]:focus-visible {outline:2px solid var(--cwn-check)!important;outline-offset:3px;}
+html.cwn-active body input[type="checkbox"]:disabled {opacity:.45;cursor:not-allowed;}
+
+html.cwn-active body dialog.cwn-resource-dialog {
+  box-sizing:border-box;width:min(440px,calc(100vw - 32px));padding:28px!important;
+  border-radius:20px!important;box-shadow:0 18px 60px #15130f24!important;text-align:left;
+}
+html.cwn-active body .cwn-resource-dialog h3 {font:500 23px/1.4 var(--cwn-type-title-family)!important;margin:0 0 8px;text-align:left;}
+html.cwn-active body .cwn-resource-dialog p {font:400 14px/1.6 var(--cwn-type-ui-family);color:var(--cwn-muted);margin:0;text-align:left;}
+html.cwn-active body .cwn-resource-card {display:flex;align-items:center;gap:12px;margin:22px 0 18px;padding:14px 16px;background:var(--cwn-surface);border:1px solid var(--cwn-line);border-radius:10px;font:400 15px/1.6 var(--cwn-type-ui-family);overflow-wrap:anywhere;}
+html.cwn-active body .cwn-resource-symbol {flex:0 0 23px;font-size:23px;color:var(--cwn-muted);}
+html.cwn-active body .cwn-resource-symbol svg {display:block;width:23px;height:23px;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;}
+html.cwn-active body .cwn-resource-card > :last-child {min-width:0;}
+html.cwn-active body .cwn-resource-dialog .cwn-resource-bind {display:flex;align-items:center;gap:10px;min-height:44px;font:400 14px/1.6 var(--cwn-type-ui-family)!important;cursor:pointer;}
+html.cwn-active body .cwn-resource-bind input[type="checkbox"] {width:20px;height:20px;flex:0 0 20px;margin:0;transform:none;}
+html.cwn-active body .cwn-resource-dialog .popup-controls {display:flex;align-self:stretch;width:100%;justify-content:flex-end;gap:10px;margin-top:24px;padding-top:20px;border-top:1px solid var(--cwn-line);}
+html.cwn-active body .cwn-resource-dialog :is(.popup-button-ok,.popup-button-cancel) {box-sizing:border-box;height:42px;min-width:92px;padding:8px 20px;margin:0;filter:none!important;display:inline-flex;align-items:center;justify-content:center;}
+html.cwn-active body .cwn-resource-dialog .popup-button-cancel {order:0;}
+html.cwn-active body .cwn-resource-dialog .popup-button-ok {order:1;background:var(--cwn-check)!important;}
+@media(max-width:700px) {
+  html.cwn-active body dialog.cwn-resource-dialog {padding:24px 20px!important;border-radius:18px!important;}
+  html.cwn-active body .cwn-resource-dialog h3 {font-size:22px!important;}
+  html.cwn-active body .cwn-resource-dialog :is(.popup-button-ok,.popup-button-cancel) {flex:1;min-width:0;}
+}
