@@ -40,6 +40,7 @@ export function mountCharacterLibrary(doc,win,host) {
   function responsive(){pane.classList.toggle('phone',win.innerWidth<=700);restoreHeight();}
   responsive();win.addEventListener('resize',responsive,{signal:abort.signal});
   function confirm(title,body){const content=doc.createElement('div'),heading=doc.createElement('h3');heading.textContent=title;content.append(heading);if(typeof body==='string'&&body){const p=doc.createElement('p');p.textContent=body;content.append(p);}else if(body)content.append(body);const popup=new Popup(content,POPUP_TYPE.CONFIRM,'',{okButton:'确定',cancelButton:'取消'});popup.dlg.classList.add('cwn-character-dialog');return popup.show();}
+  pane.cwnNavigation={isDetail:()=>!!card,back:async()=>{if(busy)return false;if(!await canLeave())return false;list();return true;}};
   const image=key=>`/characters/${encodeURIComponent(key)}`;
   function changed(){return !!draft&&JSON.stringify(draft)!==JSON.stringify(baseline);}
   function editActions(){const row=pane.querySelector('.library-edit');if(row)row.hidden=!changed();}
@@ -82,7 +83,7 @@ export function mountCharacterLibrary(doc,win,host) {
     if(action==='cancel')run(async()=>{if(await confirm('是否舍弃当前修改？')){discard();render();}});
     if(action==='prev'||action==='next'){const count=(draft||characterFields(card)).openings.length;opening=Math.max(0,Math.min(count,opening+(action==='next'?1:-1)));const y=drawer.scrollTop;render();drawer.scrollTop=y;return;}
     if(action==='back')run(async()=>{if(await canLeave())list();});
-    if(action==='save')run(async()=>{if(!changed()||!await confirm('是否保存当前修改？'))return;card=await data.save(avatar,draft,baseline);discard();render();win.toastr.success('角色详情已保存');});
+    if(action==='save')run(async()=>{if(!changed())return;card=await data.save(avatar,draft,baseline);discard();render();win.toastr.success('角色详情已保存');});
     if(action==='resources')run(async()=>{const fresh=await data.read(avatar);await importCharacterResources(fresh,{doc,win,bind:(key,name)=>data.bind(key,name)});card=await data.read(avatar);render();});
     if(action==='world')run(async()=>{
       if(!await canLeave())return;draft=null;[card]=await Promise.all([data.read(avatar),updateWorldInfoList()]);render();

@@ -1,0 +1,23 @@
+/* Shared styling for theme-owned confirmation and editing dialogs only. */
+html.cwn-active body dialog.cwn-character-dialog,
+html.cwn-active body dialog#cwn-chat-dialog {
+ width:min(440px,calc(100vw - 32px))!important;padding:28px!important;border:1px solid var(--cwn-line)!important;border-radius:20px!important;
+ background:var(--cwn-bg)!important;color:var(--cwn-ink)!important;box-shadow:0 18px 60px #15130f24!important;
+ text-align:left!important;font:400 15px/1.6 var(--cwn-type-ui-family)!important;
+}
+html.cwn-active body dialog.cwn-character-dialog *,html.cwn-active body dialog#cwn-chat-dialog * {text-shadow:none!important;filter:none!important;box-sizing:border-box;}
+html.cwn-active body dialog.cwn-character-dialog .popup-body,
+html.cwn-active body dialog.cwn-character-dialog .popup-content {padding:0!important;margin:0!important;width:100%!important;text-align:left!important;}
+html.cwn-active body dialog:is(.cwn-character-dialog,#cwn-chat-dialog) :is(h2,h3) {margin:0 0 8px!important;color:var(--cwn-ink)!important;font:500 23px/1.4 var(--cwn-type-title-family)!important;text-align:left!important;}
+html.cwn-active body dialog:is(.cwn-character-dialog,#cwn-chat-dialog) p {margin:0!important;color:var(--cwn-muted)!important;font:400 14px/1.6 var(--cwn-type-ui-family)!important;text-align:left!important;}
+html.cwn-active body dialog:is(.cwn-character-dialog,#cwn-chat-dialog) p:empty {display:none!important;}
+html.cwn-active body dialog:is(.cwn-character-dialog,#cwn-chat-dialog) label {font:400 14px/1.6 var(--cwn-type-ui-family)!important;color:var(--cwn-ink);}
+html.cwn-active body dialog:is(.cwn-character-dialog,#cwn-chat-dialog) :is(input:not([type=checkbox]),select) {width:100%;min-height:44px;margin-top:16px!important;padding:10px 12px!important;border:1px solid var(--cwn-line)!important;border-radius:9px!important;background:var(--cwn-surface)!important;color:var(--cwn-ink)!important;font:400 15px/1.6 var(--cwn-type-ui-family)!important;}
+html.cwn-active body dialog:is(.cwn-character-dialog,#cwn-chat-dialog) label select {margin-top:8px!important;}
+html.cwn-active body dialog:is(.cwn-character-dialog,#cwn-chat-dialog) .cwn-delete-name {display:block;margin:22px 0 18px!important;padding:14px 16px!important;border:1px solid var(--cwn-line);border-radius:10px;background:var(--cwn-surface);font:400 15px/1.6 var(--cwn-type-ui-family)!important;}
+html.cwn-active body dialog:is(.cwn-character-dialog,#cwn-chat-dialog) :is(.popup-controls,.cwn-dialog-buttons) {display:flex!important;align-self:stretch!important;align-items:center;justify-content:flex-end!important;width:100%!important;gap:10px!important;margin:24px 0 0!important;padding:20px 0 0!important;border-top:1px solid var(--cwn-line);}
+html.cwn-active body dialog:is(.cwn-character-dialog,#cwn-chat-dialog) :is(.popup-button-ok,.popup-button-cancel,.cwn-dialog-buttons button) {display:inline-flex!important;align-items:center;justify-content:center;box-sizing:border-box;min-width:92px!important;height:42px!important;min-height:42px!important;margin:0!important;padding:8px 20px!important;border:1px solid var(--cwn-line)!important;border-radius:9px!important;background:transparent!important;color:var(--cwn-ink)!important;font:400 14px/20px var(--cwn-type-ui-family)!important;box-shadow:none!important;}
+html.cwn-active body dialog:is(.cwn-character-dialog,#cwn-chat-dialog) :is(.popup-button-ok,.cwn-primary):is(.popup-button-ok,.cwn-primary) {order:1;background:var(--cwn-check)!important;color:white!important;border-color:var(--cwn-check)!important;}
+html.cwn-active body dialog:is(.cwn-character-dialog,#cwn-chat-dialog) .popup-button-cancel {order:0;}
+html.cwn-active body dialog:is(.cwn-character-dialog,#cwn-chat-dialog) .cwn-danger.cwn-danger {order:1;background:#a8443c!important;color:white!important;border-color:#a8443c!important;}
+@media(max-width:700px){html.cwn-active body dialog.cwn-character-dialog,html.cwn-active body dialog#cwn-chat-dialog{padding:24px 20px!important;border-radius:18px!important;}html.cwn-active body dialog:is(.cwn-character-dialog,#cwn-chat-dialog) :is(h2,h3){font-size:22px!important;}html.cwn-active body dialog:is(.cwn-character-dialog,#cwn-chat-dialog) :is(.popup-button-ok,.popup-button-cancel,.cwn-dialog-buttons button){flex:1!important;min-width:0!important;}}

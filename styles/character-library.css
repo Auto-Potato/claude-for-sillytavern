@@ -106,3 +106,6 @@ html.cwn-active body .cwn-character-dialog .popup-button-ok {
 #cwn-character-library .detail-resources svg {width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;}
 #cwn-character-library .detail-resources:hover {color:var(--cwn-accent);border-color:var(--cwn-accent);}
 html.cwn-active body .cwn-character-dialog .cwn-resource-bind {display:flex;align-items:center;gap:8px;}
+
+/* Full-screen mobile character pages have no enclosing drawer frame. */
+@media(max-width:700px){html.cwn-active body #right-nav-panel.cwn-library-mounted{border:0!important;outline:0!important;box-shadow:none!important;}}

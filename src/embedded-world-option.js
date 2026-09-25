@@ -1,5 +1,5 @@
 // Only augment the native first-use embedded lore confirmation, not other imports.
-export function mountEmbeddedWorldOption({ Popup, confirmType, affirmative, getCharacter, importWorld, doc, onError }) {
+export function mountEmbeddedWorldOption({ Popup, confirmType, affirmative, getCharacter, importWorld, doc, onError, hasWorld = () => false }) {
   const original = Popup.prototype.show;
   let active = true;
   async function show(...args) {
@@ -11,13 +11,22 @@ export function mountEmbeddedWorldOption({ Popup, confirmType, affirmative, getC
     if (!character?.data?.character_book) return original.apply(this, args);
     const snapshot = structuredClone(character);
     const label = doc.createElement('label');
-    label.className = 'cwn-bind-world-option';
+    label.className = 'cwn-resource-bind';
     const checkbox = doc.createElement('input');
     checkbox.type = 'checkbox'; checkbox.checked = true;
     const caption = doc.createElement('span');
     caption.textContent = '同时绑定到此角色';
     label.append(checkbox, caption);
-    this.content.append(label);
+    const name = snapshot.data.character_book.name || `${snapshot.name}'s Lorebook`;
+    const heading = doc.createElement('h3');heading.textContent = '导入角色世界书';
+    const note = doc.createElement('p');note.textContent = hasWorld(name) ? '导入将覆盖同名世界书。' : '此角色卡附带以下世界书。';
+    const resource = doc.createElement('div');resource.className = 'cwn-resource-card';
+    const symbol = doc.createElement('span');symbol.className = 'cwn-resource-symbol';
+    symbol.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5c-3-2-6-2-9-1v15c3-1 6-1 9 1 3-2 6-2 9-1V4c-3-1-6-1-9 1v15"/></svg>';
+    const title = doc.createElement('span');title.textContent = name;resource.append(symbol, title);
+    this.content.replaceChildren(heading, note, resource, label);
+    this.dlg.classList.add('cwn-character-dialog', 'cwn-resource-dialog');
+    this.okButton.textContent = '导入';this.cancelButton.textContent = '取消';
     const result = await original.apply(this, args);
     label.remove();
     if (result !== affirmative) return result;

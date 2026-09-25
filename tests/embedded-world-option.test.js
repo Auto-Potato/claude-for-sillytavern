@@ -8,9 +8,9 @@ test('embedded lore binding choice persists both choices without relying on the 
   const doc={createElement:()=>({append(...children){this.children=children;},remove(){}})};
   class Popup {
     constructor(text='This character has an embedded World/Lorebook. Would you like to import it now?') {
-      this.type=1; this.content={textContent:text,append:label=>{this.label=label;}};
+      this.type=1; this.dlg={classList:{add(){}}};this.okButton={};this.cancelButton={};this.content={textContent:text,replaceChildren:(...children)=>{this.label=children.at(-1);this.heading=children[0];}};
     }
-    async show(){if(this.label)this.label.children[0].checked=checked;return result;}
+    async show(){if(this.label){assert.equal(this.heading.textContent,'导入角色世界书');assert.equal(this.okButton.textContent,'导入');this.label.children[0].checked=checked;}return result;}
   }
   const original=Popup.prototype.show;
   const dispose=mountEmbeddedWorldOption({Popup,confirmType:1,affirmative:1,doc,getCharacter:()=>current,importWorld:async (card,bind)=>{assert.equal(card.avatar,'a.png');assert.equal(bind,checked);imported++;},onError:()=>errors++});

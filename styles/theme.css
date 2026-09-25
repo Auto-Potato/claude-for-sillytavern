@@ -12,6 +12,7 @@
 @import url('./character-import.css');
 @import url('./character-library.css');
 @import url('./resource-dialog.css');
+@import url('./dialogs.css');
 
 /* Crisp vector icons for compact success and info notifications. */
 html:is(.cwn-active,.cwn-toasts-active) #toast-container > .toast-success,

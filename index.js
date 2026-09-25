@@ -1,3 +1,4 @@
+import { mountBrowserNavigation } from './src/browser-navigation.js';
 import { mountSiteIcons } from './src/site-icons.js';
 import { mountToasts } from './src/toasts.js';
 import { eventSource, event_types, doNavbarIconClick, saveSettingsDebounced, processDroppedFiles } from '../../../../script.js';
@@ -6,7 +7,7 @@ import { mountCharacterLibrary } from './src/character-library.js';
 import { mountEmbeddedWorldOption, persistWorldBinding } from './src/embedded-world-option.js';
 import { Popup, POPUP_TYPE, POPUP_RESULT } from '../../../popup.js';
 import { characters, getRequestHeaders } from '../../../../script.js';
-import { convertCharacterBook, updateWorldInfoList, worldInfoCache } from '../../../world-info.js';
+import { convertCharacterBook, updateWorldInfoList, worldInfoCache, world_names } from '../../../world-info.js';
 import { extension_settings } from '../../../extensions.js';
 import { mountShell } from './src/shell.js';
 import { mountHome } from './src/home.js';
@@ -43,6 +44,7 @@ function start() {
     Popup, confirmType: POPUP_TYPE.CONFIRM, affirmative: POPUP_RESULT.AFFIRMATIVE, doc: document,
     getCharacter: () => characters[window.jQuery('#import_character_info').data('chid')],
     onError: message => window.toastr.error(message),
+    hasWorld: name => world_names.includes(name),
     importWorld: async (character, bind) => {
       const name = character.data.character_book.name || `${character.name}'s Lorebook`;
       const data = convertCharacterBook(character.data.character_book);
@@ -65,8 +67,9 @@ function start() {
       window.toastr.success(bind ? '世界书已导入并绑定到此角色' : '世界书已导入，角色绑定保持不变');
     },
   });
+  const disposeBrowserNavigation = mountBrowserNavigation(document, window);
   startToasts();
-  dispose = () => { disposeWorldOption(); disposeLibrary(); disposeImport(); disposeIcons(); stopToasts(); disposeMessages(); disposeComposer(); disposeAppearance(); disposeHome(); disposeShell(); };
+  dispose = () => { disposeBrowserNavigation(); disposeWorldOption(); disposeLibrary(); disposeImport(); disposeIcons(); stopToasts(); disposeMessages(); disposeComposer(); disposeAppearance(); disposeHome(); disposeShell(); };
 }
 eventSource.once(event_types.APP_READY, () => {
   const settings = extension_settings.claude_for_sillytavern ??= { enabled: true };
