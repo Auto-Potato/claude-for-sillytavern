@@ -6,8 +6,11 @@
 @import url('./composer.css?v=20260918-icons2');
 @import url('./sidebar.css');
 @import url('./fonts.css');
+@import url('./typography.css');
 @import url('./palette.css');
 @import url('./messages.css');
+@import url('./character-import.css');
+@import url('./character-library.css');
 
 /* Crisp vector icons for compact success and info notifications. */
 html:is(.cwn-active,.cwn-toasts-active) #toast-container > .toast-success,

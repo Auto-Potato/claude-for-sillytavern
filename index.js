@@ -1,6 +1,12 @@
 import { mountSiteIcons } from './src/site-icons.js';
 import { mountToasts } from './src/toasts.js';
-import { eventSource, event_types, doNavbarIconClick, saveSettingsDebounced } from '../../../../script.js';
+import { eventSource, event_types, doNavbarIconClick, saveSettingsDebounced, processDroppedFiles } from '../../../../script.js';
+import { mountCharacterImport } from './src/character-import.js';
+import { mountCharacterLibrary } from './src/character-library.js';
+import { mountEmbeddedWorldOption, persistWorldBinding } from './src/embedded-world-option.js';
+import { Popup, POPUP_TYPE, POPUP_RESULT } from '../../../popup.js';
+import { characters, getRequestHeaders } from '../../../../script.js';
+import { convertCharacterBook, updateWorldInfoList, worldInfoCache } from '../../../world-info.js';
 import { extension_settings } from '../../../extensions.js';
 import { mountShell } from './src/shell.js';
 import { mountHome } from './src/home.js';
@@ -31,8 +37,36 @@ function start() {
   const disposeAppearance = mountAppearance(document, window);
   const disposeComposer = mountComposer(document, host);
   const disposeMessages = mountMessages(document, host);
+  const disposeImport = mountCharacterImport(document, window, processDroppedFiles);
+  const disposeLibrary = mountCharacterLibrary(document, window, host);
+  const disposeWorldOption = mountEmbeddedWorldOption({
+    Popup, confirmType: POPUP_TYPE.CONFIRM, affirmative: POPUP_RESULT.AFFIRMATIVE, doc: document,
+    getCharacter: () => characters[window.jQuery('#import_character_info').data('chid')],
+    onError: message => window.toastr.error(message),
+    importWorld: async (character, bind) => {
+      const name = character.data.character_book.name || `${character.name}'s Lorebook`;
+      const data = convertCharacterBook(character.data.character_book);
+      const response = await fetch('/api/worldinfo/edit', {
+        method: 'POST', headers: getRequestHeaders(), body: JSON.stringify({name, data}),
+      });
+      if (!response.ok) throw new Error(`World import failed: ${response.status}`);
+      worldInfoCache.set(name, data);
+      await updateWorldInfoList();
+      await eventSource.emit(event_types.WORLDINFO_UPDATED, name, data);
+      if (bind) {
+        await persistWorldBinding((url, body) => fetch(url, {method:'POST',headers:getRequestHeaders(),body:JSON.stringify(body)}), character.avatar, name);
+        const current = characters.find(item => item.avatar === character.avatar);
+        if (current) { current.data ??= {}; current.data.extensions ??= {}; current.data.extensions.world = name; }
+        if (characters[window.jQuery('#set_character_world').data('chid')]?.avatar === character.avatar) {
+          window.jQuery('#character_world').val(name);
+          window.jQuery('#set_character_world, #world_button').addClass('world_set');
+        }
+      }
+      window.toastr.success(bind ? '世界书已导入并绑定到此角色' : '世界书已导入，角色绑定保持不变');
+    },
+  });
   startToasts();
-  dispose = () => { disposeIcons(); stopToasts(); disposeMessages(); disposeComposer(); disposeAppearance(); disposeHome(); disposeShell(); };
+  dispose = () => { disposeWorldOption(); disposeLibrary(); disposeImport(); disposeIcons(); stopToasts(); disposeMessages(); disposeComposer(); disposeAppearance(); disposeHome(); disposeShell(); };
 }
 eventSource.once(event_types.APP_READY, () => {
   const settings = extension_settings.claude_for_sillytavern ??= { enabled: true };

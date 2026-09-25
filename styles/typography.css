@@ -1,0 +1,31 @@
+/* Shared UI text roles. Change these values to tune all components using them.
+   Brand/display titles use Newsreader; Chinese titles use the bundled Noto Serif SC.
+   Keep chat prose and imported character frontends on their own typography settings. */
+html:is(.cwn-active,.cwn-design) {
+  --cwn-type-title-family:"Newsreader","Noto Serif SC",Georgia,serif;
+  --cwn-type-ui-family:"Hanken Grotesk",system-ui,"Microsoft YaHei",sans-serif;
+  --cwn-type-title-size:28px;
+  --cwn-type-title-weight:400;
+  --cwn-type-title-line:1.3;
+  --cwn-type-section-size:20px;
+  --cwn-type-section-weight:500;
+  --cwn-type-section-line:1.4;
+  --cwn-type-item-size:15px;
+  --cwn-type-item-weight:500;
+  --cwn-type-item-line:1.5;
+  --cwn-type-body-size:15px;
+  --cwn-type-body-weight:400;
+  --cwn-type-body-line:1.6;
+  --cwn-type-guide-size:14px;
+  --cwn-type-guide-weight:400;
+  --cwn-type-guide-line:1.5;
+  --cwn-type-caption-size:12px;
+  --cwn-type-caption-weight:400;
+  --cwn-type-caption-line:1.5;
+}
+:is(.cwn-active,.cwn-design) .cwn-type-title {font:var(--cwn-type-title-weight) var(--cwn-type-title-size)/var(--cwn-type-title-line) var(--cwn-type-title-family);}
+:is(.cwn-active,.cwn-design) .cwn-type-section {font:var(--cwn-type-section-weight) var(--cwn-type-section-size)/var(--cwn-type-section-line) var(--cwn-type-ui-family);}
+:is(.cwn-active,.cwn-design) .cwn-type-item {font:var(--cwn-type-item-weight) var(--cwn-type-item-size)/var(--cwn-type-item-line) var(--cwn-type-ui-family);}
+:is(.cwn-active,.cwn-design) .cwn-type-body {font:var(--cwn-type-body-weight) var(--cwn-type-body-size)/var(--cwn-type-body-line) var(--cwn-type-ui-family);}
+:is(.cwn-active,.cwn-design) .cwn-type-guide {font:var(--cwn-type-guide-weight) var(--cwn-type-guide-size)/var(--cwn-type-guide-line) var(--cwn-type-ui-family);}
+:is(.cwn-active,.cwn-design) .cwn-type-caption {font:var(--cwn-type-caption-weight) var(--cwn-type-caption-size)/var(--cwn-type-caption-line) var(--cwn-type-ui-family);}

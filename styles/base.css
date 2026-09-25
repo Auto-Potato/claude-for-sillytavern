@@ -65,3 +65,11 @@ html.cwn-active body :is(:focus,:focus-visible,.interactable:hover) {
   outline:none!important;
 }
 html.cwn-active body #send_form:has(#send_textarea:focus-visible) {outline:none!important;}
+
+/* Opaque theme panels do not need native backdrop surfaces. Those surfaces can
+   retain a thin strip of a closed drawer inside scaled desktop previews. */
+html.cwn-active body #top-bar,
+html.cwn-active body #top-settings-holder .drawer > .drawer-content {
+  backdrop-filter:none!important;
+  -webkit-backdrop-filter:none!important;
+}
