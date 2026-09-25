@@ -11,8 +11,9 @@ const back=(action,label)=>`<button type="button" class="detail-back" data-actio
 export function mountCharacterLibrary(doc,win,host) {
   const drawer=doc.getElementById('right-nav-panel');if(!drawer)return()=>{};
   const pane=doc.createElement('div');pane.id='cwn-character-library';drawer.append(pane);drawer.classList.add('cwn-library-mounted');
+  let page=null,listPage=null,pageAnimation=null,drawerAnimation=null;
   const zone=doc.getElementById('cwn-character-import-zone'),home=zone?.parentNode,next=zone?.nextSibling;
-  const abort=new win.AbortController();let card=null,avatar='',opening=0,draft=null,baseline=null,busy=false,disposed=false,query='',revision=0;
+  const abort=new win.AbortController();let card=null,avatar='',opening=0,draft=null,baseline=null,busy=false,disableControls=true,disposed=false,query='',revision=0;
   const data=createCharacterData({
     request:(url,body)=>fetch(url,{method:'POST',headers:st.getRequestHeaders(),body:JSON.stringify(body)}),
     isBusy:()=>st.isGenerating()||st.isChatSaving,
@@ -25,7 +26,7 @@ export function mountCharacterLibrary(doc,win,host) {
   });
   const heightKey=()=>`cwn-opening-height-${win.innerWidth<=700?'mobile':'desktop'}`;
   function rememberHeight(){
-    const editor=pane.querySelector('[data-field="opening"]');
+    const editor=page?.querySelector('[data-field="opening"]');
     if(!editor?.style.height)return;
     const height=Math.round(editor.getBoundingClientRect().height);
     if(height>0)try{win.localStorage.setItem(heightKey(),String(height));}catch{}
@@ -33,31 +34,41 @@ export function mountCharacterLibrary(doc,win,host) {
   const editorResize=new win.ResizeObserver(rememberHeight);
   function restoreHeight(){
     editorResize.disconnect();
-    const editor=pane.querySelector('[data-field="opening"]');if(!editor)return;
+    const editor=page?.querySelector('[data-field="opening"]');if(!editor)return;
     try{const height=Number(win.localStorage.getItem(heightKey()));if(Number.isFinite(height)&&height>=120&&height<=4000)editor.style.height=`${height}px`;}catch{}
     editorResize.observe(editor);
   }
   function responsive(){pane.classList.toggle('phone',win.innerWidth<=700);restoreHeight();}
   responsive();win.addEventListener('resize',responsive,{signal:abort.signal});
   function confirm(title,body){const content=doc.createElement('div'),heading=doc.createElement('h3');heading.textContent=title;content.append(heading);if(typeof body==='string'&&body){const p=doc.createElement('p');p.textContent=body;content.append(p);}else if(body)content.append(body);const popup=new Popup(content,POPUP_TYPE.CONFIRM,'',{okButton:'确定',cancelButton:'取消'});popup.dlg.classList.add('cwn-character-dialog');return popup.show();}
-  pane.cwnNavigation={isDetail:()=>!!card,back:async()=>{if(busy)return false;if(!await canLeave())return false;list();return true;}};
+  pane.cwnNavigation={isDetail:()=>!!card,back:backToList};
   const image=key=>`/characters/${encodeURIComponent(key)}`;
   function changed(){return !!draft&&JSON.stringify(draft)!==JSON.stringify(baseline);}
-  function editActions(){const row=pane.querySelector('.library-edit');if(row)row.hidden=!changed();}
-  function controls(){pane.querySelectorAll('button,input,textarea,select').forEach(e=>e.disabled=busy || (e.dataset.action==='prev'&&opening===0) || (e.dataset.action==='next'&&card&&opening>=(draft||characterFields(card)).openings.length));}
+  function editActions(){const row=page?.querySelector('.library-edit');if(row)row.hidden=!changed();}
+  function controls(){
+    if(!page)return;
+    // Block interaction without triggering the host's disabled-input brightness filter.
+    // Native modal dialogs live outside this page and remain interactive.
+    page.inert=busy&&disableControls;
+    page.querySelectorAll('button,input,textarea,select').forEach(e=>e.disabled=
+      (e.dataset.action==='prev'&&opening===0) ||
+      (e.dataset.action==='next'&&!!card&&opening>=(draft||characterFields(card)).openings.length));
+  }
   function beginDraft(){if(!draft){baseline=characterFields(card);draft=structuredClone(baseline);}}
   function discard(){draft=null;baseline=null;opening=Math.min(opening,characterFields(card).openings.length-1);}
 
-  async function run(fn){if(busy)return;busy=true;controls();try{await fn();}catch(error){win.toastr.error(error.message||'操作失败，请重试');}finally{busy=false;if(!disposed)controls();}}
+  async function run(fn,{disable=true}={}){if(busy)return;busy=true;disableControls=disable;controls();try{await fn();}catch(error){win.toastr.error(error.message||'操作失败，请重试');}finally{busy=false;disableControls=true;if(!disposed)controls();}}
   function drawCards(){
     const rows=st.characters.filter(c=>(c.name||'').toLocaleLowerCase().includes(query.toLocaleLowerCase()));
-    pane.querySelector('.library-grid').innerHTML=rows.map(c=>`<button type="button" class="library-card" data-avatar="${esc(c.avatar)}"><img src="${esc(image(c.avatar))}" alt="" loading="lazy"><span class="cwn-type-item">${esc(c.name)}</span></button>`).join('')||'<p class="library-muted">没有匹配的角色卡</p>';
-    pane.querySelector('.library-count').textContent=`角色卡 · ${rows.length}`;
+    page.querySelector('.library-grid').innerHTML=rows.map(c=>`<button type="button" class="library-card" data-avatar="${esc(c.avatar)}"><img src="${esc(image(c.avatar))}" alt="" loading="lazy"><span class="cwn-type-item">${esc(c.name)}</span></button>`).join('')||'<p class="library-muted">没有匹配的角色卡</p>';
+    page.querySelector('.library-count').textContent=`角色卡 · ${rows.length}`;
   }
   function list(){
     rememberHeight();editorResize.disconnect();card=null;draft=null;revision++;
-    pane.innerHTML=`<button type="button" class="design-menu" data-action="menu" aria-label="返回导航菜单">${icon('M4 6h16M4 12h16M4 18h16')}</button><div class="library-heading"><h1 class="cwn-type-title">角色卡</h1><button class="library-import" data-action="import">${icon('M12 5v14M5 12h14')}<span>导入</span></button></div><div class="library-drop"></div><input class="library-search" type="search" placeholder="搜索角色" aria-label="搜索角色" value="${esc(query)}"><p class="library-count library-muted"></p><div class="library-grid"></div>`;
-    if(zone)pane.querySelector('.library-drop').append(zone);drawCards();drawer.scrollTop=0;
+    page=doc.createElement('div');page.className='cwn-library-page';
+    pane.replaceChildren(page);listPage=page;
+    page.innerHTML=`<button type="button" class="design-menu" data-action="menu" aria-label="返回导航菜单">${icon('M4 6h16M4 12h16M4 18h16')}</button><div class="library-heading"><h1 class="cwn-type-title">角色卡</h1><button class="library-import" data-action="import">${icon('M12 5v14M5 12h14')}<span>导入</span></button></div><div class="library-drop"></div><input class="library-search" type="search" placeholder="搜索角色" aria-label="搜索角色" value="${esc(query)}"><p class="library-count library-muted"></p><div class="library-grid"></div>`;
+    if(zone)page?.querySelector('.library-drop').append(zone);drawCards();page.scrollTop=0;
   }
   function render(){
     if(disposed||!card)return;
@@ -65,24 +76,63 @@ export function mountCharacterLibrary(doc,win,host) {
     const fields=draft||characterFields(card),items=fields.openings;opening=Math.min(opening,items.length);
     const book=card.data?.extensions?.world || '';
     const missingBook=!!book&&!world_names.includes(book);
-    pane.innerHTML=`<div class="detail-view">${back('back','返回角色卡列表')}<div class="detail-hero"><img class="detail-cover" src="${esc(image(avatar))}" alt=""><div class="detail-identity"><div class="detail-title-row"><h1 class="cwn-type-title">${esc(card.name||card.data?.name)}</h1><button type="button" class="detail-resources" data-action="resources" aria-label="导入角色卡资源" title="导入角色卡资源">${icon('M12 5v14M5 12h14')}</button></div><div class="library-edit" ${changed()?'':'hidden'}><button class="edit-confirm" data-action="save" aria-label="保存修改">✓ 保存</button><button class="edit-confirm" data-action="cancel" aria-label="取消编辑">× 取消</button></div></div></div>
+    page.innerHTML=`<div class="detail-view">${back('back','返回角色卡列表')}<div class="detail-hero"><img class="detail-cover" src="${esc(image(avatar))}" alt=""><div class="detail-identity"><div class="detail-title-row"><h1 class="cwn-type-title">${esc(card.name||card.data?.name)}</h1><button type="button" class="detail-resources" data-action="resources" aria-label="导入角色卡资源" title="导入角色卡资源">${icon('M12 5v14M5 12h14')}</button></div><div class="library-edit" ${changed()?'':'hidden'}><button class="edit-confirm" data-action="save" aria-label="保存修改">✓ 保存</button><button class="edit-confirm" data-action="cancel" aria-label="取消编辑">× 取消</button></div></div></div>
     <section class="detail-section"><h2 class="cwn-type-section">角色描述</h2><textarea class="library-editor" data-field="description" aria-label="角色描述" placeholder="暂无角色描述">${esc(fields.description)}</textarea></section>
     <section class="detail-section"><div class="detail-section-head"><h2 class="cwn-type-section">开场白</h2><span class="library-muted" aria-live="polite">${opening+1} / ${characterFields(card).openings.length}${opening>=characterFields(card).openings.length?' · 新开场白':''}</span></div><div class="opening-switch"><button class="opening-arrow" data-action="prev" aria-label="上一个开场白" >${icon('m14 6-6 6 6 6')}</button><div class="detail-opening"><textarea class="library-editor" data-field="opening" aria-label="开场白" placeholder="输入新的开场白">${esc(items[opening]||'')}</textarea></div><button class="opening-arrow" data-action="next" aria-label="下一个开场白" >${icon('m10 6 6 6-6 6')}</button></div></section>
     <section class="detail-section"><h2 class="cwn-type-section">角色世界书</h2><div class="detail-world"><div><strong>${esc(book||'尚未绑定世界书')}</strong><small>${missingBook?'绑定的世界书未找到，请导入或重新选择':'跟随此角色用于各条聊天'}</small></div><button class="detail-link" data-action="world">${book?'更换':'绑定'}</button></div></section><div class="library-footer"><button class="detail-delete" data-action="delete">删除角色卡</button><button class="library-chat" data-action="chat">开始新聊天</button></div></div>`;
     controls();editActions();restoreHeight();
   }
   async function canLeave(){if(!changed())return true;return !!await confirm('是否舍弃当前修改？');}
-  async function open(key){const stamp=++revision;const [loaded]=await Promise.all([data.read(key),updateWorldInfoList()]);if(disposed||stamp!==revision)return;avatar=key;card=loaded;opening=0;draft=null;render();drawer.scrollTop=0;}
+  const motionAllowed=()=>!win.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  async function slideDetail(entering){
+    const target=page;
+    if(disposed||!motionAllowed()||!target.animate)return;
+    target.inert=true;
+    const animation=target.animate(
+      [{transform:entering?'translateX(100%)':'translateX(0)'},{transform:entering?'translateX(0)':'translateX(100%)'}],
+      {duration:300,easing:'cubic-bezier(.22,.61,.36,1)',fill:'both'},
+    );
+    pageAnimation=animation;
+    try{await animation.finished;}catch{}finally{
+      animation.cancel();
+      if(pageAnimation===animation)pageAnimation=null;
+      target.inert=false;
+    }
+  }
+  async function backToList(){
+    if(busy)return false;
+    let left=false;
+    await run(async()=>{
+      if(!await canLeave()||disposed)return;
+      await slideDetail(false);
+      if(!disposed){
+        rememberHeight();editorResize.disconnect();page.remove();
+        page=listPage;page.inert=false;page.removeAttribute('aria-hidden');
+        card=null;draft=null;revision++;
+        const y=page.scrollTop;drawCards();page.scrollTop=y;
+        left=true;
+      }
+    },{disable:false});
+    return left;
+  }
+  async function open(key){
+    const stamp=++revision,loaded=await data.read(key);
+    if(disposed||stamp!==revision)return;
+    avatar=key;card=loaded;opening=0;draft=null;
+    listPage=page;listPage.inert=true;listPage.setAttribute('aria-hidden','true');
+    page=doc.createElement('div');page.className='cwn-library-page';pane.append(page);
+    render();await slideDetail(true);
+  }
   pane.addEventListener('input',event=>{const el=event.target;if(el.matches('.library-search')){query=el.value;drawCards();}if(el.dataset.field){beginDraft();if(el.dataset.field==='description')draft.description=el.value;if(el.dataset.field==='opening'){if(opening<draft.openings.length||el.value)draft.openings[opening]=el.value;}editActions();controls();}},{signal:abort.signal});
   pane.addEventListener('click',event=>{
     const button=event.target.closest('button');if(!button||busy)return;
-    if(button.dataset.avatar){run(()=>open(button.dataset.avatar));return;}
+    if(button.dataset.avatar){run(()=>open(button.dataset.avatar),{disable:false});return;}
     const action=button.dataset.action;
     if(action==='import')doc.getElementById('character_import_file')?.click();
     if(action==='menu')drawer.querySelector('.cwn-panel-back')?.click();
     if(action==='cancel')run(async()=>{if(await confirm('是否舍弃当前修改？')){discard();render();}});
-    if(action==='prev'||action==='next'){const count=(draft||characterFields(card)).openings.length;opening=Math.max(0,Math.min(count,opening+(action==='next'?1:-1)));const y=drawer.scrollTop;render();drawer.scrollTop=y;return;}
-    if(action==='back')run(async()=>{if(await canLeave())list();});
+    if(action==='prev'||action==='next'){const count=(draft||characterFields(card)).openings.length;opening=Math.max(0,Math.min(count,opening+(action==='next'?1:-1)));const y=page.scrollTop;render();page.scrollTop=y;return;}
+    if(action==='back')void backToList();
     if(action==='save')run(async()=>{if(!changed())return;card=await data.save(avatar,draft,baseline);discard();render();win.toastr.success('角色详情已保存');});
     if(action==='resources')run(async()=>{const fresh=await data.read(avatar);await importCharacterResources(fresh,{doc,win,bind:(key,name)=>data.bind(key,name)});card=await data.read(avatar);render();});
     if(action==='world')run(async()=>{
@@ -102,8 +152,34 @@ export function mountCharacterLibrary(doc,win,host) {
     });
     if(action==='chat')run(async()=>{if(!await canLeave())return;await host.startCharacterChat(avatar);discard();render();if(win.innerWidth<=700&&doc.documentElement.classList.contains('cwn-menu-open'))doc.getElementById('cwn-backdrop')?.click();else if(drawer.classList.contains('openDrawer'))doc.querySelector('#rightNavHolder > .drawer-toggle')?.click();});
   },{signal:abort.signal});
-  const observer=new win.MutationObserver(()=>{if(drawer.classList.contains('openDrawer')&&!card)list();});observer.observe(drawer,{attributes:true,attributeFilter:['class']});
-  const refresh=()=>{if(!disposed&&!card)list();};
+  // Native visibility still controls navigation/history. Animate its panel over
+  // the existing sidebar, retaining the closing panel until its travel ends.
+  let drawerOpen=drawer.classList.contains('openDrawer');
+  function slideDrawer(entering){
+    drawerAnimation?.cancel();
+    drawer.classList.remove('cwn-library-leaving');
+    if(!motionAllowed()||!drawer.animate)return;
+    if(!entering)drawer.classList.add('cwn-library-leaving');
+    drawer.inert=true;
+    const animation=drawer.animate(
+      [{translate:entering?'100% 0':'0 0'},{translate:entering?'0 0':'100% 0'}],
+      {duration:300,easing:'cubic-bezier(.22,.61,.36,1)',fill:'both'},
+    );
+    drawerAnimation=animation;
+    animation.finished.catch(()=>{}).finally(()=>{
+      if(drawerAnimation!==animation)return;
+      animation.cancel();drawerAnimation=null;drawer.inert=false;
+      drawer.classList.remove('cwn-library-leaving');
+    });
+  }
+  const observer=new win.MutationObserver(()=>{
+    const isOpen=drawer.classList.contains('openDrawer');
+    if(disposed||isOpen===drawerOpen)return;
+    drawerOpen=isOpen;
+    if(isOpen&&!card)list();
+    slideDrawer(isOpen);
+  });observer.observe(drawer,{attributes:true,attributeFilter:['class']});
+  const refresh=()=>{if(!disposed&&!card&&!busy)list();};
   for(const type of ['CHARACTER_EDITED','CHARACTER_DELETED','CHARACTER_DUPLICATED','CHARACTER_RENAMED'])st.eventSource.on(st.event_types[type],refresh);
   // Native imports rebuild their list; observe that list, not the whole document.
   const nativeList=doc.getElementById('rm_print_characters_block');const imports=new win.MutationObserver(refresh);if(nativeList)imports.observe(nativeList,{childList:true});
@@ -125,5 +201,5 @@ export function mountCharacterLibrary(doc,win,host) {
     if(press&&event.button===0&&Math.hypot(event.clientX-press.x,event.clientY-press.y)<=6&&win.innerWidth>700&&drawer.classList.contains('openDrawer')&&!busy&&!changed()&&isOutside(event))doc.querySelector('#rightNavHolder > .drawer-toggle')?.click();
   };
   doc.addEventListener('click',outside,{signal:abort.signal});list();
-  return()=>{rememberHeight();editorResize.disconnect();disposed=true;revision++;abort.abort();observer.disconnect();imports.disconnect();for(const type of ['CHARACTER_EDITED','CHARACTER_DELETED','CHARACTER_DUPLICATED','CHARACTER_RENAMED'])st.eventSource.removeListener(st.event_types[type],refresh);if(zone&&home)home.insertBefore(zone,next?.parentNode===home?next:null);pane.remove();drawer.classList.remove('cwn-library-mounted');};
+  return()=>{rememberHeight();editorResize.disconnect();disposed=true;revision++;pageAnimation?.cancel();drawerAnimation?.cancel();drawer.inert=false;drawer.classList.remove('cwn-library-leaving');abort.abort();observer.disconnect();imports.disconnect();for(const type of ['CHARACTER_EDITED','CHARACTER_DELETED','CHARACTER_DUPLICATED','CHARACTER_RENAMED'])st.eventSource.removeListener(st.event_types[type],refresh);if(zone&&home)home.insertBefore(zone,next?.parentNode===home?next:null);pane.remove();drawer.classList.remove('cwn-library-mounted');};
 }

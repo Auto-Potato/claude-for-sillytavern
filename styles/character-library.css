@@ -109,3 +109,13 @@ html.cwn-active body .cwn-character-dialog .cwn-resource-bind {display:flex;alig
 
 /* Full-screen mobile character pages have no enclosing drawer frame. */
 @media(max-width:700px){html.cwn-active body #right-nav-panel.cwn-library-mounted{border:0!important;outline:0!important;box-shadow:none!important;}}
+
+/* Keep covers stable while the existing busy lock prevents duplicate opens. */
+#cwn-character-library .library-card:disabled{opacity:1;filter:none;}
+
+/* Each page scrolls independently; the list stays behind its detail page. */
+html.cwn-active #right-nav-panel.cwn-library-mounted {overflow:hidden!important;}
+#cwn-character-library {position:relative;height:100%;min-height:0;padding:0!important;overflow:hidden;isolation:isolate;}
+#cwn-character-library .cwn-library-page {position:absolute;inset:0;isolation:isolate;overflow:auto;overscroll-behavior:contain;scrollbar-width:none;padding:28px 28px calc(48px + env(safe-area-inset-bottom,0px));background:var(--cwn-bg);}
+@media(max-width:700px){#cwn-character-library .cwn-library-page {padding:22px 18px calc(48px + env(safe-area-inset-bottom,0px));}}
+html.cwn-active body #top-settings-holder .drawer > #right-nav-panel.cwn-library-leaving {display:flex!important;pointer-events:none;}

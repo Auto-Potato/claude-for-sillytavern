@@ -179,12 +179,21 @@ export function mountHome(doc, win, host) {
       if(!disposed) {if(pending){pending=false;void refreshList();}}
     }
   }
-  listen(newChat,'click',()=>{if(host.isGenerating()){void preview.show(null);closeNavigation();return;}void action(async()=>{
+  async function returnHome(){
+    if(switching||mutating||disposed)return false;
+    await action(async()=>{
       // Show the destination before native clearChat removes messages and awaits I/O.
       returningHome=true;syncHome();
       try {await host.newChat();preview.close();}
       finally {returningHome=false;syncHome();}
-    });});
+    });
+    return !preview.isActive()&&host.isHome();
+  }
+  shell.cwnNavigation={
+    isChat:()=>preview.isActive()||!shell.classList.contains('cwn-home-active'),
+    back:returnHome,
+  };
+  listen(newChat,'click',()=>{if(host.isGenerating()){void preview.show(null);closeNavigation();return;}void returnHome();});
   listen(list,'click',event=>{
     if(mutating || switching)return;
     const more=event.target.closest('.cwn-recent-more');
@@ -214,7 +223,7 @@ export function mountHome(doc, win, host) {
   const unsubscribe=host.subscribe((refresh=true)=>{syncHome();if(refresh) void refreshList();});
   syncHome();void refreshList();
   return ()=>{
-    disposed=true;composerTransition.dispose();preview.dispose();unsubscribeGeneration();themeObserver.disconnect();closeActions();dialogReturn=null;dialog.remove();actions.remove();abort.abort();unsubscribe();hero.remove();newChat.remove();recent.remove();profile.remove();
+    disposed=true;delete shell.cwnNavigation;composerTransition.dispose();preview.dispose();unsubscribeGeneration();themeObserver.disconnect();closeActions();dialogReturn=null;dialog.remove();actions.remove();abort.abort();unsubscribe();hero.remove();newChat.remove();recent.remove();profile.remove();
     shell.classList.remove('cwn-home-active','cwn-show-welcome');
   };
 }
