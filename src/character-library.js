@@ -3,6 +3,8 @@ import * as st from '../../../../../script.js';
 import { world_names, updateWorldInfoList } from '../../../../world-info.js';
 import { Popup, POPUP_TYPE } from '../../../../popup.js';
 import { characterFields, createCharacterData } from './character-data.js';
+import { accountStorage } from '../../../../util/AccountStorage.js';
+import { characterSortOptions, normalizeCharacterSort, sortCharacters } from './character-sort.js';
 
 const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const icon=path=>`<svg viewBox="0 0 24 24" aria-hidden="true"><path d="${path}"/></svg>`;
@@ -14,6 +16,8 @@ export function mountCharacterLibrary(doc,win,host) {
   let page=null,listPage=null,pageAnimation=null,drawerAnimation=null;
   const zone=doc.getElementById('cwn-character-import-zone'),home=zone?.parentNode,next=zone?.nextSibling;
   const abort=new win.AbortController();let card=null,avatar='',opening=0,draft=null,baseline=null,busy=false,disableControls=true,disposed=false,query='',revision=0;
+  const sortKey='cwn-character-sort';
+  let sortMode=normalizeCharacterSort(accountStorage.getItem(sortKey));
   const data=createCharacterData({
     request:(url,body)=>fetch(url,{method:'POST',headers:st.getRequestHeaders(),body:JSON.stringify(body)}),
     isBusy:()=>st.isGenerating()||st.isChatSaving,
@@ -59,15 +63,25 @@ export function mountCharacterLibrary(doc,win,host) {
 
   async function run(fn,{disable=true}={}){if(busy)return;busy=true;disableControls=disable;controls();try{await fn();}catch(error){win.toastr.error(error.message||'操作失败，请重试');}finally{busy=false;disableControls=true;if(!disposed)controls();}}
   function drawCards(){
-    const rows=st.characters.filter(c=>(c.name||'').toLocaleLowerCase().includes(query.toLocaleLowerCase()));
+    const rows=sortCharacters(st.characters.filter(c=>(c.name||'').toLocaleLowerCase().includes(query.toLocaleLowerCase())),sortMode);
     page.querySelector('.library-grid').innerHTML=rows.map(c=>`<button type="button" class="library-card" data-avatar="${esc(c.avatar)}"><img src="${esc(image(c.avatar))}" alt="" loading="lazy"><span class="cwn-type-item">${esc(c.name)}</span></button>`).join('')||'<p class="library-muted">没有匹配的角色卡</p>';
     page.querySelector('.library-count').textContent=`角色卡 · ${rows.length}`;
+  }
+  function closeSort({focus=false}={}){
+    const trigger=page?.querySelector('[data-action="sort"]');
+    page?.querySelector('.library-sort-pop')?.setAttribute('hidden','');
+    trigger?.setAttribute('aria-expanded','false');
+    if(focus)trigger?.focus();
+  }
+  function sortControl(){
+    const current=characterSortOptions.find(option=>option.value===sortMode);
+    return `<div class="library-sort-wrap"><button type="button" class="library-sort-trigger" data-action="sort" aria-expanded="false" aria-controls="cwn-character-sort-options" aria-label="角色卡排序：${current.summary}">${icon('M4 6h16M4 12h11M4 18h6')}<span>${current.summary}</span>${icon('m9 10 3 3 3-3')}</button><fieldset id="cwn-character-sort-options" class="library-sort-pop" hidden><legend>角色卡排序</legend>${characterSortOptions.map(option=>`<label class="library-sort-option"><input type="radio" name="cwn-character-sort" value="${option.value}" ${option.value===sortMode?'checked':''}><span><strong>${option.label}</strong><small>${option.description}</small></span><span class="library-sort-check" aria-hidden="true">✓</span></label>`).join('')}</fieldset></div>`;
   }
   function list(){
     rememberHeight();editorResize.disconnect();card=null;draft=null;revision++;
     page=doc.createElement('div');page.className='cwn-library-page';
     pane.replaceChildren(page);listPage=page;
-    page.innerHTML=`<button type="button" class="design-menu" data-action="menu" aria-label="返回导航菜单">${icon('M4 6h16M4 12h16M4 18h16')}</button><div class="library-heading"><h1 class="cwn-type-title">角色卡</h1><button class="library-import" data-action="import">${icon('M12 5v14M5 12h14')}<span>导入</span></button></div><div class="library-drop"></div><input class="library-search" type="search" placeholder="搜索角色" aria-label="搜索角色" value="${esc(query)}"><p class="library-count library-muted"></p><div class="library-grid"></div>`;
+    page.innerHTML=`<div class="cwn-library-nav cwn-library-nav-mobile"><button type="button" class="design-menu" data-action="menu" aria-label="返回导航菜单">${icon('M4 6h16M4 12h16M4 18h16')}</button></div><div class="library-heading"><h1 class="cwn-type-title">角色卡</h1><button class="library-import" data-action="import">${icon('M12 5v14M5 12h14')}<span>导入</span></button></div><div class="library-drop"></div><input class="library-search" type="search" placeholder="搜索角色" aria-label="搜索角色" value="${esc(query)}"><div class="library-sort-row"><p class="library-count library-muted"></p>${sortControl()}</div><div class="library-grid"></div>`;
     if(zone)page?.querySelector('.library-drop').append(zone);drawCards();page.scrollTop=0;
   }
   function render(){
@@ -76,7 +90,7 @@ export function mountCharacterLibrary(doc,win,host) {
     const fields=draft||characterFields(card),items=fields.openings;opening=Math.min(opening,items.length);
     const book=card.data?.extensions?.world || '';
     const missingBook=!!book&&!world_names.includes(book);
-    page.innerHTML=`<div class="detail-view">${back('back','返回角色卡列表')}<div class="detail-hero"><img class="detail-cover" src="${esc(image(avatar))}" alt=""><div class="detail-identity"><div class="detail-title-row"><h1 class="cwn-type-title">${esc(card.name||card.data?.name)}</h1><button type="button" class="detail-resources" data-action="resources" aria-label="导入角色卡资源" title="导入角色卡资源">${icon('M12 5v14M5 12h14')}</button></div><div class="library-edit" ${changed()?'':'hidden'}><button class="edit-confirm" data-action="save" aria-label="保存修改">✓ 保存</button><button class="edit-confirm" data-action="cancel" aria-label="取消编辑">× 取消</button></div></div></div>
+    page.innerHTML=`<div class="detail-view"><div class="cwn-library-nav">${back('back','返回角色卡列表')}</div><div class="detail-hero"><img class="detail-cover" src="${esc(image(avatar))}" alt=""><div class="detail-identity"><div class="detail-title-row"><h1 class="cwn-type-title">${esc(card.name||card.data?.name)}</h1><button type="button" class="detail-resources" data-action="resources" aria-label="导入角色卡资源" title="导入角色卡资源">${icon('M12 5v14M5 12h14')}</button></div><div class="library-edit" ${changed()?'':'hidden'}><button class="edit-confirm" data-action="save" aria-label="保存修改">✓ 保存</button><button class="edit-confirm" data-action="cancel" aria-label="取消编辑">× 取消</button></div></div></div>
     <section class="detail-section"><h2 class="cwn-type-section">角色描述</h2><textarea class="library-editor" data-field="description" aria-label="角色描述" placeholder="暂无角色描述">${esc(fields.description)}</textarea></section>
     <section class="detail-section"><div class="detail-section-head"><h2 class="cwn-type-section">开场白</h2><span class="library-muted" aria-live="polite">${opening+1} / ${characterFields(card).openings.length}${opening>=characterFields(card).openings.length?' · 新开场白':''}</span></div><div class="opening-switch"><button class="opening-arrow" data-action="prev" aria-label="上一个开场白" >${icon('m14 6-6 6 6 6')}</button><div class="detail-opening"><textarea class="library-editor" data-field="opening" aria-label="开场白" placeholder="输入新的开场白">${esc(items[opening]||'')}</textarea></div><button class="opening-arrow" data-action="next" aria-label="下一个开场白" >${icon('m10 6 6 6-6 6')}</button></div></section>
     <section class="detail-section"><h2 class="cwn-type-section">角色世界书</h2><div class="detail-world"><div><strong>${esc(book||'尚未绑定世界书')}</strong><small>${missingBook?'绑定的世界书未找到，请导入或重新选择':'跟随此角色用于各条聊天'}</small></div><button class="detail-link" data-action="world">${book?'更换':'绑定'}</button></div></section><div class="library-footer"><button class="detail-delete" data-action="delete">删除角色卡</button><button class="library-chat" data-action="chat">开始新聊天</button></div></div>`;
@@ -116,6 +130,7 @@ export function mountCharacterLibrary(doc,win,host) {
     return left;
   }
   async function open(key){
+    closeSort();
     const stamp=++revision,loaded=await data.read(key);
     if(disposed||stamp!==revision)return;
     avatar=key;card=loaded;opening=0;draft=null;
@@ -124,10 +139,28 @@ export function mountCharacterLibrary(doc,win,host) {
     render();await slideDetail(true);
   }
   pane.addEventListener('input',event=>{const el=event.target;if(el.matches('.library-search')){query=el.value;drawCards();}if(el.dataset.field){beginDraft();if(el.dataset.field==='description')draft.description=el.value;if(el.dataset.field==='opening'){if(opening<draft.openings.length||el.value)draft.openings[opening]=el.value;}editActions();controls();}},{signal:abort.signal});
+  pane.addEventListener('change',event=>{
+    if(!event.target.matches('input[name="cwn-character-sort"]'))return;
+    sortMode=normalizeCharacterSort(event.target.value);accountStorage.setItem(sortKey,sortMode);
+    drawCards();closeSort();
+    const wrap=page.querySelector('.library-sort-wrap');wrap.outerHTML=sortControl();
+    page.querySelector('[data-action="sort"]').focus();
+  },{signal:abort.signal});
+  doc.addEventListener('click',event=>{if(!event.target.closest('.library-sort-wrap'))closeSort();},{signal:abort.signal});
+  doc.addEventListener('keydown',event=>{
+    if(event.key==='Escape'&&page?.querySelector('[data-action="sort"][aria-expanded="true"]')){
+      event.preventDefault();event.stopImmediatePropagation();closeSort({focus:true});
+    }
+  },{capture:true,signal:abort.signal});
   pane.addEventListener('click',event=>{
     const button=event.target.closest('button');if(!button||busy)return;
     if(button.dataset.avatar){run(()=>open(button.dataset.avatar),{disable:false});return;}
     const action=button.dataset.action;
+    if(action==='sort'){
+      const expanded=button.getAttribute('aria-expanded')==='true';
+      button.setAttribute('aria-expanded',String(!expanded));
+      page.querySelector('.library-sort-pop').hidden=expanded;return;
+    }
     if(action==='import')doc.getElementById('character_import_file')?.click();
     if(action==='menu')drawer.querySelector('.cwn-panel-back')?.click();
     if(action==='cancel')run(async()=>{if(await confirm('是否舍弃当前修改？')){discard();render();}});
@@ -157,12 +190,18 @@ export function mountCharacterLibrary(doc,win,host) {
   let drawerOpen=drawer.classList.contains('openDrawer');
   function slideDrawer(entering){
     drawerAnimation?.cancel();
+    drawer.inert=false;
     drawer.classList.remove('cwn-library-leaving');
     if(!motionAllowed()||!drawer.animate)return;
     if(!entering)drawer.classList.add('cwn-library-leaving');
     drawer.inert=true;
+    // Desktop emerges from the left rail. The matching left clip keeps its
+    // moving portion behind the rail; mobile still enters from the right.
+    const frames=win.innerWidth>700
+      ?[{translate:entering?'-100% 0':'0 0',clipPath:entering?'inset(0 0 0 100%)':'inset(0 0 0 0)'},{translate:entering?'0 0':'-100% 0',clipPath:entering?'inset(0 0 0 0)':'inset(0 0 0 100%)'}]
+      :[{translate:entering?'100% 0':'0 0'},{translate:entering?'0 0':'100% 0'}];
     const animation=drawer.animate(
-      [{translate:entering?'100% 0':'0 0'},{translate:entering?'0 0':'100% 0'}],
+      frames,
       {duration:300,easing:'cubic-bezier(.22,.61,.36,1)',fill:'both'},
     );
     drawerAnimation=animation;

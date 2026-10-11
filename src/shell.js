@@ -89,6 +89,9 @@ export function mountShell(doc, win, toggleDrawer) {
     const slot = doc.createComment('original drawer position');
     drawer.before(slot); drawerSlots.push([drawer,slot]); pane.append(drawer);
   }
+  // Reorder the actual controls so keyboard navigation follows the visible order.
+  const navOrder = ['rightNavHolder', 'WI-SP-button', 'ai-config-button', 'extensions-settings-button', 'sys-settings-button', 'user-settings-button'];
+  pane.prepend(...navOrder.map(id => drawerSlots.find(([drawer]) => drawer.id === id)?.[0]).filter(Boolean));
   rail.append(pane);
   const disposeRailResize = mountRailResize(doc, win, rail, media);
   const disposeNavigation = mountNavigation({doc, win, rail, chatShell, menu, backdrop, media, toggleDrawer});

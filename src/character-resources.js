@@ -1,3 +1,4 @@
+import { recordWorldbookSource } from './worldbook-sources.js';
 import { Popup, POPUP_TYPE, POPUP_RESULT } from '../../../../popup.js';
 import { convertCharacterBook, updateWorldInfoList, world_names, worldInfoCache } from '../../../../world-info.js';
 import { allowScopedScripts, isScopedScriptsAllowed, RegexProvider } from '../../../../extensions/regex/engine.js';
@@ -53,6 +54,7 @@ export async function importCharacterResources(card, { doc, win, bind }) {
       const response = await fetch('/api/worldinfo/edit', {method:'POST',headers:getRequestHeaders(),body:JSON.stringify({name,data})});
       if (!response.ok) throw new Error('世界书导入失败，请重试');
       worldInfoCache.set(name, data);
+      recordWorldbookSource(name, card);
       await updateWorldInfoList();
       await eventSource.emit(event_types.WORLDINFO_UPDATED, name, data);
       if (checkbox.checked) await bind(card.avatar, name);

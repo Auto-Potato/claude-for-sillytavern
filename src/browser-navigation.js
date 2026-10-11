@@ -5,6 +5,7 @@ export function mountBrowserNavigation(doc,win) {
   const root=doc.documentElement,rail=doc.getElementById('top-settings-holder');
   const library=doc.getElementById('cwn-character-library');
   const shell=doc.getElementById('sheld');
+  const worldbook=doc.getElementById('cwn-worldbook-library');
   const chatOpen=()=>win.innerWidth<=700&&!!shell?.cwnNavigation?.isChat();
   const panels=[...rail.querySelectorAll('.drawer > .drawer-content')];
   const panel=()=>panels.find(p=>p.classList.contains('openDrawer'));
@@ -12,7 +13,7 @@ export function mountBrowserNavigation(doc,win) {
   const railOpen=()=>win.innerWidth<=700?root.classList.contains('cwn-menu-open'):!root.classList.contains('cwn-rail-hidden');
   const read=()=>{
     const p=panel();
-    return (chatOpen()?1:0)+(railOpen()||p?1:0)+(p?1:0)+(p?.id==='right-nav-panel'&&library?.cwnNavigation?.isDetail()?1:0)+popups().length;
+    return (chatOpen()?1:0)+(railOpen()||p?1:0)+(p?1:0)+(p?.id==='right-nav-panel'&&library?.cwnNavigation?.isDetail()?1:0)+(p?.id==='WorldInfo'?(worldbook?.cwnNavigation?.depth()||0):0)+popups().length;
   };
   const controller=createMenuHistory({history:win.history,read,
     dismissPopup:async()=>{await popups().at(-1)?.completeCancelled();},
@@ -23,6 +24,7 @@ export function mountBrowserNavigation(doc,win) {
       if(popup){await popup.completeCancelled();return true;}
       const p=panel();
       if(p?.id==='right-nav-panel'&&library?.cwnNavigation?.isDetail())return library.cwnNavigation.back();
+      if(p?.id==='WorldInfo'&&worldbook?.cwnNavigation?.depth())return worldbook.cwnNavigation.back();
       if(p){p.querySelector('.cwn-panel-back')?.click();return true;}
       if(railOpen()){doc.getElementById(win.innerWidth<=700?'cwn-menu':'cwn-desktop-rail-icon')?.click();return true;}
       if(chatOpen())return shell.cwnNavigation.back();
@@ -33,6 +35,7 @@ export function mountBrowserNavigation(doc,win) {
   observer.observe(root,{attributes:true,attributeFilter:['class']});
   if(shell)observer.observe(shell,{attributes:true,attributeFilter:['class']});
   panels.forEach(p=>observer.observe(p,{attributes:true,attributeFilter:['class']}));
+  if(worldbook)observer.observe(worldbook,{attributes:true,attributeFilter:['data-depth']});
   if(library)observer.observe(library,{childList:true});
   // Native popup dialogs are direct body children; watch their open state only.
   const dialogs=new win.MutationObserver(()=>{watchDialogs();controller.sync();});

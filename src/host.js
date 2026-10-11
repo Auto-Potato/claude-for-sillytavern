@@ -50,8 +50,11 @@ export const host = {
   async rerollLastReply(){
     if(st.isGenerating() || st.isChatSaving)throw new Error('请等待当前生成或保存完成。');
     const message=st.chat.at(-1);
-    if(!message || message.is_user || message.is_system)throw new Error('最后一条消息不是角色回复，无法重新生成。');
+    if(!message || message.is_system)throw new Error('当前没有可重新生成的聊天消息。');
     if(document.querySelector('#chat .edit_textarea'))throw new Error('请先结束消息编辑。');
+    // ST 1.19.0 (06bde939), script.js Generate: regenerate preserves a
+    // trailing user message and skips the composer text / pending attachments.
+    if(message.is_user){await st.Generate('regenerate');return;}
     await st.swipe(null, SWIPE_DIRECTION.RIGHT, {message,forceSwipeId:message.swipes?.length || 1});
   },
   async startCharacterChat(avatar){

@@ -17,6 +17,7 @@ export function mountCharacterImport(doc, win, importFiles) {
   }, { signal: abort.signal });
   const clear = () => zone.classList.remove('cwn-drag-over');
   async function handle(event) {
+    if(event.target.closest?.('#cwn-worldbook-import-zone')) return;
     // Even URL/image drags must not reach the host's global URL importer.
     event.preventDefault();
     event.stopImmediatePropagation();

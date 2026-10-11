@@ -7,7 +7,7 @@ function setup(answers=[]){
  const calls=[], enabled=[], store={settings:{script:{enabled:{characters:enabled}}}};
  const element=()=>({append(){},classList:{add(){}},checked:true});
  const doc={createElement:element,createTextNode:x=>x,getElementById:()=>({__vue_app__:{config:{globalProperties:{$pinia:{_s:new Map([['global_settings',store]])}}}}})};
- const context=vm.createContext({Popup:class{dlg=element();async show(){calls.push('prompt');return answers.shift()??0;}},POPUP_TYPE:{CONFIRM:1},POPUP_RESULT:{AFFIRMATIVE:1},renderExtensionTemplateAsync:async()=>element(),updateWorldInfoList:async()=>{},world_names:[],worldInfoCache:new Map(),convertCharacterBook:x=>x,getRequestHeaders:()=>({}),fetch:async()=>{calls.push('world');return{ok:true};},eventSource:{emit:async()=>{}},event_types:{},allowScopedScripts:c=>calls.push('regex:'+c.avatar),isScopedScriptsAllowed:()=>false,RegexProvider:{instance:{clear(){}}}});
+ const context=vm.createContext({recordWorldbookSource:()=>{},Popup:class{dlg=element();async show(){calls.push('prompt');return answers.shift()??0;}},POPUP_TYPE:{CONFIRM:1},POPUP_RESULT:{AFFIRMATIVE:1},renderExtensionTemplateAsync:async()=>element(),updateWorldInfoList:async()=>{},world_names:[],worldInfoCache:new Map(),convertCharacterBook:x=>x,getRequestHeaders:()=>({}),fetch:async()=>{calls.push('world');return{ok:true};},eventSource:{emit:async()=>{}},event_types:{},allowScopedScripts:c=>calls.push('regex:'+c.avatar),isScopedScriptsAllowed:()=>false,RegexProvider:{instance:{clear(){}}}});
  vm.runInContext(source,context);
  return {context,calls,enabled,options:{doc,win:{toastr:{success(){},info(){},warning(){}}},bind:async key=>calls.push('bind:'+key)}};
 }
