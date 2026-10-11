@@ -14,6 +14,7 @@
 @import url('./resource-dialog.css');
 @import url('./dialogs.css');
 @import url('./worldbook-library.css');
+@import url('./panel-motion.css');
 
 /* Crisp vector icons for compact success and info notifications. */
 html:is(.cwn-active,.cwn-toasts-active) #toast-container > .toast-success,

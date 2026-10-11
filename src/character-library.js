@@ -13,7 +13,7 @@ const back=(action,label)=>`<button type="button" class="detail-back" data-actio
 export function mountCharacterLibrary(doc,win,host) {
   const drawer=doc.getElementById('right-nav-panel');if(!drawer)return()=>{};
   const pane=doc.createElement('div');pane.id='cwn-character-library';drawer.append(pane);drawer.classList.add('cwn-library-mounted');
-  let page=null,listPage=null,pageAnimation=null,drawerAnimation=null;
+  let page=null,listPage=null,pageAnimation=null;
   const zone=doc.getElementById('cwn-character-import-zone'),home=zone?.parentNode,next=zone?.nextSibling;
   const abort=new win.AbortController();let card=null,avatar='',opening=0,draft=null,baseline=null,busy=false,disableControls=true,disposed=false,query='',revision=0;
   const sortKey='cwn-character-sort';
@@ -62,9 +62,12 @@ export function mountCharacterLibrary(doc,win,host) {
   function discard(){draft=null;baseline=null;opening=Math.min(opening,characterFields(card).openings.length-1);}
 
   async function run(fn,{disable=true}={}){if(busy)return;busy=true;disableControls=disable;controls();try{await fn();}catch(error){win.toastr.error(error.message||'操作失败，请重试');}finally{busy=false;disableControls=true;if(!disposed)controls();}}
+  const cardMarkup=new WeakMap();
   function drawCards(){
     const rows=sortCharacters(st.characters.filter(c=>(c.name||'').toLocaleLowerCase().includes(query.toLocaleLowerCase())),sortMode);
-    page.querySelector('.library-grid').innerHTML=rows.map(c=>`<button type="button" class="library-card" data-avatar="${esc(c.avatar)}"><img src="${esc(image(c.avatar))}" alt="" loading="lazy"><span class="cwn-type-item">${esc(c.name)}</span></button>`).join('')||'<p class="library-muted">没有匹配的角色卡</p>';
+    const grid=page.querySelector('.library-grid');
+    const markup=rows.map(c=>`<button type="button" class="library-card" data-avatar="${esc(c.avatar)}"><img src="${esc(image(c.avatar))}" alt="" loading="lazy"><span class="cwn-type-item">${esc(c.name)}</span></button>`).join('')||'<p class="library-muted">没有匹配的角色卡</p>';
+    if(cardMarkup.get(grid)!==markup){grid.innerHTML=markup;cardMarkup.set(grid,markup);}
     page.querySelector('.library-count').textContent=`角色卡 · ${rows.length}`;
   }
   function closeSort({focus=false}={}){
@@ -78,10 +81,13 @@ export function mountCharacterLibrary(doc,win,host) {
     return `<div class="library-sort-wrap"><button type="button" class="library-sort-trigger" data-action="sort" aria-expanded="false" aria-controls="cwn-character-sort-options" aria-label="角色卡排序：${current.summary}">${icon('M4 6h16M4 12h11M4 18h6')}<span>${current.summary}</span>${icon('m9 10 3 3 3-3')}</button><fieldset id="cwn-character-sort-options" class="library-sort-pop" hidden><legend>角色卡排序</legend>${characterSortOptions.map(option=>`<label class="library-sort-option"><input type="radio" name="cwn-character-sort" value="${option.value}" ${option.value===sortMode?'checked':''}><span><strong>${option.label}</strong><small>${option.description}</small></span><span class="library-sort-check" aria-hidden="true">✓</span></label>`).join('')}</fieldset></div>`;
   }
   function list(){
+    // Reopening a drawer must preserve decoded covers, focus and scroll.
+    // Native list notifications may arrive again while this surface is moving.
+    if(!card&&page===listPage&&page?.isConnected){revision++;drawCards();return;}
     rememberHeight();editorResize.disconnect();card=null;draft=null;revision++;
     page=doc.createElement('div');page.className='cwn-library-page';
     pane.replaceChildren(page);listPage=page;
-    page.innerHTML=`<div class="cwn-library-nav cwn-library-nav-mobile"><button type="button" class="design-menu" data-action="menu" aria-label="返回导航菜单">${icon('M4 6h16M4 12h16M4 18h16')}</button></div><div class="library-heading"><h1 class="cwn-type-title">角色卡</h1><button class="library-import" data-action="import">${icon('M12 5v14M5 12h14')}<span>导入</span></button></div><div class="library-drop"></div><input class="library-search" type="search" placeholder="搜索角色" aria-label="搜索角色" value="${esc(query)}"><div class="library-sort-row"><p class="library-count library-muted"></p>${sortControl()}</div><div class="library-grid"></div>`;
+    page.innerHTML=`<div class="cwn-library-nav cwn-library-nav-mobile"><button type="button" class="design-menu" data-action="menu" aria-label="返回导航菜单">${icon('m15 5-7 7 7 7')}</button></div><div class="library-heading"><h1 class="cwn-type-title">角色卡</h1><button class="library-import" data-action="import">${icon('M12 5v14M5 12h14')}<span>导入</span></button></div><div class="library-drop"></div><input class="library-search" type="search" placeholder="搜索角色" aria-label="搜索角色" value="${esc(query)}"><div class="library-sort-row"><p class="library-count library-muted"></p>${sortControl()}</div><div class="library-grid"></div>`;
     if(zone)page?.querySelector('.library-drop').append(zone);drawCards();page.scrollTop=0;
   }
   function render(){
@@ -102,8 +108,9 @@ export function mountCharacterLibrary(doc,win,host) {
     const target=page;
     if(disposed||!motionAllowed()||!target.animate)return;
     target.inert=true;
+    const hidden=win.innerWidth<=700?'translateX(-100%)':'translateX(100%)';
     const animation=target.animate(
-      [{transform:entering?'translateX(100%)':'translateX(0)'},{transform:entering?'translateX(0)':'translateX(100%)'}],
+      [{transform:entering?hidden:'translateX(0)'},{transform:entering?'translateX(0)':hidden}],
       {duration:300,easing:'cubic-bezier(.22,.61,.36,1)',fill:'both'},
     );
     pageAnimation=animation;
@@ -185,38 +192,13 @@ export function mountCharacterLibrary(doc,win,host) {
     });
     if(action==='chat')run(async()=>{if(!await canLeave())return;await host.startCharacterChat(avatar);discard();render();if(win.innerWidth<=700&&doc.documentElement.classList.contains('cwn-menu-open'))doc.getElementById('cwn-backdrop')?.click();else if(drawer.classList.contains('openDrawer'))doc.querySelector('#rightNavHolder > .drawer-toggle')?.click();});
   },{signal:abort.signal});
-  // Native visibility still controls navigation/history. Animate its panel over
-  // the existing sidebar, retaining the closing panel until its travel ends.
+  // Shared navigation owns drawer motion; keep list refresh tied to opening.
   let drawerOpen=drawer.classList.contains('openDrawer');
-  function slideDrawer(entering){
-    drawerAnimation?.cancel();
-    drawer.inert=false;
-    drawer.classList.remove('cwn-library-leaving');
-    if(!motionAllowed()||!drawer.animate)return;
-    if(!entering)drawer.classList.add('cwn-library-leaving');
-    drawer.inert=true;
-    // Desktop emerges from the left rail. The matching left clip keeps its
-    // moving portion behind the rail; mobile still enters from the right.
-    const frames=win.innerWidth>700
-      ?[{translate:entering?'-100% 0':'0 0',clipPath:entering?'inset(0 0 0 100%)':'inset(0 0 0 0)'},{translate:entering?'0 0':'-100% 0',clipPath:entering?'inset(0 0 0 0)':'inset(0 0 0 100%)'}]
-      :[{translate:entering?'100% 0':'0 0'},{translate:entering?'0 0':'100% 0'}];
-    const animation=drawer.animate(
-      frames,
-      {duration:300,easing:'cubic-bezier(.22,.61,.36,1)',fill:'both'},
-    );
-    drawerAnimation=animation;
-    animation.finished.catch(()=>{}).finally(()=>{
-      if(drawerAnimation!==animation)return;
-      animation.cancel();drawerAnimation=null;drawer.inert=false;
-      drawer.classList.remove('cwn-library-leaving');
-    });
-  }
   const observer=new win.MutationObserver(()=>{
     const isOpen=drawer.classList.contains('openDrawer');
     if(disposed||isOpen===drawerOpen)return;
     drawerOpen=isOpen;
     if(isOpen&&!card)list();
-    slideDrawer(isOpen);
   });observer.observe(drawer,{attributes:true,attributeFilter:['class']});
   const refresh=()=>{if(!disposed&&!card&&!busy)list();};
   for(const type of ['CHARACTER_EDITED','CHARACTER_DELETED','CHARACTER_DUPLICATED','CHARACTER_RENAMED'])st.eventSource.on(st.event_types[type],refresh);
@@ -240,5 +222,5 @@ export function mountCharacterLibrary(doc,win,host) {
     if(press&&event.button===0&&Math.hypot(event.clientX-press.x,event.clientY-press.y)<=6&&win.innerWidth>700&&drawer.classList.contains('openDrawer')&&!busy&&!changed()&&isOutside(event))doc.querySelector('#rightNavHolder > .drawer-toggle')?.click();
   };
   doc.addEventListener('click',outside,{signal:abort.signal});list();
-  return()=>{rememberHeight();editorResize.disconnect();disposed=true;revision++;pageAnimation?.cancel();drawerAnimation?.cancel();drawer.inert=false;drawer.classList.remove('cwn-library-leaving');abort.abort();observer.disconnect();imports.disconnect();for(const type of ['CHARACTER_EDITED','CHARACTER_DELETED','CHARACTER_DUPLICATED','CHARACTER_RENAMED'])st.eventSource.removeListener(st.event_types[type],refresh);if(zone&&home)home.insertBefore(zone,next?.parentNode===home?next:null);pane.remove();drawer.classList.remove('cwn-library-mounted');};
+  return()=>{rememberHeight();editorResize.disconnect();disposed=true;revision++;pageAnimation?.cancel();abort.abort();observer.disconnect();imports.disconnect();for(const type of ['CHARACTER_EDITED','CHARACTER_DELETED','CHARACTER_DUPLICATED','CHARACTER_RENAMED'])st.eventSource.removeListener(st.event_types[type],refresh);if(zone&&home)home.insertBefore(zone,next?.parentNode===home?next:null);pane.remove();drawer.classList.remove('cwn-library-mounted');};
 }

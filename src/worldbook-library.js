@@ -49,7 +49,8 @@ export function mountWorldbookLibrary(doc,win) {
   function render(){
     if(disposed)return;
     pane.dataset.depth=String(screen==='entry'?2:screen==='book'?1:0);pane.classList.toggle('phone',win.innerWidth<=700);
-    pane.innerHTML=`<div class="wb-nav ${screen==='library'?'wb-library-nav':''}">${iconButton('back',screen==='library'?'返回导航':'返回上一页',screen==='library'?icons.menu:icons.back)}</div><div class="wb-scroll"></div>`;
+    if(screen==='library'&&pane.querySelector('.book-grid')){drawBooks();void discoverCovers();return;}
+    pane.innerHTML=`<div class="wb-nav ${screen==='library'?'wb-library-nav':''}">${iconButton('back',screen==='library'?'返回导航':'返回上一页',icons.back)}</div><div class="wb-scroll"></div>`;
     const body=pane.querySelector('.wb-scroll');
     if(screen==='library'){
       body.innerHTML=`<div class="heading"><h1 class="cwn-type-title">世界书</h1>${button('import','导入','solid mobile-import',icons.plus)}</div><button type="button" class="drop" id="cwn-worldbook-import-zone" data-action="import">${icons.plus}<span><strong>将世界书拖到这里</strong><small>或点击选择 JSON 文件导入</small></span></button><input class="search" data-search placeholder="搜索世界书" aria-label="搜索世界书" value="${esc(query)}"><div class="summary"><span>世界书 · ${wi.world_names.length}</span><span>已启用 ${wi.selected_world_info.length} 本</span></div><div class="book-grid"></div>`;
@@ -65,7 +66,15 @@ export function mountWorldbookLibrary(doc,win) {
       body.dataset.light=e.vectorized?'vector':e.constant?'blue':'green';
     }
   }
-  function drawBooks(){pane.querySelector('.book-grid').innerHTML=wi.world_names.filter(n=>n.toLocaleLowerCase().includes(query.toLocaleLowerCase())).map(n=>`<article class="book"><button type="button" class="cover-button" data-book="${esc(n)}" aria-label="查看${esc(n)}">${cover(n)}<span class="book-title">${esc(n)}</span></button>${checkbox(n,'cover-enable')}</article>`).join('')||'<p class="empty">没有找到世界书</p>';}
+  const bookMarkup=new WeakMap();
+  function drawBooks(){
+    const grid=pane.querySelector('.book-grid');if(!grid)return;
+    const markup=wi.world_names.filter(n=>n.toLocaleLowerCase().includes(query.toLocaleLowerCase())).map(n=>`<article class="book"><button type="button" class="cover-button" data-book="${esc(n)}" aria-label="查看${esc(n)}">${cover(n)}<span class="book-title">${esc(n)}</span></button>${checkbox(n,'cover-enable')}</article>`).join('')||'<p class="empty">没有找到世界书</p>';
+    if(bookMarkup.get(grid)!==markup){grid.innerHTML=markup;bookMarkup.set(grid,markup);}
+    const summary=pane.querySelectorAll('.summary > span');
+    if(summary[0])summary[0].textContent=`世界书 · ${wi.world_names.length}`;
+    if(summary[1])summary[1].textContent=`已启用 ${wi.selected_world_info.length} 本`;
+  }
   function drawEntries(){pane.querySelector('.entry-list').innerHTML=Object.values(book.entries).sort((a,b)=>(a.displayIndex??a.uid)-(b.displayIndex??b.uid)).filter(e=>(e.comment||'').includes(query)||(e.content||'').includes(query)).map(e=>`<div class="entry-row" data-uid="${esc(e.uid)}"><button type="button" class="entry-open" data-entry="${esc(e.uid)}"><span class="dot ${e.constant?'':'green'}"></span><span><strong>${esc(e.comment||'未命名条目')}</strong><small>${esc(e.content||'暂无内容')}</small></span></button><input type="checkbox" class="toggle entry-enabled" data-enabled="${esc(e.uid)}" aria-label="启用条目${esc(e.comment||e.uid)}" ${!e.disable?'checked':''}><div class="row-actions">${iconButton('copy-entry','复制条目',icons.copy)}${iconButton('delete-entry','删除条目',icons.trash,'danger')}</div></div>`).join('')||'<p class="empty">没有找到条目</p>';}
   function draftPatch(){
     if(screen!=='entry')return {};

@@ -1,0 +1,11 @@
+/* One visibility/stacking owner for every native sidebar panel. */
+html.cwn-active body #top-settings-holder.cwn-panels-managed .drawer > .drawer-content[data-cwn-panel-layer="hidden"]{display:none!important;}
+html.cwn-active body #top-settings-holder.cwn-panels-managed .drawer > .drawer-content[data-cwn-panel-layer="base"],
+html.cwn-active body #top-settings-holder.cwn-panels-managed .drawer > .drawer-content[data-cwn-panel-layer="front"]{display:block!important;visibility:visible!important;opacity:1!important;z-index:1100!important;}
+html.cwn-active body #top-settings-holder.cwn-panels-managed .drawer > .drawer-content[data-cwn-panel-layer="front"]{z-index:1101!important;}
+html.cwn-active body #top-settings-holder.cwn-panel-in-motion .drawer > .drawer-content{pointer-events:none;}
+/* The mobile rail remains the underlying page during its panel's exit. */
+@media(max-width:700px){
+  html.cwn-active body #top-settings-holder.cwn-panel-in-motion{transition:none!important;transform:none!important;}
+  html.cwn-active:has(#top-settings-holder.cwn-panel-in-motion) body #cwn-menu{display:none!important;}
+}

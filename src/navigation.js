@@ -1,3 +1,5 @@
+import { mountPanelMotion } from './panel-motion.js';
+
 // Native drawer actions keep SillyTavern's icon, pin and widget state in sync.
 export function mountNavigation({ doc, win, rail, chatShell, menu, backdrop, media, toggleDrawer }) {
   const abort = new win.AbortController();
@@ -9,6 +11,7 @@ export function mountNavigation({ doc, win, rail, chatShell, menu, backdrop, med
     panel: drawer.querySelector(':scope > .drawer-content'),
     toggle: drawer.querySelector(':scope > .drawer-toggle'),
   })).filter(({panel, toggle}) => panel && toggle);
+  const disposeMotion = mountPanelMotion({doc,win,rail,drawers,media,toggleDrawer});
   const listen = (node, type, fn) => node.addEventListener(type, fn, { signal: abort.signal });
   const isOpen = ({panel}) => panel.classList.contains('openDrawer');
   function render() {
@@ -97,6 +100,7 @@ export function mountNavigation({ doc, win, rail, chatShell, menu, backdrop, med
     disposed = true;
     abort.abort();
     observer.disconnect();
+    disposeMotion();
     additions.forEach(node => node.remove());
     root.classList.remove('cwn-menu-open');
     [rail.inert, chatShell.inert] = savedInert;
