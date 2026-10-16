@@ -1,0 +1,106 @@
+<!doctype html><html><meta charset="utf-8"><title>预设面板兼容测试</title>
+<body><h1>预设面板兼容测试</h1><pre id="result">运行中</pre>
+<select id="main_api"><option value="openai">Chat Completion</option><option value="textgenerationwebui">Text Completion</option></select>
+<div id="left-nav-panel"><button class="cwn-panel-back">返回</button><div id="native">
+<div id="openai_api-presets"><label for="bind_preset_to_connection"><input id="bind_preset_to_connection" type="checkbox"></label><select id="settings_preset_openai"><option value="original">Original</option></select><button id="update_oai_preset">保存原生</button><button id="import_oai_preset">导入原生</button></div>
+<div id="range_block_openai"><div><input id="openai_max_context" value="2000000"></div><div><input id="openai_max_tokens" value="8192"></div><div><input id="temp_openai" value="0.8"></div><div><input id="stream_toggle" type="checkbox" checked></div><div data-source="custom"><input id="seed_openai" value="42"></div></div>
+<div id="openai_settings"><div><div><select id="openai_reasoning_effort"><option>high</option></select></div><div><input id="continue_prefill" type="checkbox"></div></div><div><select id="openai_logit_bias_preset"><option>bias</option></select></div><div><div id="completion_prompt_manager"><div class="completion_prompt_manager_footer"><select id="completion_prompt_manager_footer_append_prompt"><option>test</option></select></div><ul id="completion_prompt_manager_list"><li><span class="prompt-manager-edit-action">编辑</span><span class="prompt-manager-toggle-action fa-toggle-on">开关</span></li></ul></div></div></div>
+</div></div>
+<div id="completion_prompt_manager_popup" class="drawer-content" style="display:none"><input id="fixture-draft" value="original"><button id="fixture-cancel">取消条目</button><button id="fixture-save">保存条目</button></div>
+<script type="module">
+import { mountPresetPanel } from '../src/preset-panel.js';
+const results = [];
+const check = (test, message) => { if (!test) throw new Error(message); results.push('通过：' + message); };
+const tick = () => new Promise(resolve => setTimeout(resolve, 0));
+try {
+    const native = document.querySelector('#native');
+    const initial = native.innerHTML;
+    const fields = Array.from(native.querySelectorAll('input,select'));
+    const values = fields.map(el => [el.value, el.checked]);
+    let saves = 0;
+    document.querySelector('#update_oai_preset').addEventListener('click', () => saves++);
+    const binding = document.querySelector('#bind_preset_to_connection');
+    let bindingValue = true, bindingUpdates = 0;
+    binding.checked = true;
+    binding.addEventListener('input', () => { bindingValue = binding.checked; bindingUpdates++; });
+    const dispose = mountPresetPanel(document, window);
+    check(!binding.checked && bindingValue === false && bindingUpdates === 1, '原生关联开关关闭，并通过原处理程序保存');
+    check(document.querySelector('.cp-native-storage').contains(binding) && !document.querySelector('.cp-binding-slot'), '移除关联入口，原生控件留在隐藏存储区');
+    check(document.querySelector('#cwn-preset-panel'), '挂载新版面板');
+    check(fields.every((el, i) => el === document.getElementById(el.id) && el.value === values[i][0] && el.checked === values[i][1]), '原生控件身份、值与勾选状态保持不变');
+    check(document.querySelector('.cp-advanced #seed_openai').value === '42', '隐藏到高级区的种子保持原值');
+    document.querySelector('[data-cp-action="save"]').click();
+    check(saves === 1, '保存只触发原生处理一次');
+    const popup = document.querySelector('#completion_prompt_manager_popup');
+    const popupParent = document.body;
+    const manager = document.querySelector('#completion_prompt_manager');
+    const entry = manager.querySelector('li');
+    entry.dataset.pmIdentifier = 'fixture';
+    const name = document.createElement('span');
+    name.className = 'completion_prompt_manager_prompt_name';
+    name.innerHTML = '<a class="prompt-manager-inspect-action">测试条目</a>';
+    entry.prepend(name);
+    let inspected = 0, opened = 0, toggled = 0;
+    name.firstChild.addEventListener('click', () => inspected++);
+    entry.querySelector('.prompt-manager-toggle-action').addEventListener('click', () => toggled++);
+    entry.querySelector('.prompt-manager-edit-action').addEventListener('click', () => {
+        opened++;
+        popup.style.display = 'block'; popup.classList.add('openDrawer');
+    });
+    const cancel = () => {popup.style.display = 'none';popup.classList.remove('openDrawer');};
+    document.querySelector('#fixture-cancel').addEventListener('click', cancel);
+    name.firstChild.click(); await tick();
+    check(opened === 1 && inspected === 0, '点击名称进入编辑，不触发原生只读查看框');
+    check(popup.parentElement === entry && popup.classList.contains('cp-inline-editor') && !popup.classList.contains('drawer-content'), '编辑复用原表单并在当前条目下展开，不作为嵌套侧栏');
+    document.querySelector('#fixture-draft').value = 'draft';
+    name.click(); await tick();
+    check(popup.hidden && name.getAttribute('aria-expanded') === 'false', '再次点击收起编辑区');
+    name.dispatchEvent(new KeyboardEvent('keydown', {key:'Enter',bubbles:true})); await tick();
+    check(!popup.hidden && opened === 1 && document.querySelector('#fixture-draft').value === 'draft', '键盘重新展开，保留草稿且不重新加载');
+    entry.querySelector('.prompt-manager-toggle-action').click(); await tick();
+    check(toggled === 1 && opened === 1 && !popup.hidden, '启用开关独立操作，不影响编辑展开');
+    const more = document.querySelector('[data-cp-action="prompt-more"]');
+    more.click();
+    check(more.getAttribute('aria-expanded') === 'true', '条目操作从标题菜单展开');
+    more.dispatchEvent(new KeyboardEvent('keydown', {key:'Escape',bubbles:true}));
+    check(more.getAttribute('aria-expanded') === 'false', 'Escape 关闭条目菜单');
+    const rowHTML = entry.outerHTML.replace(popup.outerHTML, '');
+    manager.querySelector('ul').innerHTML = ''; await tick();
+    check(document.querySelector('#fixture-draft').value === 'draft', '宿主清空列表时暂存表单并保留草稿与 DOM ID');
+    manager.querySelector('ul').innerHTML = rowHTML; await tick();
+    check(popup.closest('[data-pm-identifier]')?.dataset.pmIdentifier === 'fixture', '宿主重绘后编辑区回到对应条目');
+    document.querySelector('#fixture-cancel').click(); await tick();
+    check(popup.parentElement === popupParent && !popup.classList.contains('cp-inline-editor') && popup.classList.contains('drawer-content'), '取消收起并还原原生编辑器位置和侧栏属性');
+    let savedDraft;
+    document.querySelector('#fixture-save').addEventListener('click', () => {
+        savedDraft = document.querySelector('#fixture-draft').value;
+        cancel();
+        manager.querySelector('ul').innerHTML = rowHTML;
+    });
+    const redrawnEdit = manager.querySelector('.prompt-manager-edit-action');
+    redrawnEdit.addEventListener('click', () => {popup.style.display = 'block';popup.classList.add('openDrawer');});
+    redrawnEdit.click(); await tick();
+    document.querySelector('#fixture-save').click(); await tick();
+    check(savedDraft === 'draft' && popup.parentElement === popupParent && !document.querySelector('.cp-editor-open'), '保存使用原生表单值，重绘后编辑区正常收起');
+    // Restore the fixture row before testing byte-for-byte host DOM restoration.
+    manager.querySelector('ul').innerHTML = '<li><span class="prompt-manager-edit-action">编辑</span><span class="prompt-manager-toggle-action fa-toggle-on">开关</span></li>';
+    await tick();
+    const main = document.querySelector('#main_api');
+    main.value = 'textgenerationwebui'; main.dispatchEvent(new Event('change')); await tick();
+    check(!document.querySelector('#cwn-preset-panel') && native.innerHTML === initial, '切换非聊天补全接口时完整恢复原生结构');
+    main.value = 'openai'; main.dispatchEvent(new Event('change')); await tick();
+    check(document.querySelectorAll('#cwn-preset-panel').length === 1, '切回时没有重复面板');
+    document.querySelector('#completion_prompt_manager_list').innerHTML = '<li><span class="prompt-manager-toggle-action fa-toggle-off">关</span></li>';
+    await tick();
+    check(document.querySelector('.prompt-manager-toggle-action').getAttribute('aria-label') === '启用条目', '宿主重新渲染后操作仍有正确标签');
+    dispose(); dispose();
+    check(!document.querySelector('#cwn-preset-panel,.cp-append-label,.cp-section,.cp-advanced'), '重复卸载清理所有新增结构');
+    check(!document.querySelector('.prompt-manager-toggle-action').hasAttribute('role'), '卸载恢复宿主操作属性');
+    check(fields.every(el => native.contains(el)), '卸载归还全部原生控件');
+    const again = mountPresetPanel(document, window);
+    document.querySelector('[data-cp-action="save"]').click();
+    check(saves === 2, '重新挂载没有重复监听');
+    again();
+    document.querySelector('#result').textContent = results.join('\n') + '\n全部通过';
+} catch (error) { document.querySelector('#result').textContent = results.join('\n') + '\n失败：' + error.stack; }
+</script></body></html>
