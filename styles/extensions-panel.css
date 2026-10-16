@@ -4,7 +4,7 @@ html.cwn-active #rm_extensions_block.cwn-extensions-mounted>:not(#cwn-extensions
 #cwn-extensions-panel{position:absolute;inset:0;display:flex;flex-direction:column;background:var(--cwn-bg);color:var(--cwn-ink);overflow:hidden;font:var(--cwn-type-body-weight) var(--cwn-type-body-size)/var(--cwn-type-body-line) var(--cwn-type-ui-family)}
 #rm_extensions_block #cwn-extensions-panel{
  *{box-sizing:border-box} [hidden]{display:none!important}
- h1,h2,h3,p{margin:0;text-shadow:none}h1{font:var(--cwn-type-title-weight) var(--cwn-type-title-size)/var(--cwn-type-title-line) var(--cwn-type-title-family)}h2{font:var(--cwn-type-section-weight) var(--cwn-type-section-size)/var(--cwn-type-section-line) var(--cwn-type-ui-family)}h3{font:500 15px/1.5 var(--cwn-type-ui-family)}
+ h1,h2,h3,p{margin:0;text-shadow:none}h1{font:var(--cwn-type-title-weight) var(--cwn-type-title-size)/var(--cwn-type-title-line) var(--cwn-type-title-family)}h2{font:var(--cwn-type-section-weight) var(--cwn-type-section-size)/var(--cwn-type-section-line) var(--cwn-type-section-family)}h3{font:500 15px/1.5 var(--cwn-type-ui-family)}
  button,input,select,textarea{filter:none!important;box-shadow:none!important;text-shadow:none!important;color:var(--cwn-ink);font-family:var(--cwn-type-ui-family)}button{cursor:pointer}button:disabled{opacity:.45;cursor:default}
  svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;flex:none}
  :is(button,input,select,textarea,[role=button]):focus-visible{outline:2px solid var(--cwn-accent);outline-offset:2px}

@@ -38,7 +38,7 @@ html.cwn-active #left-nav-panel.cwn-preset-mounted > :not(#cwn-preset-panel) {di
     .cp-section {padding:24px 0;border-bottom:1px solid var(--cwn-line)}
     .cp-prompts {position:relative}
     .cp-prompt-heading {display:flex;align-items:center;justify-content:space-between;gap:12px}
-    .cp-section h2,.cp-advanced>summary>span:first-child {font:var(--cwn-type-section-weight) var(--cwn-type-section-size)/var(--cwn-type-section-line) var(--cwn-type-ui-family)}
+    .cp-section h2,.cp-advanced>summary>span:first-child {font:var(--cwn-type-section-weight) var(--cwn-type-section-size)/var(--cwn-type-section-line) var(--cwn-type-section-family)}
     .cp-guide {font-size:var(--cwn-type-caption-size);font-weight:400;line-height:1.6;color:var(--cwn-muted);margin:6px 0 16px}
     .cp-fields {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px 20px;margin-top:20px;align-items:start}
     .cp-fields>.range-block,.cp-fields>.flex-container {margin:0!important;padding:0;min-width:0;align-items:stretch;text-align:left}
