@@ -17,6 +17,7 @@ html.cwn-active #left-nav-panel.cwn-preset-mounted > :not(#cwn-preset-panel) {di
     .cp-heading {justify-content:space-between;margin-bottom:24px}
     .cp-heading h1 {font:var(--cwn-type-title-weight) var(--cwn-type-title-size)/var(--cwn-type-title-line) var(--cwn-type-title-family)}
     .cp-button {display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:42px;padding:9px 13px;border:0;border-radius:9px;background:transparent;font-size:14px;font-weight:400;white-space:nowrap}
+    .cp-mobile-import {display:none}
     .cp-button:hover {background:var(--cwn-hover)}
     .cp-outline {border:1px solid var(--cwn-line)}
     .cp-solid {background:var(--cwn-accent);color:white;min-width:84px}
@@ -195,3 +196,5 @@ html.cwn-active body #left-nav-panel #cwn-preset-panel #completion_prompt_manage
         .completion_prompt_manager_popup_entry_form_control:has(#completion_prompt_manager_popup_entry_form_name) {flex-basis:100%!important}
     }
 }
+
+@media(max-width:700px){#left-nav-panel #cwn-preset-panel .cp-mobile-import{display:inline-flex}}

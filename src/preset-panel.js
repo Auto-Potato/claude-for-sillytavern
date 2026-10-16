@@ -1,4 +1,6 @@
 import { mountPresetEntryEditor } from './preset-entry-editor.js';
+import { importZoneContent, mountPresetDrop } from './import-zone.js';
+import { createImportDialog } from './import-dialog.js';
 
 const paths = {
     back: 'm15 5-7 7 7 7', plus: 'M12 5v14M5 12h14',
@@ -39,7 +41,7 @@ export function mountPresetPanel(doc, win) {
         root.innerHTML = `<nav class="cp-mobile-nav">${button('back', '返回侧边栏', 'back', 'cp-icon')}</nav>
             <div class="cp-scroll">
                 <header class="cp-heading"><h1 class="cwn-type-title">预设</h1><div class="cp-heading-actions">
-                    ${button('import', '导入', 'plus', 'cp-outline')}
+                    ${button('import', '导入', 'plus', 'cp-outline cp-mobile-import')}
                     <div class="cp-more-wrap">${button('more', '更多操作', 'more', 'cp-icon')}
                         <div class="cp-menu" hidden>
                             ${button('rename', '重命名', 'edit')}${button('save-as', '另存为', 'copy')}
@@ -47,12 +49,27 @@ export function mountPresetPanel(doc, win) {
                         </div>
                     </div>
                 </div></header>
+                <button type="button" id="cwn-preset-import-zone" class="cwn-import-zone" data-cp-action="import">${importZoneContent('预设')}</button>
                 <section class="cp-current"><label class="cwn-type-caption" for="settings_preset_openai">当前预设</label>
                     <div class="cp-select-row"><div class="cp-select-slot"></div>${button('save', '保存', 'save', 'cp-solid')}</div>
                 </section>
                 <div class="cp-native-storage" hidden></div>
             </div>`;
         panel.append(root);
+        // ST 1.19.0 openai.js registers an async input handler on this native
+        // field. Await its promise to retain validation, overwrite confirmation,
+        // resource import hooks and saving, and to prevent overlapping imports.
+        const importPresetFile = async file => {
+            const input = doc.getElementById('openai_preset_import_file');
+            if (!input || !win.jQuery) throw new Error('Preset importer unavailable');
+            const transfer = new win.DataTransfer();
+            transfer.items.add(file);
+            input.files = transfer.files;
+            try { await win.jQuery(input).triggerHandler('input'); }
+            finally { input.value = ''; }
+        };
+        const importDialog = createImportDialog(doc, win, {kind:'preset',label:'预设',chooseFile:()=>doc.getElementById('openai_preset_import_file')?.click(),importFile:importPresetFile});
+        const disposeDrop = mountPresetDrop(doc, win, root.querySelector('#cwn-preset-import-zone'), importPresetFile);
         const scroll = root.querySelector('.cp-scroll');
         const sourceOptions = settings.firstElementChild;
         const managerBlock = manager.parentElement;
@@ -125,6 +142,7 @@ export function mountPresetPanel(doc, win) {
             if (event.target.closest('.completion_prompt_manager_footer a')) closePromptMenu();
             const action = event.target.closest('[data-cp-action]')?.dataset.cpAction;
             if (!action) return;
+            if (action === 'import' && win.innerWidth <= 700) {void importDialog.open();return;}
             if (action === 'prompt-more') {
                 closeMenu();
                 const open = root.classList.toggle('cp-prompt-menu-open');
@@ -184,6 +202,8 @@ export function mountPresetPanel(doc, win) {
         root.addEventListener('keydown', keydown);
         doc.addEventListener('click', outside, true);
         unmount = () => {
+            importDialog.dispose();
+            disposeDrop();
             disposeEntryEditor();
             observer.disconnect();
             root.removeEventListener('click', onClick); root.removeEventListener('keydown', keydown);

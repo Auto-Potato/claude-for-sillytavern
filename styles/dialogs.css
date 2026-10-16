@@ -1,4 +1,14 @@
 /* Shared styling for theme-owned confirmation and editing dialogs only. */
+.cwn-import-dialog-heading {display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:20px}
+.cwn-import-dialog-heading button {display:grid;place-items:center;flex:none;width:32px;height:32px;padding:6px;border:0;border-radius:8px;background:transparent;color:var(--cwn-muted);cursor:pointer}
+.cwn-import-dialog-heading button:hover {background:var(--cwn-hover)}
+.cwn-import-dialog-heading svg {width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round}
+html.cwn-active body dialog.cwn-import-dialog .cwn-import-dialog-heading h3 {margin:0!important}
+html.cwn-active body dialog.cwn-import-dialog label {display:block;color:var(--cwn-muted)}
+html.cwn-active body dialog.cwn-import-dialog label input {margin-top:8px!important}
+html.cwn-active body dialog.cwn-import-dialog .cwn-import-error {margin-top:10px!important;color:var(--cwn-accent)!important;font-size:13px!important}
+html.cwn-active body dialog.cwn-import-dialog [hidden] {display:none!important}
+html.cwn-active body dialog.cwn-import-dialog [aria-disabled=true] {opacity:.5;cursor:wait}
 html.cwn-active body dialog.cwn-character-dialog,
 html.cwn-active body dialog#cwn-chat-dialog {
  width:min(440px,calc(100vw - 32px))!important;padding:28px!important;border:1px solid var(--cwn-line)!important;border-radius:20px!important;

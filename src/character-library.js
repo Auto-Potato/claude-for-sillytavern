@@ -1,4 +1,5 @@
 import { importCharacterResources } from './character-resources.js';
+import { createImportDialog } from './import-dialog.js';
 import * as st from '../../../../../script.js';
 import { world_names, updateWorldInfoList } from '../../../../world-info.js';
 import { Popup, POPUP_TYPE } from '../../../../popup.js';
@@ -15,6 +16,7 @@ export function mountCharacterLibrary(doc,win,host) {
   const pane=doc.createElement('div');pane.id='cwn-character-library';drawer.append(pane);drawer.classList.add('cwn-library-mounted');
   let page=null,listPage=null,pageAnimation=null;
   const zone=doc.getElementById('cwn-character-import-zone'),home=zone?.parentNode,next=zone?.nextSibling;
+  const importDialog=createImportDialog(doc,win,{kind:'character',label:'角色卡',chooseFile:()=>doc.getElementById('character_import_file')?.click(),importFile:file=>st.processDroppedFiles([file])});
   const abort=new win.AbortController();let card=null,avatar='',opening=0,draft=null,baseline=null,busy=false,disableControls=true,disposed=false,query='',revision=0;
   const sortKey='cwn-character-sort';
   let sortMode=normalizeCharacterSort(accountStorage.getItem(sortKey));
@@ -168,7 +170,7 @@ export function mountCharacterLibrary(doc,win,host) {
       button.setAttribute('aria-expanded',String(!expanded));
       page.querySelector('.library-sort-pop').hidden=expanded;return;
     }
-    if(action==='import')doc.getElementById('character_import_file')?.click();
+    if(action==='import'){if(win.innerWidth<=700)void importDialog.open();else doc.getElementById('character_import_file')?.click();}
     if(action==='menu')drawer.querySelector('.cwn-panel-back')?.click();
     if(action==='cancel')run(async()=>{if(await confirm('是否舍弃当前修改？')){discard();render();}});
     if(action==='prev'||action==='next'){const count=(draft||characterFields(card)).openings.length;opening=Math.max(0,Math.min(count,opening+(action==='next'?1:-1)));const y=page.scrollTop;render();page.scrollTop=y;return;}
@@ -222,5 +224,5 @@ export function mountCharacterLibrary(doc,win,host) {
     if(press&&event.button===0&&Math.hypot(event.clientX-press.x,event.clientY-press.y)<=6&&win.innerWidth>700&&drawer.classList.contains('openDrawer')&&!busy&&!changed()&&isOutside(event))doc.querySelector('#rightNavHolder > .drawer-toggle')?.click();
   };
   doc.addEventListener('click',outside,{signal:abort.signal});list();
-  return()=>{rememberHeight();editorResize.disconnect();disposed=true;revision++;pageAnimation?.cancel();abort.abort();observer.disconnect();imports.disconnect();for(const type of ['CHARACTER_EDITED','CHARACTER_DELETED','CHARACTER_DUPLICATED','CHARACTER_RENAMED'])st.eventSource.removeListener(st.event_types[type],refresh);if(zone&&home)home.insertBefore(zone,next?.parentNode===home?next:null);pane.remove();drawer.classList.remove('cwn-library-mounted');};
+  return()=>{importDialog.dispose();rememberHeight();editorResize.disconnect();disposed=true;revision++;pageAnimation?.cancel();abort.abort();observer.disconnect();imports.disconnect();for(const type of ['CHARACTER_EDITED','CHARACTER_DELETED','CHARACTER_DUPLICATED','CHARACTER_RENAMED'])st.eventSource.removeListener(st.event_types[type],refresh);if(zone&&home)home.insertBefore(zone,next?.parentNode===home?next:null);pane.remove();drawer.classList.remove('cwn-library-mounted');};
 }
