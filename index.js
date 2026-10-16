@@ -1,5 +1,6 @@
 import { mountWorldbookLibrary } from './src/worldbook-library.js';
 import { mountPresetPanel } from './src/preset-panel.js';
+import { mountExtensionsPanel } from './src/extensions-panel.js';
 import { recordWorldbookSource } from './src/worldbook-sources.js';
 import { mountBrowserNavigation } from './src/browser-navigation.js';
 import { mountSiteIcons } from './src/site-icons.js';
@@ -45,6 +46,7 @@ function start() {
   const disposeLibrary = mountCharacterLibrary(document, window, host);
   const disposeWorldbook = mountWorldbookLibrary(document, window);
   const disposePreset = mountPresetPanel(document, window);
+  const disposeExtensions = mountExtensionsPanel(document, window);
   const disposeWorldOption = mountEmbeddedWorldOption({
     Popup, confirmType: POPUP_TYPE.CONFIRM, affirmative: POPUP_RESULT.AFFIRMATIVE, doc: document,
     getCharacter: () => characters[window.jQuery('#import_character_info').data('chid')],
@@ -75,7 +77,7 @@ function start() {
   });
   const disposeBrowserNavigation = mountBrowserNavigation(document, window);
   startToasts();
-  dispose = () => { disposeBrowserNavigation(); disposeWorldOption(); disposePreset(); disposeWorldbook(); disposeLibrary(); disposeImport(); disposeIcons(); stopToasts(); disposeMessages(); disposeComposer(); disposeAppearance(); disposeHome(); disposeShell(); };
+  dispose = () => { disposeBrowserNavigation(); disposeWorldOption(); disposeExtensions(); disposePreset(); disposeWorldbook(); disposeLibrary(); disposeImport(); disposeIcons(); stopToasts(); disposeMessages(); disposeComposer(); disposeAppearance(); disposeHome(); disposeShell(); };
 }
 eventSource.once(event_types.APP_READY, () => {
   const settings = extension_settings.claude_for_sillytavern ??= { enabled: true };

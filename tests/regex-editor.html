@@ -1,0 +1,35 @@
+<!doctype html><html lang="zh-CN"><meta charset="utf-8"><title>正则编辑兼容测试</title><body>
+<h1>正则编辑兼容测试</h1><pre id="result">运行中</pre>
+<div class="ce-scroll"><section class="ce-detail"><div id="regex_container"><button id="open_regex_editor">新建</button><div class="ce-scope"><button class="ce-fold" aria-expanded="true">分组</button><div class="ce-scope-list"><div id="saved_regex_scripts"><div class="regex-script-label"><button class="edit_existing_regex">编辑</button></div></div></div></div></div></section></div>
+<script type="module">
+import {mountRegexEditor} from '../src/regex-editor.js';
+const results=[],check=(value,text)=>{if(!value)throw Error(text);results.push('通过：'+text);};
+const tick=()=>new Promise(resolve=>setTimeout(resolve,0));
+class MockPopup{
+ static util={popups:[]};
+ constructor(regex=true){this.dlg=document.createElement('dialog');this.content=document.createElement('div');this.content.innerHTML=regex?'<div id="regex_editor_template"><input value="原值"></div>':'<p>其他弹窗</p>';this.dlg.append(this.content);MockPopup.util.popups.push(this);}
+ show(){document.body.append(this.dlg);this.dlg.showModal();return new Promise(resolve=>this.resolve=resolve);}
+ async completeCancelled(){this.dlg.close();this.dlg.remove();MockPopup.util.popups=MockPopup.util.popups.filter(p=>p!==this);this.resolve(0);return 0;}
+}
+try{
+ const container=document.getElementById('regex_container'),original=MockPopup.prototype.show;
+ let popup,promise;
+ const edit=document.querySelector('.edit_existing_regex');
+ edit.addEventListener('click',()=>{popup=new MockPopup();promise=popup.show();});
+ const dispose=mountRegexEditor(document,window,container,MockPopup);
+ edit.click();await tick();
+ check(popup.dlg.previousElementSibling===edit.parentElement,'编辑器紧接原规则行');
+ check(popup.dlg.open&&!popup.dlg.matches(':modal'),'原位展开，不进入模态顶层');
+ const field=popup.content.querySelector('input');field.value='草稿';
+ await popup.completeCancelled();check(await promise===0,'取消返回原生否定结果');
+ check(!document.querySelector('dialog'),'取消后清理编辑器');
+ edit.click();await tick();const detached=popup;
+ document.getElementById('saved_regex_scripts').replaceChildren();await tick();
+ check(!detached.dlg.open&&await promise===0,'宿主重绘移除规则时取消悬空编辑');
+ const ordinary=new MockPopup(false),normal=ordinary.show();
+ check(ordinary.dlg.matches(':modal'),'其他弹窗不受影响');await ordinary.completeCancelled();await normal;
+ dispose();check(MockPopup.prototype.show===original,'卸载恢复原生方法');
+ check(MockPopup.util.popups.length===0,'无残留弹窗引用');
+ document.getElementById('result').textContent=results.join('\n')+'\n全部通过';
+}catch(error){document.getElementById('result').textContent=results.join('\n')+'\n失败：'+error.stack;}
+</script></body></html>
