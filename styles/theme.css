@@ -16,6 +16,7 @@
 @import url('./worldbook-library.css');
 @import url('./preset-panel.css');
 @import url('./extensions-panel.css');
+@import url('./extensions-generic.css');
 @import url('./panel-motion.css');
 
 /* Crisp vector icons for compact success and info notifications. */

@@ -50,6 +50,7 @@ export function mountExtensionsPanel(doc,win) {
             const label=node.id==='tavern_helper'?'酒馆助手':node.id==='regex_container'?'正则':names[node.id]||header?.textContent.trim();
             if(!label)continue;
             const entry={node,label};entries.set(node,entry);move(node,parking);
+            if(!hints[node.id])node.classList.add('ce-generic-extension');
             const row=doc.createElement('button');row.type='button';row.className='ce-feature';row.dataset.ceEntry=node.id;
             row.innerHTML=`<span class="ce-feature-icon">${exIcon(node.id==='tavern_helper'?'helper':node.id==='regex_container'?'regex':'extension')}</span><span class="ce-grow"><span class="ce-item-title"></span><small></small></span>${exIcon('right')}`;
             row.querySelector('.ce-item-title').textContent=label;row.querySelector('small').textContent=hints[node.id]||'';
@@ -71,6 +72,11 @@ export function mountExtensionsPanel(doc,win) {
             // Opening the original top drawer preserves third-party lazy setup.
             const content=entry.node.querySelector('.inline-drawer-content');
             if(content && win.getComputedStyle(content).display==='none')entry.node.querySelector('.inline-drawer-toggle')?.click();
+            // Flatten only the outer wrapper, never a nested settings group.
+            let drawer=entry.node;
+            while(!drawer.matches('.inline-drawer')&&drawer.children.length===1)drawer=drawer.firstElementChild;
+            const header=drawer.matches('.inline-drawer')?drawer.querySelector(':scope > .inline-drawer-header'):null;
+            if(header&&!header.querySelector('input,select,textarea,button,a[href],[role=switch]'))drawer.classList.add('ce-root-drawer');
         }
         if(page==='manage')renderManagement();scroll.scrollTop=0;
     }
@@ -146,5 +152,5 @@ export function mountExtensionsPanel(doc,win) {
         }};
         if(win.navigator.locks)await win.navigator.locks.request(`cwn-extension-auto-update:${account}`,{ifAvailable:true},lock=>lock?run():undefined);else await run();
     },3000);
-    return()=>{disposed=true;win.clearTimeout(timer);abort.abort();observer.disconnect();regexDispose();for(const {node} of entries.values())node.classList.remove('ce-native-open');for(const restore of restores.reverse())restore();root.remove();panel.classList.remove('cwn-extensions-mounted');};
+    return()=>{disposed=true;win.clearTimeout(timer);abort.abort();observer.disconnect();regexDispose();for(const {node} of entries.values()){node.classList.remove('ce-native-open','ce-generic-extension','ce-root-drawer');node.querySelectorAll('.ce-root-drawer').forEach(drawer=>drawer.classList.remove('ce-root-drawer'));}for(const restore of restores.reverse())restore();root.remove();panel.classList.remove('cwn-extensions-mounted');};
 }

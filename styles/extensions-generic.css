@@ -1,0 +1,71 @@
+/* Appearance only for discovered, otherwise unadapted extension settings.
+   Do not change display, dimensions, spacing, order or event ownership.
+   Icon fonts, code editors, color swatches and semantic warning colors remain native. */
+html.cwn-active #rm_extensions_block #cwn-extensions-panel .ce-generic-extension {
+    --SmartThemeBodyColor:var(--cwn-ink);
+    --SmartThemeEmColor:var(--cwn-muted);
+    --SmartThemeQuoteColor:var(--cwn-accent);
+    --SmartThemeBlurTintColor:var(--cwn-bg);
+    --SmartThemeChatTintColor:var(--cwn-bg);
+    --SmartThemeBorderColor:var(--cwn-line);
+    --SmartThemeShadowColor:transparent;
+    color:var(--cwn-ink);
+    background-color:var(--cwn-bg);
+    font-family:var(--cwn-type-ui-family);
+
+    :is(p,label,small,legend,summary,option,optgroup):not([class*="fa-"]) {
+        font-family:var(--cwn-type-ui-family);
+        text-shadow:none;
+    }
+    :is(h1,h2,h3,h4) {
+        font-family:var(--cwn-type-title-family);
+        font-weight:var(--cwn-type-title-weight);
+        color:var(--cwn-ink);
+        text-shadow:none;
+    }
+    :is(.inline-drawer-header,.inline-drawer-content) {
+        background:transparent!important;
+        color:var(--cwn-ink);
+        border-color:var(--cwn-line);
+        text-shadow:none;
+    }
+    :is(fieldset,hr) {border-color:var(--cwn-line)}
+    :is(.text_pole,select,textarea,input:not([type])):not([type=color]):not([type=range]):not([type=checkbox]):not([type=radio]),
+    input:is([type=text],[type=number],[type=url],[type=email],[type=password],[type=search]) {
+        background-color:var(--cwn-surface)!important;
+        color:var(--cwn-ink)!important;
+        border-color:var(--cwn-line)!important;
+        border-radius:8px;
+        font-family:var(--cwn-type-ui-family);
+        box-shadow:none!important;
+        text-shadow:none!important;
+    }
+    :is(input,textarea)::placeholder {color:var(--cwn-muted);opacity:1}
+    :is(input[type=checkbox],input[type=radio],input[type=range]) {accent-color:var(--cwn-accent)}
+    :is(button,.menu_button,input[type=button],input[type=submit]):not(.redWarningBG):not(.redWarning):not(.danger):not(.warning) {
+        background-color:var(--cwn-surface)!important;
+        background-image:none!important;
+        color:var(--cwn-ink)!important;
+        border-color:var(--cwn-line)!important;
+        border-radius:8px;
+        box-shadow:none!important;
+        text-shadow:none!important;
+    }
+    :is(button,.menu_button,input[type=button],input[type=submit]):not([class*="fa-"]) {
+        font-family:var(--cwn-type-ui-family);
+        font-weight:400;
+    }
+    :is(button,.menu_button,input[type=button],input[type=submit]):not(.redWarningBG):not(.redWarning):not(.danger):not(.warning):not(:disabled):not([aria-disabled=true]):hover {
+        background-color:var(--cwn-hover)!important;
+        border-color:var(--cwn-accent)!important;
+    }
+    :is(button,.menu_button)[aria-pressed=true]:not(.redWarningBG):not(.redWarning):not(.danger):not(.warning) {
+        background-color:var(--cwn-accent)!important;
+        color:#fff!important;
+        border-color:var(--cwn-accent)!important;
+    }
+    :is(button,input,select,textarea,.menu_button):focus-visible {
+        outline:2px solid var(--cwn-accent);
+        outline-offset:2px;
+    }
+}
