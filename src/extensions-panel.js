@@ -140,7 +140,7 @@ export function mountExtensionsPanel(doc,win) {
         view.querySelector('[data-ce-notify]').checked=extension_settings.notifyUpdates;
         for(const item of inventory()){
             const third=item.id.startsWith('third-party/'),row=doc.createElement('article');row.className='ce-managed-item';row.dataset.extensionId=item.id;
-            row.innerHTML=`<div class="ce-setting"><div class="ce-grow"><h3></h3><p></p></div><label class="ce-switch"><input type="checkbox" data-ce-enabled><i></i></label></div>${third?`<div class="ce-manage-options"><label class="ce-auto-label">自动更新<span class="ce-switch"><input type="checkbox" data-ce-auto><i></i></span></label>${exButton('update','检查更新','refresh')}</div>`:''}`;
+            row.innerHTML=`<div class="ce-setting"><div class="ce-grow"><h3></h3><p></p></div><label class="ce-switch"><input type="checkbox" data-ce-enabled><i></i></label></div>${third?`<div class="ce-manage-options"><label class="ce-auto-label"><input type="checkbox" data-ce-auto><span>自动更新</span></label>${exButton('update','检查更新','refresh')}</div>`:''}`;
             const label=item.manifest.display_name;row.querySelector('h3').textContent=label;row.querySelector('p').textContent=item.manifest.version?`v${item.manifest.version}`:'';
             const check=row.querySelector('[data-ce-enabled]');check.checked=item.enabled;check.setAttribute('aria-label',`启用 ${label}`);
             if(third){const auto=row.querySelector('[data-ce-auto]');auto.checked=preferences[item.id]?.enabled===true;auto.setAttribute('aria-label',`${label} 自动更新`);if(item.type==='global'&&!isAdmin()){auto.disabled=true;row.querySelector('[data-ce-action="update"]').disabled=true;}}
