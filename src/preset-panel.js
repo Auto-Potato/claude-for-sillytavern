@@ -1,6 +1,8 @@
 import { mountPresetEntryEditor } from './preset-entry-editor.js';
 import { importZoneContent, mountPresetDrop } from './import-zone.js';
 import { createImportDialog } from './import-dialog.js';
+import { eventSource, event_types, saveSettingsDebounced } from '../../../../../script.js';
+import { oai_settings } from '../../../../openai.js';
 
 const paths = {
     back: 'm15 5-7 7 7 7', plus: 'M12 5v14M5 12h14',
@@ -18,6 +20,16 @@ export function mountPresetPanel(doc, win) {
     const panel = doc.getElementById('left-nav-panel');
     const mainApi = doc.getElementById('main_api');
     if (!panel || !mainApi) return () => {};
+    // The host applies a cloned preset after this event. Change that working
+    // copy only; never overwrite the user's saved/imported preset file.
+    const defaultStreamingOff = ({ preset }) => { preset.stream_openai = false; };
+    eventSource.on(event_types.OAI_PRESET_CHANGED_BEFORE, defaultStreamingOff);
+    const streamToggle = doc.getElementById('stream_toggle');
+    if (streamToggle) streamToggle.checked = false;
+    if (oai_settings.stream_openai !== false) {
+        oai_settings.stream_openai = false;
+        saveSettingsDebounced();
+    }
     let unmount;
     let disposed = false;
 
@@ -231,6 +243,7 @@ export function mountPresetPanel(doc, win) {
     sync();
     return () => {
         disposed = true;
+        eventSource.removeListener(event_types.OAI_PRESET_CHANGED_BEFORE, defaultStreamingOff);
         mainApi.removeEventListener('change', onApiChange);
         win.jQuery?.(mainApi).off('change.cwnPresetPanel', onApiChange);
         unmount?.();

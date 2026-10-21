@@ -1,33 +1,33 @@
 /* Shared styling for theme-owned confirmation and editing dialogs only. */
-.cwn-import-dialog-heading {display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:20px}
-.cwn-import-dialog-heading button {display:grid;place-items:center;flex:none;width:32px;height:32px;padding:6px;border:0;border-radius:8px;background:transparent;color:var(--cwn-muted);cursor:pointer}
+.cwn-import-dialog-heading {display:flex;align-items:center;justify-content:space-between;gap:var(--cwn-space-3);margin-bottom:var(--cwn-space-5)}
+.cwn-import-dialog-heading button {display:grid;place-items:center;flex:none;width:32px;height:32px;padding:6px;border:0;border-radius:var(--cwn-radius-sm);background:transparent;color:var(--cwn-muted);cursor:pointer}
 .cwn-import-dialog-heading button:hover {background:var(--cwn-hover)}
 .cwn-import-dialog-heading svg {width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round}
 html.cwn-active body dialog.cwn-import-dialog .cwn-import-dialog-heading h3 {margin:0!important}
 html.cwn-active body dialog.cwn-import-dialog label {display:block;color:var(--cwn-muted)}
-html.cwn-active body dialog.cwn-import-dialog label input {margin-top:8px!important}
+html.cwn-active body dialog.cwn-import-dialog label input {margin-top:var(--cwn-space-2)!important}
 html.cwn-active body dialog.cwn-import-dialog .cwn-import-error {margin-top:10px!important;color:var(--cwn-accent)!important;font-size:13px!important}
 html.cwn-active body dialog.cwn-import-dialog [hidden] {display:none!important}
 html.cwn-active body dialog.cwn-import-dialog [aria-disabled=true] {opacity:.5;cursor:wait}
 html.cwn-active body dialog.cwn-character-dialog,
 html.cwn-active body dialog#cwn-chat-dialog {
- width:min(440px,calc(100vw - 32px))!important;padding:28px!important;border:1px solid var(--cwn-line)!important;border-radius:20px!important;
- background:var(--cwn-bg)!important;color:var(--cwn-ink)!important;box-shadow:0 18px 60px #15130f24!important;
+ width:min(var(--cwn-dialog-width),calc(100vw - 32px))!important;padding:var(--cwn-dialog-padding)!important;border:1px solid var(--cwn-line)!important;border-radius:var(--cwn-radius-dialog)!important;
+ background:var(--cwn-bg)!important;color:var(--cwn-ink)!important;box-shadow:var(--cwn-shadow-dialog)!important;
  text-align:left!important;font:400 15px/1.6 var(--cwn-type-ui-family)!important;
 }
 html.cwn-active body dialog.cwn-character-dialog *,html.cwn-active body dialog#cwn-chat-dialog * {text-shadow:none!important;filter:none!important;box-sizing:border-box;}
 html.cwn-active body dialog.cwn-character-dialog .popup-body,
 html.cwn-active body dialog.cwn-character-dialog .popup-content {padding:0!important;margin:0!important;width:100%!important;text-align:left!important;}
-html.cwn-active body dialog:is(.cwn-character-dialog,#cwn-chat-dialog) :is(h2,h3) {margin:0 0 8px!important;color:var(--cwn-ink)!important;font:500 23px/1.4 var(--cwn-type-title-family)!important;text-align:left!important;}
+html.cwn-active body dialog:is(.cwn-character-dialog,#cwn-chat-dialog) :is(h2,h3) {margin:0 0 var(--cwn-space-2)!important;color:var(--cwn-ink)!important;font:500 23px/1.4 var(--cwn-type-title-family)!important;text-align:left!important;}
 html.cwn-active body dialog:is(.cwn-character-dialog,#cwn-chat-dialog) p {margin:0!important;color:var(--cwn-muted)!important;font:400 14px/1.6 var(--cwn-type-ui-family)!important;text-align:left!important;}
 html.cwn-active body dialog:is(.cwn-character-dialog,#cwn-chat-dialog) p:empty {display:none!important;}
 html.cwn-active body dialog:is(.cwn-character-dialog,#cwn-chat-dialog) label {font:400 14px/1.6 var(--cwn-type-ui-family)!important;color:var(--cwn-ink);}
-html.cwn-active body dialog:is(.cwn-character-dialog,#cwn-chat-dialog) :is(input:not([type=checkbox]),select) {width:100%;min-height:44px;margin-top:16px!important;padding:10px 12px!important;border:1px solid var(--cwn-line)!important;border-radius:9px!important;background:var(--cwn-surface)!important;color:var(--cwn-ink)!important;font:400 15px/1.6 var(--cwn-type-ui-family)!important;}
-html.cwn-active body dialog:is(.cwn-character-dialog,#cwn-chat-dialog) label select {margin-top:8px!important;}
-html.cwn-active body dialog:is(.cwn-character-dialog,#cwn-chat-dialog) .cwn-delete-name {display:block;margin:22px 0 18px!important;padding:14px 16px!important;border:1px solid var(--cwn-line);border-radius:10px;background:var(--cwn-surface);font:400 15px/1.6 var(--cwn-type-ui-family)!important;}
-html.cwn-active body dialog:is(.cwn-character-dialog,#cwn-chat-dialog) :is(.popup-controls,.cwn-dialog-buttons) {display:flex!important;align-self:stretch!important;align-items:center;justify-content:flex-end!important;width:100%!important;gap:10px!important;margin:24px 0 0!important;padding:20px 0 0!important;border-top:1px solid var(--cwn-line);}
-html.cwn-active body dialog:is(.cwn-character-dialog,#cwn-chat-dialog) :is(.popup-button-ok,.popup-button-cancel,.cwn-dialog-buttons button) {display:inline-flex!important;align-items:center;justify-content:center;box-sizing:border-box;min-width:92px!important;height:42px!important;min-height:42px!important;margin:0!important;padding:8px 20px!important;border:1px solid var(--cwn-line)!important;border-radius:9px!important;background:transparent!important;color:var(--cwn-ink)!important;font:400 14px/20px var(--cwn-type-ui-family)!important;box-shadow:none!important;}
-html.cwn-active body dialog:is(.cwn-character-dialog,#cwn-chat-dialog) :is(.popup-button-ok,.cwn-primary):is(.popup-button-ok,.cwn-primary) {order:1;background:var(--cwn-check)!important;color:white!important;border-color:var(--cwn-check)!important;}
+html.cwn-active body dialog:is(.cwn-character-dialog,#cwn-chat-dialog) :is(input:not([type=checkbox]),select) {width:100%;min-height:var(--cwn-touch-size);margin-top:var(--cwn-space-4)!important;padding:10px var(--cwn-space-3)!important;border:1px solid var(--cwn-line)!important;border-radius:var(--cwn-radius-control)!important;background:var(--cwn-surface)!important;color:var(--cwn-ink)!important;font:400 15px/1.6 var(--cwn-type-ui-family)!important;}
+html.cwn-active body dialog:is(.cwn-character-dialog,#cwn-chat-dialog) label select {margin-top:var(--cwn-space-2)!important;}
+html.cwn-active body dialog:is(.cwn-character-dialog,#cwn-chat-dialog) .cwn-delete-name {display:block;margin:22px 0 18px!important;padding:14px var(--cwn-space-4)!important;border:1px solid var(--cwn-line);border-radius:var(--cwn-radius-md);background:var(--cwn-surface);font:400 15px/1.6 var(--cwn-type-ui-family)!important;}
+html.cwn-active body dialog:is(.cwn-character-dialog,#cwn-chat-dialog) :is(.popup-controls,.cwn-dialog-buttons) {display:flex!important;align-self:stretch!important;align-items:center;justify-content:flex-end!important;width:100%!important;gap:10px!important;margin:var(--cwn-space-6) 0 0!important;padding:var(--cwn-space-5) 0 0!important;border-top:1px solid var(--cwn-line);}
+html.cwn-active body dialog:is(.cwn-character-dialog,#cwn-chat-dialog) :is(.popup-button-ok,.popup-button-cancel,.cwn-dialog-buttons button) {display:inline-flex!important;align-items:center;justify-content:center;box-sizing:border-box;min-width:var(--cwn-dialog-action-width)!important;height:var(--cwn-control-height)!important;min-height:var(--cwn-control-height)!important;margin:0!important;padding:var(--cwn-dialog-action-padding)!important;border:1px solid var(--cwn-line)!important;border-radius:var(--cwn-radius-control)!important;background:transparent!important;color:var(--cwn-ink)!important;font:400 14px/20px var(--cwn-type-ui-family)!important;box-shadow:none!important;}
+html.cwn-active body dialog:is(.cwn-character-dialog,#cwn-chat-dialog) :is(.popup-button-ok,.cwn-primary):is(.popup-button-ok,.cwn-primary) {order:1;background:var(--cwn-check)!important;color:var(--cwn-on-accent)!important;border-color:var(--cwn-check)!important;}
 html.cwn-active body dialog:is(.cwn-character-dialog,#cwn-chat-dialog) .popup-button-cancel {order:0;}
-html.cwn-active body dialog:is(.cwn-character-dialog,#cwn-chat-dialog) .cwn-danger.cwn-danger {order:1;background:#a8443c!important;color:white!important;border-color:#a8443c!important;}
-@media(max-width:700px){html.cwn-active body dialog.cwn-character-dialog,html.cwn-active body dialog#cwn-chat-dialog{padding:24px 20px!important;border-radius:18px!important;}html.cwn-active body dialog:is(.cwn-character-dialog,#cwn-chat-dialog) :is(h2,h3){font-size:22px!important;}html.cwn-active body dialog:is(.cwn-character-dialog,#cwn-chat-dialog) :is(.popup-button-ok,.popup-button-cancel,.cwn-dialog-buttons button){flex:1!important;min-width:0!important;}}
+html.cwn-active body dialog:is(.cwn-character-dialog,#cwn-chat-dialog) .cwn-danger.cwn-danger {order:1;background:var(--cwn-danger-bg)!important;color:var(--cwn-on-accent)!important;border-color:var(--cwn-danger-bg)!important;}
+@media(max-width:700px){html.cwn-active body dialog.cwn-character-dialog,html.cwn-active body dialog#cwn-chat-dialog{padding:var(--cwn-dialog-padding-mobile)!important;border-radius:var(--cwn-radius-dialog-mobile)!important;}html.cwn-active body dialog:is(.cwn-character-dialog,#cwn-chat-dialog) :is(h2,h3){font-size:22px!important;}html.cwn-active body dialog:is(.cwn-character-dialog,#cwn-chat-dialog) :is(.popup-button-ok,.popup-button-cancel,.cwn-dialog-buttons button){flex:1!important;min-width:0!important;}}

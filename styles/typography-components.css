@@ -1,0 +1,93 @@
+/* Final text-role bindings for theme-owned UI. Keep this after component CSS.
+   Only font properties belong here: no palette, spacing or geometry changes.
+   Never target icon-font glyphs, chat prose or imported character frontends. */
+html.cwn-active body {
+  :is(#cwn-character-library,#cwn-worldbook-library,#cwn-preset-panel,#cwn-extensions-panel) {
+    font:var(--cwn-font-body)!important;
+  }
+
+  :is(#cwn-character-library,#cwn-worldbook-library,#cwn-preset-panel,#cwn-extensions-panel) h1,
+  .cwn-type-title {
+    font:var(--cwn-font-title)!important;
+  }
+  :is(#cwn-character-library,#cwn-worldbook-library,#cwn-preset-panel,#cwn-extensions-panel) h2,
+  .cwn-type-section,
+  #cwn-extensions-panel .ce-label,
+  #cwn-extensions-panel #tavern_helper .TH-fieldset>legend,
+  #cwn-preset-panel .cp-inline-editor h3 {
+    font:var(--cwn-font-section)!important;
+  }
+
+  .cwn-type-item,
+  #cwn-character-library :is(.library-card>span,.detail-world strong,.library-sort-option strong),
+  #cwn-worldbook-library :is(.book-title,.entry-open strong),
+  #cwn-extensions-panel :is(.ce-theme h3,.ce-setting h3,.ce-item-title,.ce-fold strong,.ce-generic-extension h3) {
+    font:var(--cwn-font-item)!important;
+  }
+  #cwn-preset-panel .completion_prompt_manager_prompt_name,
+  #cwn-extensions-panel .regex_script_name {
+    font:var(--cwn-font-body)!important;
+  }
+
+  #cwn-character-library :is(.library-search,.detail-world select),
+  #cwn-worldbook-library :is(.search,.field input,.field select),
+  #cwn-preset-panel :is(#settings_preset_openai,.cp-fields input:not([type=checkbox]):not([type=range]),.cp-fields select,.cp-fields textarea),
+  #cwn-extensions-panel .ce-search {
+    font:var(--cwn-font-body)!important;
+  }
+  #cwn-preset-panel #completion_prompt_manager_popup :is(input:not([type=checkbox]),select,textarea,.select2-selection) {
+    font:var(--cwn-font-body)!important;
+  }
+  #cwn-preset-panel #completion_prompt_manager_popup label {
+    font:var(--cwn-font-guide)!important;
+  }
+  #cwn-character-library :is(.library-editor,.detail-text),
+  #cwn-worldbook-library .field textarea {
+    font:var(--cwn-font-prose)!important;
+  }
+
+  #cwn-character-library :is(.library-chat,.library-import,.library-footer>button,.library-edit .edit-confirm,.detail-link,.library-sort-trigger),
+  #cwn-worldbook-library :is(.quiet,.solid,.outline,.lights button,.book-more-menu button),
+  #cwn-preset-panel .cp-button,
+  #cwn-extensions-panel :is(.ce-button,.ce-auto-label),
+  dialog:is(.cwn-character-dialog,#cwn-chat-dialog,.cwn-resource-dialog) :is(.popup-button-ok,.popup-button-cancel,.cwn-dialog-buttons button) {
+    font:var(--cwn-font-button)!important;
+  }
+
+  #cwn-worldbook-library :is(.field>span,.entry-state label,.enable-book,.mode),
+  #cwn-preset-panel :is(.cp-current>label,.range-block-title,.cp-subsection>summary),
+  .cwn-import-zone .cwn-import-heading {
+    font:var(--cwn-font-guide)!important;
+  }
+  #cwn-character-library :is(.library-muted,.detail-world small,.library-sort-option small),
+  #cwn-worldbook-library :is(.summary,.book-meta,.entry-open small,.muted,.keyword-field small),
+  #cwn-preset-panel :is(.cp-guide,.cp-append-label,.toggle-description,.range-block-title small),
+  #cwn-extensions-panel :is(.ce-guide,.ce-theme p,.ce-setting p,.ce-feature small,.ce-fold small),
+  .cwn-import-zone .cwn-import-hint {
+    font:var(--cwn-font-caption)!important;
+  }
+  #cwn-preset-panel #completion_prompt_manager_popup .text_muted,
+  #cwn-preset-panel .completion_prompt_manager_header,
+  #cwn-extensions-panel .ce-empty {
+    font:var(--cwn-font-caption)!important;
+  }
+  /* Native preset actions use icon fonts on the element. Style only the
+     generated text label, leaving ::before glyphs and their font intact. */
+  #cwn-preset-panel .completion_prompt_manager_footer a::after,
+  #cwn-preset-panel .completion_prompt_manager_popup_entry_form_footer .menu_button::after {
+    font:var(--cwn-font-button)!important;
+  }
+  #cwn-extensions-panel :is(.ce-move-choice,.ce-move-picker>p) {
+    font:var(--cwn-font-guide)!important;
+  }
+
+  dialog:is(.cwn-character-dialog,#cwn-chat-dialog,.cwn-resource-dialog) :is(h2,h3) {
+    font:var(--cwn-font-dialog)!important;
+  }
+  dialog:is(.cwn-character-dialog,#cwn-chat-dialog,.cwn-resource-dialog) :is(p,label,.cwn-resource-bind) {
+    font:var(--cwn-font-guide)!important;
+  }
+  dialog:is(.cwn-character-dialog,#cwn-chat-dialog,.cwn-resource-dialog) :is(input:not([type=checkbox]),select,.cwn-delete-name,.cwn-resource-card) {
+    font:var(--cwn-font-body)!important;
+  }
+}

@@ -30,7 +30,7 @@ export function mountExtensionsPanel(doc,win) {
       <section class="ce-home"><header class="ce-heading"><h1>扩展</h1><div>${exButton('install','安装','plus','ce-outline')}${exButton('manage','管理','settings')}</div></header>
       <div class="ce-theme"><svg class="ce-crab" viewBox="0 0 32 32" aria-hidden="true"><path d="M7 8h18v4h4v5h-4v7h-3v-5h-4v5h-4v-5h-4v5H7v-7H3v-5h4z"/><path class="ce-crab-eyes" d="M11 10h3v3h-3zm8 0h3v3h-3z"/></svg><div class="ce-grow"><h3>Claude for SillyTavern</h3><p>界面主题</p></div><label class="ce-switch ce-theme-switch"><span class="ce-sr">启用 Claude for SillyTavern</span></label></div>
       <p class="ce-label">常用扩展</p><div class="ce-common"></div><section class="ce-section"><h2>其他扩展</h2><div class="ce-others"></div></section>
-      <details class="ce-compat"><summary>兼容设置</summary><div class="ce-compat-slot"></div></details></section>
+      </section>
       <section class="ce-detail" hidden><header class="ce-heading"><h1></h1><div class="ce-detail-actions"></div></header><div class="ce-detail-slot"></div></section>
       <section class="ce-management" hidden></section><div class="ce-parking" hidden></div></div>`;
     panel.append(root);panel.classList.add('cwn-extensions-mounted');
@@ -38,11 +38,8 @@ export function mountExtensionsPanel(doc,win) {
     const move=(node,target)=>{if(!node)return;const marker=doc.createComment('cwn-extension-home');node.before(marker);target.append(node);restores.push(()=>marker.replaceWith(node));};
     const enabled=doc.getElementById('cwn-enabled');move(enabled,root.querySelector('.ce-theme-switch'));
     root.querySelector('.ce-theme-switch').insertAdjacentHTML('beforeend','<i aria-hidden="true"></i>');
-    const nativeBlock=panel.querySelector('.extensions_block');
-    const extras=doc.createElement('div');extras.className='ce-extras';
-    root.querySelector('.ce-compat-slot').append(extras);
-    // Only the native Extras footer, never the two extension containers.
-    for(const node of [...nativeBlock.children]) if(node!==nativeBlock.firstElementChild&&!sources.includes(node)&&node.tagName!=='HR')move(node,extras);
+    // Deprecated Extras API controls stay in the hidden native panel.
+    // Keep native nodes intact so disabling the theme restores the host UI.
     function discover(){
         if(disposed)return;
         for(const source of sources)for(const node of [...source.children]){

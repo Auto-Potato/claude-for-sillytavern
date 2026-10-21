@@ -1,0 +1,97 @@
+/* Shared geometry for adapted panels. Keep native extension layouts and chat untouched. */
+html.cwn-active body {
+  #cwn-character-library .cwn-library-page {
+    padding-inline:var(--cwn-panel-padding);
+  }
+  #cwn-worldbook-library .wb-scroll,
+  #left-nav-panel #cwn-preset-panel .cp-scroll,
+  #rm_extensions_block #cwn-extensions-panel .ce-scroll {
+    padding-inline:var(--cwn-panel-padding);
+    padding-bottom:var(--cwn-space-8);
+  }
+  #cwn-character-library .library-heading,
+  #cwn-worldbook-library .heading,
+  #cwn-preset-panel .cp-heading,
+  #cwn-extensions-panel .ce-heading {
+    gap:var(--cwn-space-3);
+    margin-bottom:var(--cwn-space-6);
+  }
+  #cwn-character-library .detail-section,
+  #left-nav-panel #cwn-preset-panel .cp-section {
+    padding-block:var(--cwn-space-6);
+  }
+  #cwn-character-library .library-grid,
+  #cwn-worldbook-library .book-grid {
+    gap:var(--cwn-space-6) var(--cwn-space-4);
+  }
+  #cwn-preset-panel .cp-fields {
+    gap:var(--cwn-space-6) var(--cwn-space-4);
+  }
+  #cwn-preset-panel .cp-heading-actions,
+  #cwn-preset-panel .cp-select-row {
+    gap:var(--cwn-space-3);
+  }
+  #cwn-preset-panel .cp-guide {margin:var(--cwn-space-2) 0 var(--cwn-space-4)}
+  #cwn-preset-panel .range-block-title {margin-bottom:var(--cwn-space-2)}
+  #left-nav-panel #cwn-preset-panel #completion_prompt_manager_list .completion_prompt_manager_prompt {
+    padding-inline:var(--cwn-space-3);
+  }
+  #left-nav-panel #cwn-preset-panel #completion_prompt_manager .prompt_manager_prompt_controls>span {
+    width:var(--cwn-touch-size);
+    height:var(--cwn-touch-size);
+    align-items:center;
+    justify-content:center;
+  }
+
+  #cwn-character-library :is(.library-chat,.library-import,.library-sort-trigger),
+  #cwn-worldbook-library :is(.quiet,.solid,.outline),
+  #cwn-preset-panel .cp-button,
+  #cwn-extensions-panel .ce-button {
+    box-sizing:border-box;
+    min-height:var(--cwn-control-height);
+    padding:var(--cwn-button-padding);
+    border-radius:var(--cwn-radius-control);
+    gap:var(--cwn-button-gap);
+  }
+  #cwn-character-library .library-search,
+  #cwn-worldbook-library .search,
+  #cwn-worldbook-library .field :is(input:not([type=checkbox]),select),
+  #left-nav-panel #cwn-preset-panel :is(input:not([type=range]):not([type=checkbox]):not([type=radio]),select) {
+    box-sizing:border-box;
+    min-height:var(--cwn-control-height);
+    padding:var(--cwn-input-padding);
+    border-radius:var(--cwn-radius-control);
+  }
+  #left-nav-panel #cwn-preset-panel #settings_preset_openai {
+    min-height:var(--cwn-control-height);
+    height:var(--cwn-control-height);
+    padding-right:var(--cwn-space-8);
+  }
+  #cwn-character-library .detail-resources,
+  #cwn-worldbook-library .row-actions button,
+  #cwn-preset-panel .cp-icon,
+  #cwn-extensions-panel .ce-icon {
+    flex-shrink:0;
+    width:var(--cwn-touch-size);
+    min-width:var(--cwn-touch-size);
+    height:var(--cwn-touch-size);
+    padding:var(--cwn-space-3);
+  }
+  #cwn-character-library .detail-resources {flex-basis:var(--cwn-touch-size)}
+}
+
+@media(max-width:700px) {
+  html.cwn-active {--cwn-panel-padding:var(--cwn-space-5)}
+  html.cwn-active body #cwn-character-library .cwn-library-page {padding-top:var(--cwn-space-5)}
+  /* Sticky navigation offsets must match the page padding exactly. */
+  html.cwn-active body #cwn-character-library .cwn-library-nav {
+    top:calc(-1 * var(--cwn-panel-padding));
+    margin:calc(-1 * var(--cwn-panel-padding)) calc(-1 * var(--cwn-panel-padding)) var(--cwn-space-4);
+    padding:var(--cwn-space-2) var(--cwn-space-2);
+  }
+  html.cwn-active body #cwn-worldbook-library .wb-library-nav+.wb-scroll {padding-top:var(--cwn-space-2)}
+  html.cwn-active body #cwn-preset-panel .prompt_manager_prompt_controls>span {
+    width:var(--cwn-touch-size);
+    height:var(--cwn-touch-size);
+  }
+}

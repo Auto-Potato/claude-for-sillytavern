@@ -1,14 +1,14 @@
 html.cwn-active body button.cwn-import-zone {
-  display:block;width:100%;box-sizing:border-box;height:96px;min-height:96px;
-  margin:0 0 20px;padding:20px;border:1px dashed var(--cwn-line);
-  border-radius:14px;background:var(--cwn-bg);color:var(--cwn-muted)!important;
+  display:block;width:100%;box-sizing:border-box;height:var(--cwn-import-height);min-height:var(--cwn-import-height);
+  margin:0 0 var(--cwn-space-5);padding:var(--cwn-space-5);border:1px dashed var(--cwn-line);
+  border-radius:var(--cwn-import-radius);background:var(--cwn-bg);color:var(--cwn-muted)!important;
   font:400 14px/1.5 var(--cwn-type-ui-family);text-align:center;cursor:pointer;transition:background .15s,border-color .15s;
 }
 html.cwn-active body button.cwn-import-zone:is(:hover,.cwn-drag-over) {
   border-color:var(--cwn-accent);background:var(--cwn-surface);color:var(--cwn-ink)!important;
 }
 html.cwn-active body button.cwn-import-zone:disabled {opacity:.6;cursor:wait;}
-.cwn-import-zone .cwn-import-heading {display:flex;justify-content:center;align-items:center;gap:8px;}
+.cwn-import-zone .cwn-import-heading {display:flex;justify-content:center;align-items:center;gap:var(--cwn-space-2);}
 .cwn-import-zone .cwn-import-symbol {display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;color:var(--cwn-accent);transition:transform 150ms ease;font-size:20px;line-height:1;}
 .cwn-import-zone .cwn-import-hint {display:block;margin-top:5px;font:400 12px/1.5 var(--cwn-type-ui-family);color:var(--cwn-muted);}
 .cwn-import-zone .cwn-import-active {display:none;}
@@ -27,7 +27,7 @@ html.cwn-design .cwn-import-zone.cwn-drag-over {
 @media(max-width:700px) {
   html.cwn-active body button.cwn-import-zone {display:none;}
 }
-.cwn-bind-world-option {display:flex;align-items:center;justify-content:center;gap:8px;margin-top:18px;padding:12px;border-radius:10px;background:var(--cwn-bg);color:var(--cwn-ink);cursor:pointer;}
+.cwn-bind-world-option {display:flex;align-items:center;justify-content:center;gap:var(--cwn-space-2);margin-top:18px;padding:var(--cwn-space-3);border-radius:var(--cwn-radius-md);background:var(--cwn-bg);color:var(--cwn-ink);cursor:pointer;}
 .cwn-bind-world-option input {width:16px;height:16px;margin:0;accent-color:var(--cwn-accent,#c76b48);flex:none;}
 
 html.cwn-active body button.cwn-import-zone svg {width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;}

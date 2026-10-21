@@ -1,0 +1,51 @@
+/* Shared component contract. Typography: typography.css; palettes: palette.css.
+   Theme-owned controls only; host layouts keep their own dimensions. */
+html:is(.cwn-active,.cwn-design) {
+  --cwn-space-1:4px;
+  --cwn-space-2:8px;
+  --cwn-space-3:12px;
+  --cwn-space-4:16px;
+  --cwn-space-5:20px;
+  --cwn-space-6:24px;
+  --cwn-space-7:28px;
+  --cwn-space-8:32px;
+  --cwn-radius-sm:8px;
+  --cwn-radius-control:10px;
+  --cwn-radius-md:10px;
+  --cwn-radius-lg:12px;
+  --cwn-radius-switch:20px;
+  --cwn-radius-dialog:20px;
+  --cwn-radius-dialog-mobile:18px;
+  --cwn-control-height:44px;
+  --cwn-control-height-compact:44px;
+  --cwn-touch-size:44px;
+  --cwn-button-padding:10px 16px;
+  --cwn-button-gap:var(--cwn-space-2);
+  --cwn-input-padding:10px 12px;
+  --cwn-panel-padding:var(--cwn-space-7);
+  --cwn-section-gap:var(--cwn-space-8);
+  --cwn-dialog-padding:var(--cwn-space-7);
+  --cwn-dialog-padding-mobile:var(--cwn-space-6) var(--cwn-space-5);
+  --cwn-dialog-width:440px;
+  --cwn-dialog-action-width:92px;
+  --cwn-dialog-action-padding:var(--cwn-space-2) var(--cwn-space-5);
+  --cwn-import-height:96px;
+  --cwn-import-radius:14px;
+  --cwn-opacity-disabled:.45;
+  --cwn-shadow-menu:0 8px 28px #302e2725;
+  --cwn-shadow-dialog:0 18px 60px #15130f24;
+  --cwn-on-accent:#fff;
+  --cwn-action-bg:var(--cwn-accent);
+  --cwn-action-hover:color-mix(in srgb,var(--cwn-accent) 90%,black);
+  --cwn-confirm-bg:var(--cwn-check);
+  --cwn-danger:#b96150;
+  --cwn-danger-icon:#b65b49;
+  --cwn-danger-worldbook:#ab6256;
+  --cwn-danger-bg:#a8443c;
+  --cwn-check:#ae4d2c;
+  --cwn-check-border:#918874;
+}
+html:is(.cwn-active,.cwn-design)[data-cwn-theme="dark"] {
+  --cwn-check:#b65534;
+  --cwn-check-border:#a8a192;
+}

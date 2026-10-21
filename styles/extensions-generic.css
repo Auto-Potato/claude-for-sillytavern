@@ -35,7 +35,7 @@ html.cwn-active #rm_extensions_block #cwn-extensions-panel .ce-generic-extension
         background-color:var(--cwn-surface)!important;
         color:var(--cwn-ink)!important;
         border-color:var(--cwn-line)!important;
-        border-radius:8px;
+        border-radius:var(--cwn-radius-sm);
         font-family:var(--cwn-type-ui-family);
         box-shadow:none!important;
         text-shadow:none!important;
@@ -47,7 +47,7 @@ html.cwn-active #rm_extensions_block #cwn-extensions-panel .ce-generic-extension
         background-image:none!important;
         color:var(--cwn-ink)!important;
         border-color:var(--cwn-line)!important;
-        border-radius:8px;
+        border-radius:var(--cwn-radius-sm);
         box-shadow:none!important;
         text-shadow:none!important;
     }
@@ -61,7 +61,7 @@ html.cwn-active #rm_extensions_block #cwn-extensions-panel .ce-generic-extension
     }
     :is(button,.menu_button)[aria-pressed=true]:not(.redWarningBG):not(.redWarning):not(.danger):not(.warning) {
         background-color:var(--cwn-accent)!important;
-        color:#fff!important;
+        color:var(--cwn-on-accent)!important;
         border-color:var(--cwn-accent)!important;
     }
     :is(button,input,select,textarea,.menu_button):focus-visible {

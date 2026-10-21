@@ -23,6 +23,22 @@ html:is(.cwn-active,.cwn-design) {
   --cwn-type-caption-size:12px;
   --cwn-type-caption-weight:400;
   --cwn-type-caption-line:1.5;
+  --cwn-type-button-size:14px;
+  --cwn-type-button-weight:400;
+  --cwn-type-button-line:1.4;
+  --cwn-type-dialog-size:22px;
+  --cwn-type-dialog-weight:500;
+  --cwn-type-dialog-line:1.4;
+  --cwn-type-prose-line:1.8;
+  --cwn-font-title:var(--cwn-type-title-weight) var(--cwn-type-title-size)/var(--cwn-type-title-line) var(--cwn-type-title-family);
+  --cwn-font-section:var(--cwn-type-section-weight) var(--cwn-type-section-size)/var(--cwn-type-section-line) var(--cwn-type-section-family);
+  --cwn-font-item:var(--cwn-type-item-weight) var(--cwn-type-item-size)/var(--cwn-type-item-line) var(--cwn-type-ui-family);
+  --cwn-font-body:var(--cwn-type-body-weight) var(--cwn-type-body-size)/var(--cwn-type-body-line) var(--cwn-type-ui-family);
+  --cwn-font-guide:var(--cwn-type-guide-weight) var(--cwn-type-guide-size)/var(--cwn-type-guide-line) var(--cwn-type-ui-family);
+  --cwn-font-caption:var(--cwn-type-caption-weight) var(--cwn-type-caption-size)/var(--cwn-type-caption-line) var(--cwn-type-ui-family);
+  --cwn-font-button:var(--cwn-type-button-weight) var(--cwn-type-button-size)/var(--cwn-type-button-line) var(--cwn-type-ui-family);
+  --cwn-font-dialog:var(--cwn-type-dialog-weight) var(--cwn-type-dialog-size)/var(--cwn-type-dialog-line) var(--cwn-type-title-family);
+  --cwn-font-prose:var(--cwn-type-body-weight) var(--cwn-type-body-size)/var(--cwn-type-prose-line) var(--cwn-type-ui-family);
 }
 :is(.cwn-active,.cwn-design) .cwn-type-title {font:var(--cwn-type-title-weight) var(--cwn-type-title-size)/var(--cwn-type-title-line) var(--cwn-type-title-family);}
 :is(.cwn-active,.cwn-design) .cwn-type-section {font:var(--cwn-type-section-weight) var(--cwn-type-section-size)/var(--cwn-type-section-line) var(--cwn-type-section-family);}
