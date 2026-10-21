@@ -1,12 +1,15 @@
 import { mountScriptPanel } from './script-panel.js';
 import { mountCharacterPicker } from './character-picker.js';
 import { createComposerNotice } from './composer-notice.js';
+import { mountComposerMenuDismiss } from './composer-menu-dismiss.js';
 // Keep sending, attachments and generation controls owned by SillyTavern.
 export function mountComposer(doc, host) {
   const row = doc.getElementById('nonQRFormItems');
   if (!row) return () => {};
   const form = doc.getElementById('send_form') || row;
   const abort = new doc.defaultView.AbortController();
+  const disposeMenus=mountComposerMenuDismiss(doc,doc.defaultView);
+  abort.signal.addEventListener('abort',disposeMenus,{once:true});
   const disposeScripts=mountScriptPanel(doc,doc.defaultView);
   const controls = doc.createElement('div');
   controls.id = 'cwn-composer-context';

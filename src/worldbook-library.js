@@ -18,6 +18,8 @@ export function mountWorldbookLibrary(doc,win) {
   const pane=doc.createElement('div');pane.id='cwn-worldbook-library';drawer.append(pane);drawer.classList.add('cwn-worldbook-mounted');
   const abort=new win.AbortController(),signal=abort.signal;
   let screen='library',name='',book=null,uid=null,baseline=null,busy=false,disposed=false,query='',editing=false;
+  const pagePositions=new Map();
+  let renderedPage=null;
   const checkedSources=new Set();
   const request=(url,body)=>fetch(url,{method:'POST',headers:st.getRequestHeaders(),body:JSON.stringify(body)});
   const data=createWorldbookData({request,changed:async(n,saved)=>{wi.worldInfoCache.set(n,saved);await st.eventSource.emit(st.event_types.WORLDINFO_UPDATED,n,saved);await wi.reloadEditor(n);}});
@@ -51,6 +53,15 @@ export function mountWorldbookLibrary(doc,win) {
   async function ensureExists(n){await wi.updateWorldInfoList();if(!wi.world_names.includes(n))throw new Error('这本世界书已不存在，请返回列表刷新');}
   function render(){
     if(disposed)return;
+    // Read the outgoing DOM, not the already-changed route/query variables.
+    const previousBody=pane.querySelector('.wb-scroll');
+    if(previousBody&&renderedPage!==null){
+      pagePositions.set(renderedPage,{top:previousBody.scrollTop,query:previousBody.querySelector('[data-search]')?.value??''});
+    }
+    const pageKey=JSON.stringify([screen,screen==='library'?'':name,screen==='entry'?uid:null]);
+    const position=pagePositions.get(pageKey);
+    if(pageKey!==renderedPage&&screen!=='entry')query=position?.query??'';
+    renderedPage=pageKey;
     pane.dataset.depth=String(screen==='entry'?2:screen==='book'?1:0);pane.classList.toggle('phone',win.innerWidth<=700);
     if(screen==='library'&&pane.querySelector('.book-grid')){drawBooks();void discoverCovers();return;}
     pane.innerHTML=`<div class="wb-nav ${screen==='library'?'wb-library-nav':''}">${iconButton('back',screen==='library'?'返回导航':'返回上一页',icons.back)}</div><div class="wb-scroll"></div>`;
@@ -68,6 +79,7 @@ export function mountWorldbookLibrary(doc,win) {
       body.innerHTML=`<div class="entry-heading"><p class="muted">${esc(name)}</p><h1 class="cwn-type-title">${esc(e.comment||'未命名条目')}</h1></div><div class="entry-state"><div class="lights" role="group" aria-label="触发方式">${['blue','green',...(e.vectorized?['vector']:[])].map(mode=>`<button type="button" data-light="${mode}" aria-pressed="${(e.vectorized?'vector':e.constant?'blue':'green')===mode}"><span class="dot ${mode==='green'?'green':''}"></span>${mode==='blue'?'常驻':mode==='green'?'条件':'向量'}</button>`).join('')}</div><label>启用<input class="toggle" type="checkbox" data-field="disable" aria-label="启用此条目" ${!e.disable?'checked':''}></label></div><label class="field"><span>条目名称</span><input data-field="comment" aria-label="条目名称" value="${esc(e.comment)}"></label><label class="field keyword-field" ${e.constant||e.vectorized?'hidden':''}><span>主要关键字</span><input data-field="key" aria-label="主要关键字" value="${esc((e.key||[]).join(', '))}"><small>多个关键字用逗号分隔</small></label><label class="field"><span>插入位置</span><select data-field="position" aria-label="插入位置">${positions.map(([v,t])=>`<option value="${v}" ${v===position?'selected':''}>${t}</option>`).join('')}</select></label><div class="parameters">${[['depth','深度',e.depth??4],['order','顺序',e.order??100],['probability','概率',e.probability??100]].map(([key,label,value])=>`<label class="field"><span>${label}${key==='probability'?' %':''}</span><input type="number" step="1" ${key==='probability'?'min="0" max="100"':key==='depth'?'min="0"':''} data-field="${key}" aria-label="${label}" value="${value}"></label>`).join('')}</div><label class="field"><span>内容</span><textarea data-field="content" aria-label="条目内容">${esc(e.content)}</textarea></label><div class="entry-actions">${button('transfer','移动 / 复制到…','quiet',icons.move)}${button('copy-entry','复制条目','quiet',icons.copy)}${button('delete-entry','删除条目','quiet danger',icons.trash)}</div><div class="save-row">${button('reset','取消','outline')}${button('save','保存修改','solid')}</div>`;
       body.dataset.light=e.vectorized?'vector':e.constant?'blue':'green';
     }
+    body.scrollTop=position?.top??0;
   }
   const bookMarkup=new WeakMap();
   function drawBooks(){
