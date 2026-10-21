@@ -59,3 +59,6 @@ html.cwn-active #rm_extensions_block #cwn-extensions-panel dialog.ce-inline-rege
  .popup-body,.popup-content{max-height:none!important;overflow:visible!important;padding:0!important}.popup-controls{margin-top:var(--cwn-space-4);justify-content:flex-end}.popup-content{text-align:left}.regex_editor>h3,.regex_editor>.extensions_info{display:none}.regex_editor hr{border-color:var(--cwn-line)}.regex_editor .flex-container{min-width:0}.popup-button-ok{background:var(--cwn-action-bg)!important;color:var(--cwn-on-accent)!important}.popup-button-cancel{background:transparent!important;color:var(--cwn-ink)!important}.regex_editor small{font-family:var(--cwn-type-ui-family);font-size:13px}.popup-content textarea{width:100%;min-height:100px;resize:vertical}.popup-button-close{display:none}
 }
 #rm_extensions_block #cwn-extensions-panel #tavern_helper .TH-fieldset>legend{font-size:18px!important;font-weight:500!important;line-height:1.5!important;color:var(--cwn-ink)!important}
+
+html.cwn-active body #cwn-extensions-panel .ce-manage-options {flex-wrap:wrap}
+html.cwn-active body #cwn-extensions-panel .ce-update-status {margin-right:auto;color:var(--cwn-muted);font:var(--cwn-font-caption);}

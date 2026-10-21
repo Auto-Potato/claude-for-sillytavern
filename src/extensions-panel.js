@@ -1,7 +1,7 @@
 import { extensionNames, extensionTypes, getExtensionManifest, extension_settings, enableExtension, disableExtension } from '../../../../extensions.js';
 import { getRequestHeaders, saveSettingsDebounced, isGenerating, isChatSaving, saveChatConditional, getCurrentChatId, chat } from '../../../../../script.js';
 import { isAdmin, getCurrentUserHandle } from '../../../../user.js';
-import { Popup } from '../../../../popup.js';
+import { Popup, POPUP_TYPE } from '../../../../popup.js';
 import { mountRegexPanel } from './regex-panel.js';
 import { eligibleUpdates, createExtensionUpdater } from './extension-updates.js';
 import { createExtensionRefresh } from './extension-refresh.js';
@@ -24,6 +24,14 @@ export function mountExtensionsPanel(doc,win) {
     const sources=['extensions_settings','extensions_settings2'].map(id=>doc.getElementById(id));
     if(!panel || sources.some(node=>!node)) return ()=>{};
     const abort=new win.AbortController(),restores=[],entries=new Map();
+    const versionChecks=new Map();
+    function confirmAction(title,message,okButton='确定'){
+        const content=doc.createElement('div'),heading=doc.createElement('h3'),description=doc.createElement('p');
+        heading.textContent=title;description.textContent=message;content.append(heading,description);
+        const popup=new Popup(content,POPUP_TYPE.CONFIRM,'',{okButton,cancelButton:'取消'});
+        popup.dlg.classList.add('cwn-character-dialog');
+        return popup.show();
+    }
     let disposed=false,current='home',regexDispose=()=>{},busy=false;
     const root=doc.createElement('div');root.id='cwn-extensions-panel';root.dataset.depth='0';
     root.innerHTML=`<nav class="ce-nav">${exButton('back','返回侧边栏','back','ce-icon')}</nav><div class="ce-scroll">
@@ -128,6 +136,37 @@ export function mountExtensionsPanel(doc,win) {
         if(item.type==='global'&&!isAdmin())throw new Error('当前账号不能更新全局安装的扩展。');
         const data=await updater(item);if(!quiet&&!disposed&&data.isUpToDate)win.toastr.success('已是最新版本');return data;
     }
+    function checkVersion(item){
+        if(versionChecks.has(item.id))return versionChecks.get(item.id);
+        const task=(async()=>{
+            const response=await originalFetch.call(win,'/api/extensions/version',{
+                method:'POST',headers:getRequestHeaders(),
+                body:JSON.stringify({extensionName:item.id.replace(/^third-party\//,''),global:item.type==='global'}),
+                signal:win.AbortSignal.any([abort.signal,win.AbortSignal.timeout(60000)]),
+            });
+            if(!response.ok)throw new Error('检查失败');
+            const data=await response.json();
+            if(typeof data.isUpToDate!=='boolean')throw new Error('检查失败');
+            return data;
+        })().finally(()=>versionChecks.delete(item.id));
+        versionChecks.set(item.id,task);return task;
+    }
+    async function checkRow(item,row){
+        const status=row.querySelector('.ce-update-status'),button=row.querySelector('[data-ce-action="update"],[data-ce-action="check-update"]');
+        if(!status||!button)return;
+        status.textContent='正在检查…';button.hidden=true;
+        try{
+            const data=await checkVersion(item);
+            if(disposed||!row.isConnected)return;
+            const available=!data.isUpToDate;
+            status.textContent=!data.currentCommitHash?'本地安装，无法检查更新':available?'有可用更新':'已是最新版本';
+            button.dataset.ceAction='update';button.querySelector('span').textContent='更新';button.setAttribute('aria-label','更新');button.title='更新';
+            button.hidden=!available;button.disabled=item.type==='global'&&!isAdmin();
+        }catch{
+            if(disposed||!row.isConnected)return;
+            status.textContent='检查失败';button.dataset.ceAction='check-update';button.querySelector('span').textContent='重试';button.setAttribute('aria-label','重试检查更新');button.title='重试检查更新';button.disabled=false;button.hidden=false;
+        }
+    }
     function renderManagement(){
         const view=root.querySelector('.ce-management');view.innerHTML=`<header class="ce-heading"><h1>管理扩展</h1>${exButton('install','安装','plus','ce-outline')}</header>
         <div class="ce-setting"><div class="ce-grow"><h3>更新通知</h3><p>发现扩展更新时提醒。</p></div><label class="ce-switch"><input type="checkbox" data-ce-notify aria-label="更新通知"><i></i></label></div>
@@ -142,6 +181,11 @@ export function mountExtensionsPanel(doc,win) {
             const check=row.querySelector('[data-ce-enabled]');check.checked=item.enabled;check.setAttribute('aria-label',`启用 ${label}`);
             if(third){const auto=row.querySelector('[data-ce-auto]');auto.checked=preferences[item.id]?.enabled===true;auto.setAttribute('aria-label',`${label} 自动更新`);if(item.type==='global'&&!isAdmin()){auto.disabled=true;row.querySelector('[data-ce-action="update"]').disabled=true;}}
             view.querySelector(third?'.ce-installed':'.ce-builtin').append(row);
+            if(third){
+                const status=doc.createElement('span');status.className='ce-update-status';status.setAttribute('role','status');
+                row.querySelector('.ce-manage-options').prepend(status);
+                void checkRow(item,row);
+            }
         }
     }
     root.addEventListener('change',async event=>{
@@ -150,7 +194,7 @@ export function mountExtensionsPanel(doc,win) {
         if(input.matches('[data-ce-auto]')&&item){preferences[item.id]={...preferences[item.id],enabled:input.checked};saveSettingsDebounced();}
         if(input.matches('[data-ce-enabled]')&&item){
             const requested=input.checked;input.checked=item.enabled;input.disabled=true;
-            try{if(await Popup.show.confirm(requested?'启用此扩展？':'关闭此扩展？','页面将刷新以应用更改。'))await(requested?enableExtension:disableExtension)(item.id);}catch{win.toastr.error('扩展状态修改失败，请重试。');}finally{input.disabled=false;}
+            try{if(await confirmAction(requested?'启用此扩展？':'关闭此扩展？','页面将刷新以应用更改。',requested?'启用':'关闭'))await(requested?enableExtension:disableExtension)(item.id);}catch{win.toastr.error('扩展状态修改失败，请重试。');}finally{input.disabled=false;}
         }
     },{signal:abort.signal});
     root.addEventListener('click',async event=>{
@@ -160,12 +204,17 @@ export function mountExtensionsPanel(doc,win) {
         if(action==='manage')show('manage');
         if(action==='install')doc.getElementById('third_party_extension_button')?.click();
         if(action==='native-manage')doc.getElementById('extensions_details')?.click();
+        if(action==='check-update'){
+            const row=target.closest('[data-extension-id]'),item=inventory().find(x=>x.id===row?.dataset.extensionId);
+            if(item)void checkRow(item,row);
+        }
         if(action==='update'||action==='update-all'){
             if(busy)return;
             const items=inventory().filter(x=>x.id.startsWith('third-party/')&&(action==='update-all'||x.id===target.closest('[data-extension-id]')?.dataset.extensionId));
-            if(action==='update-all'&&!await Popup.show.confirm('更新全部扩展？','更新完成后需刷新页面。'))return;
+            if(action==='update-all'&&!await confirmAction('更新全部扩展？','更新完成后需刷新页面。','更新全部'))return;
+            if(busy||disposed)return;
             busy=true;target.disabled=true;
-            try{await refresh.run(async()=>{for(const item of items)await update(item);});}catch(error){win.toastr.error(error.message);}finally{busy=false;target.disabled=false;}
+            try{await refresh.run(async()=>{for(const item of items)await update(item);});}catch(error){win.toastr.error(error.message);}finally{busy=false;target.disabled=false;if(!disposed&&current==='manage')renderManagement();}
         }
     },{signal:abort.signal});
     root.cwnNavigation={depth:()=>current==='home'?0:1,back:()=>{show('home');return true;}};
