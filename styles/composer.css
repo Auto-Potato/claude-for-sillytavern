@@ -190,7 +190,8 @@ html.cwn-active[data-cwn-theme="dark"] body .cwn-api-notice {color:#97958c;}
   /* Chat continues beneath the transparent outer gutter; only the input is opaque. */
   html.cwn-active body #sheld:not(.cwn-home-active) #form_sheld {
     position:absolute!important;inset:auto 0 0!important;
-    z-index:20;background:transparent!important;pointer-events:none;
+    /* Native #chat is at 30; the input must paint and receive taps above it. */
+    z-index:31!important;background:transparent!important;pointer-events:none;
   }
   html.cwn-active body #sheld:not(.cwn-home-active) #form_sheld>* {pointer-events:auto;}
 }
