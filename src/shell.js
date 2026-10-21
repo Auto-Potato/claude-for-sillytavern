@@ -10,6 +10,15 @@ export function mountShell(doc, win, toggleDrawer) {
   const listen = (node, type, fn) => node?.addEventListener(type, fn, { signal: abort.signal });
   const media = win.matchMedia(`(max-width:${MOBILE_BREAKPOINT}px)`);
   const root = doc.documentElement;
+  const originalInputMode = root.getAttribute('data-cwn-input');
+  root.setAttribute('data-cwn-input', 'pointer');
+  doc.addEventListener('pointerdown', () => root.setAttribute('data-cwn-input', 'pointer'), {capture:true, signal:abort.signal});
+  doc.addEventListener('keydown', event => {
+    const editing=event.target?.matches('textarea,input:not([type=checkbox]):not([type=radio]):not([type=button]),[contenteditable="true"]');
+    if (!event.isComposing && (event.key==='Tab' || (!editing && ['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Enter',' '].includes(event.key)))) {
+      root.setAttribute('data-cwn-input', 'keyboard');
+    }
+  }, {capture:true, signal:abort.signal});
   let raf = 0;
   let disposed = false;
   // Normalize only the shell boundary, never message bodies or native controls.
@@ -137,6 +146,8 @@ export function mountShell(doc, win, toggleDrawer) {
     disposeNavigation();
     if (raf) win.cancelAnimationFrame(raf);
     root.classList.remove('cwn-active', 'cwn-menu-open', 'cwn-rail-hidden');
+    if (originalInputMode === null) root.removeAttribute('data-cwn-input');
+    else root.setAttribute('data-cwn-input', originalInputMode);
     menu.remove(); backdrop.remove(); brand.remove(); railIcon.remove();
     labels.forEach(label => label.remove());
     for (const [drawer,slot] of drawerSlots) slot.replaceWith(drawer);

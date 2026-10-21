@@ -61,7 +61,14 @@ html.cwn-active body #send_form {background-color:var(--cwn-surface)!important;}
 .cwn-active .cwn-panel-actions button:focus-visible,.cwn-active #cwn-menu:focus-visible {outline:2px solid var(--cwn-accent);outline-offset:2px;}
 
 /* Suppress interaction focus outlines without removing component borders. */
-html.cwn-active body :is(:focus,:focus-visible,.interactable:hover) {
+html.cwn-active body :is(:focus,.interactable:hover):not(:focus-visible) {
+  outline:none!important;
+}
+html.cwn-active[data-cwn-input="keyboard"] body :focus-visible {
+  outline:2px solid var(--cwn-accent)!important;outline-offset:2px;
+}
+/* Touch can match :focus-visible on text fields; use the actual input method. */
+html.cwn-active[data-cwn-input="pointer"] body :is(:focus,:focus-visible,:focus-within) {
   outline:none!important;
 }
 html.cwn-active body #send_form:has(#send_textarea:focus-visible) {outline:none!important;}

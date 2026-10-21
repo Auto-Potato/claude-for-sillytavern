@@ -1,9 +1,10 @@
 import { extensionNames, extensionTypes, getExtensionManifest, extension_settings, enableExtension, disableExtension } from '../../../../extensions.js';
-import { getRequestHeaders, saveSettingsDebounced } from '../../../../../script.js';
+import { getRequestHeaders, saveSettingsDebounced, isGenerating, isChatSaving, saveChatConditional, getCurrentChatId, chat } from '../../../../../script.js';
 import { isAdmin, getCurrentUserHandle } from '../../../../user.js';
 import { Popup } from '../../../../popup.js';
 import { mountRegexPanel } from './regex-panel.js';
 import { eligibleUpdates, createExtensionUpdater } from './extension-updates.js';
+import { createExtensionRefresh } from './extension-refresh.js';
 
 const paths = {
     back:'m15 5-7 7 7 7',plus:'M12 5v14M5 12h14',right:'m9 6 6 6-6 6',more:'M5 12h.01M12 12h.01M19 12h.01',
@@ -82,17 +83,49 @@ export function mountExtensionsPanel(doc,win) {
     }
     const settings=extension_settings.claude_for_sillytavern??={};
     const preferences=settings.extensionAutoUpdates??={};
+    // Updates from other entry points may have their own asynchronous hooks.
+    // If observed, leave refreshing to the user instead of guessing completion.
+    const originalFetch=win.fetch;
+    let externalUpdate=false, checkingChatSave=false, chatSaveSucceeded=false;
+    const observedFetch=function(input,...args){
+        let chatSave=false;
+        try {
+            const url=new URL(typeof input==='string'?input:input.url || String(input),win.location.href);
+            if(url.origin===win.location.origin && /^\/api\/extensions\/(update|install|delete)$/.test(url.pathname))externalUpdate=true;
+            chatSave=checkingChatSave&&url.origin===win.location.origin&&/^\/api\/chats\/(group\/)?save$/.test(url.pathname);
+        } catch {/* Preserve native fetch validation. */}
+        const result=originalFetch.call(this,input,...args);
+        return chatSave?result.then(response=>{chatSaveSucceeded=response.ok;return response;}):result;
+    };
+    win.fetch=observedFetch;
+    const refresh=createExtensionRefresh({
+        canReload:()=>!disposed&&!externalUpdate&&!isGenerating()&&!isChatSaving
+            &&!doc.getElementById('send_textarea')?.value.trim()
+            &&!doc.getElementById('file_form_input')?.files?.length
+            &&!doc.getElementById('embed_file_input')?.files?.length
+            &&!doc.querySelector('#chat .edit_textarea,dialog[open],#form_sheld.isExecutingCommandsFromChatInput')
+            &&root.dataset.page==='manage',
+        prepare:async()=>{
+            if(!getCurrentChatId()||!chat.length)return;
+            checkingChatSave=true;chatSaveSucceeded=false;
+            try{await saveChatConditional();if(!chatSaveSucceeded)throw new Error('Chat save not confirmed');}
+            finally{checkingChatSave=false;}
+        },
+        reload:()=>win.location.reload(),
+        notify:message=>{if(!disposed)win.toastr.info(message);},
+        schedule:(fn,delay)=>win.setTimeout(fn,delay),cancel:id=>win.clearTimeout(id),
+    });
     const inventory=()=>extensionNames.map(id=>({id,manifest:getExtensionManifest(id),type:extensionTypes[id],enabled:!extension_settings.disabledExtensions.includes(id)})).filter(x=>x.manifest).sort((a,b)=>(b.id.endsWith('/claude-theme-next')?1:0)-(a.id.endsWith('/claude-theme-next')?1:0)||a.manifest.display_name.localeCompare(b.manifest.display_name));
     const updater=createExtensionUpdater({
-        request:async(url,body)=>{const response=await win.fetch(url,{method:'POST',headers:getRequestHeaders(),body:JSON.stringify(body),signal:win.AbortSignal.timeout(60000)});if(!response.ok)throw new Error('扩展更新失败，请检查网络或本地改动。');return response.json();},
+        request:async(url,body)=>{const response=await originalFetch.call(win,url,{method:'POST',headers:getRequestHeaders(),body:JSON.stringify(body),signal:win.AbortSignal.timeout(60000)});if(!response.ok)throw new Error('扩展更新失败，请检查网络或本地改动。');return response.json();},
         runHook:async item=>{
             const hook=item.manifest.hooks?.update;if(!hook||!item.manifest.js)return;
             // Same module path and five-second hook limit as ST extensions.js.
             const mod=await import(`/scripts/extensions/${item.id}/${item.manifest.js}`);
             if(typeof mod[hook]!=='function')return;
-            let timer;try{await Promise.race([Promise.resolve(mod[hook]()),new Promise(resolve=>{timer=win.setTimeout(resolve,5000);})]);}finally{win.clearTimeout(timer);}
+            let timer;try{await Promise.race([Promise.resolve(mod[hook]()),new Promise((_,reject)=>{timer=win.setTimeout(()=>reject(new Error('扩展更新后处理尚未完成，请稍后手动刷新。')),5000);})]);}finally{win.clearTimeout(timer);}
         },
-        onUpdated:()=>{if(!disposed)win.toastr.success('扩展已更新，刷新页面后生效。');},
+        onUpdated:item=>{if(!disposed){win.toastr.success('扩展已更新，刷新页面后生效。');if(item.id.endsWith('/claude-theme-next'))refresh.updated();}},
     });
     async function update(item,quiet=false){
         if(item.type==='global'&&!isAdmin())throw new Error('当前账号不能更新全局安装的扩展。');
@@ -135,7 +168,7 @@ export function mountExtensionsPanel(doc,win) {
             const items=inventory().filter(x=>x.id.startsWith('third-party/')&&(action==='update-all'||x.id===target.closest('[data-extension-id]')?.dataset.extensionId));
             if(action==='update-all'&&!await Popup.show.confirm('更新全部扩展？','更新完成后需刷新页面。'))return;
             busy=true;target.disabled=true;
-            try{for(const item of items)await update(item);}catch(error){win.toastr.error(error.message);}finally{busy=false;target.disabled=false;}
+            try{await refresh.run(async()=>{for(const item of items)await update(item);});}catch(error){win.toastr.error(error.message);}finally{busy=false;target.disabled=false;}
         }
     },{signal:abort.signal});
     root.cwnNavigation={depth:()=>current==='home'?0:1,back:()=>{show('home');return true;}};
@@ -148,9 +181,9 @@ export function mountExtensionsPanel(doc,win) {
             const key=`cwn-extension-update:${account}:${item.id}`;
             try{const last=Number(win.localStorage.getItem(key))||0;if(Date.now()-last<86400000)continue;win.localStorage.setItem(key,String(Date.now()));}catch{/* Settings still provide a per-session fallback. */}
             preferences[item.id].lastAttempt=Date.now();saveSettingsDebounced();
-            try{await update(item,true);}catch{if(!disposed)win.toastr.warning(`${item.manifest.display_name} 自动更新失败，可在管理扩展中重试。`);}
+            try{await update(item,true);}catch{refresh.failed();if(!disposed)win.toastr.warning(`${item.manifest.display_name} 自动更新失败，可在管理扩展中重试。`);}
         }};
-        if(win.navigator.locks)await win.navigator.locks.request(`cwn-extension-auto-update:${account}`,{ifAvailable:true},lock=>lock?run():undefined);else await run();
+        if(win.navigator.locks)await win.navigator.locks.request(`cwn-extension-auto-update:${account}`,{ifAvailable:true},lock=>lock?refresh.run(run):undefined);else await refresh.run(run);
     },3000);
-    return()=>{disposed=true;win.clearTimeout(timer);abort.abort();observer.disconnect();regexDispose();for(const {node} of entries.values()){node.classList.remove('ce-native-open','ce-generic-extension','ce-root-drawer');node.querySelectorAll('.ce-root-drawer').forEach(drawer=>drawer.classList.remove('ce-root-drawer'));}for(const restore of restores.reverse())restore();root.remove();panel.classList.remove('cwn-extensions-mounted');};
+    return()=>{disposed=true;refresh.dispose();if(win.fetch===observedFetch)win.fetch=originalFetch;win.clearTimeout(timer);abort.abort();observer.disconnect();regexDispose();for(const {node} of entries.values()){node.classList.remove('ce-native-open','ce-generic-extension','ce-root-drawer');node.querySelectorAll('.ce-root-drawer').forEach(drawer=>drawer.classList.remove('ce-root-drawer'));}for(const restore of restores.reverse())restore();root.remove();panel.classList.remove('cwn-extensions-mounted');};
 }
