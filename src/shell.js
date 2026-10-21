@@ -22,6 +22,9 @@ export function mountShell(doc, win, toggleDrawer) {
   }
   const originalHeight = chatShell.style.getPropertyValue('--cwn-visible-height');
   const originalPriority = chatShell.style.getPropertyPriority('--cwn-visible-height');
+  const composer = doc.getElementById('form_sheld');
+  const originalComposerHeight = chatShell.style.getPropertyValue('--cwn-composer-height');
+  const originalComposerPriority = chatShell.style.getPropertyPriority('--cwn-composer-height');
   const menu = doc.createElement('button');
   menu.id = 'cwn-menu';
   menu.type = 'button';
@@ -98,6 +101,12 @@ export function mountShell(doc, win, toggleDrawer) {
   function measure() {
     raf = 0;
     if (disposed) return;
+    if (composer) {
+      const composerHeight = `${Math.ceil(composer.getBoundingClientRect().height)}px`;
+      if (chatShell.style.getPropertyValue('--cwn-composer-height') !== composerHeight) {
+        chatShell.style.setProperty('--cwn-composer-height', composerHeight);
+      }
+    }
     const height = visibleShellHeight({mobile:media.matches,
       focused:chatShell.contains(doc.activeElement) && doc.activeElement?.matches('textarea,input,[contenteditable="true"]'),
       innerHeight:win.innerHeight, viewportHeight:win.visualViewport?.height, scale:win.visualViewport?.scale ?? 1});
@@ -114,6 +123,8 @@ export function mountShell(doc, win, toggleDrawer) {
   listen(win, 'resize', queueMeasure);
   listen(chatShell, 'focusin', queueMeasure);
   listen(chatShell, 'focusout', queueMeasure);
+  const composerResize = new win.ResizeObserver(queueMeasure);
+  if (composer) composerResize.observe(composer);
   root.classList.add('cwn-active');
   queueMeasure();
   return () => {
@@ -121,6 +132,7 @@ export function mountShell(doc, win, toggleDrawer) {
     disposed = true;
     railMotion?.cancel();
     abort.abort();
+    composerResize.disconnect();
     disposeRailResize();
     disposeNavigation();
     if (raf) win.cancelAnimationFrame(raf);
@@ -131,6 +143,8 @@ export function mountShell(doc, win, toggleDrawer) {
     pane.remove();
     if (originalHeight) chatShell.style.setProperty('--cwn-visible-height', originalHeight, originalPriority);
     else chatShell.style.removeProperty('--cwn-visible-height');
+    if (originalComposerHeight) chatShell.style.setProperty('--cwn-composer-height', originalComposerHeight, originalComposerPriority);
+    else chatShell.style.removeProperty('--cwn-composer-height');
     if (moved && placeholder.isConnected) placeholder.replaceWith(chatShell);
   };
 }
