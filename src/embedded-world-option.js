@@ -1,8 +1,23 @@
-// Only augment the native first-use embedded lore confirmation, not other imports.
+// Adapt native first-use resource confirmations without changing regex permissions.
 export function mountEmbeddedWorldOption({ Popup, confirmType, affirmative, getCharacter, importWorld, doc, onError, hasWorld = () => false }) {
   const original = Popup.prototype.show;
   let active = true;
   async function show(...args) {
+    if (active && this.type === confirmType) {
+      const presetRegex = this.content?.querySelector?.('[data-i18n="This preset has embedded regex script(s)."]');
+      const characterRegex = this.content?.querySelector?.('[data-i18n="This character has embedded regex script(s)."]');
+      if (presetRegex || characterRegex) {
+        const heading = doc.createElement('h3');
+        heading.textContent = presetRegex ? '启用预设正则' : '启用角色正则';
+        const note = doc.createElement('p');
+        note.textContent = '是否启用附带的正则规则？也可以稍后在“扩展 → 正则”中启用。';
+        this.content.replaceChildren(heading, note);
+        this.dlg.classList.add('cwn-character-dialog', 'cwn-resource-dialog');
+        this.okButton.textContent = '启用';
+        this.cancelButton.textContent = '取消';
+        return original.apply(this, args);
+      }
+    }
     const text = this.content?.textContent || '';
     if (!active || this.type !== confirmType ||
         !text.includes('This character has an embedded World/Lorebook.') ||

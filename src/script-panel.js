@@ -13,9 +13,11 @@ export function mountScriptPanel(doc,win){
   function position(){
     if(!bar)return;const desktop=win.matchMedia('(min-width:701px)').matches;
     const r=button.getBoundingClientRect(),width=Math.min(desktop?480:340,win.innerWidth-24);
-    bar.style.width='max-content';bar.style.maxWidth=width+'px';bar.style.left='auto';bar.style.right='70px';bar.style.maxWidth=Math.min(width,Math.max(80,r.left-16))+'px';
+    const availableWidth=Math.min(width,Math.max(80,r.left-16));
+    bar.style.width='max-content';bar.style.minWidth=Math.min(190,availableWidth)+'px';bar.style.maxWidth=availableWidth+'px';bar.style.left='auto';bar.style.right='70px';
     bar.style.top='auto';bar.style.bottom='calc(100% + 31px)';
-    bar.style.maxHeight=Math.max(80,Math.min(desktop?280:180,r.top-24))+'px';
+    const availableHeight=Math.max(80,Math.min(desktop?280:180,r.top-24));
+    bar.style.minHeight='0';bar.style.maxHeight=availableHeight+'px';
   }
   function restore(){if(!bar)return;close();bar.removeEventListener('toggle',toggle);bar.removeEventListener('pointerenter',cancelLeave);bar.removeEventListener('pointerleave',leave);bar.classList.remove('cwn-script-panel','cwn-panel-open');for(const [key,value]of Object.entries(saved)){if(value===null)bar.removeAttribute(key);else bar.setAttribute(key,value);}bar=null;}
   function toggle(){button.setAttribute('aria-expanded',String(bar?.classList.contains('cwn-panel-open')||false));}

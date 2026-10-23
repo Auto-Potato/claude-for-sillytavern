@@ -351,7 +351,8 @@ html.cwn-active body #sheld #send_form > :is(.cwn-api-notice,.cwn-start-error) {
 html.cwn-active body #qr--bar.cwn-script-panel.cwn-panel-open {
   flex-direction:row!important;flex-wrap:wrap!important;
   align-items:flex-start!important;align-content:flex-start!important;
-  justify-content:flex-start!important;gap:6px!important;
+  justify-content:flex-start!important;gap:7px!important;padding:12px!important;
+  border-top:2px solid var(--cwn-accent)!important;border-radius:14px!important;
   overflow-x:hidden!important;overflow-y:auto!important;
   scrollbar-width:none;
 }
@@ -361,5 +362,13 @@ html.cwn-active body #qr--bar.cwn-script-panel .qr--buttons {
 html.cwn-active body #qr--bar.cwn-script-panel .qr--button {
   box-sizing:border-box;white-space:normal!important;
   overflow-wrap:anywhere!important;max-width:100%!important;
-  flex:0 0 auto!important;
+  flex:0 1 auto!important;min-height:32px;padding:6px 12px!important;
+  border:1px solid var(--cwn-line)!important;
+  border-radius:999px!important;
+  background:var(--cwn-surface)!important;
+  color:var(--cwn-ink)!important;font:400 13px/18px var(--cwn-type-ui-family)!important;
+  /* Native .menu_button desaturates the warm palette. */
+  filter:none!important;backdrop-filter:none!important;text-shadow:none!important;
 }
+html.cwn-active body #qr--bar.cwn-script-panel .qr--button:hover {background:color-mix(in srgb,var(--cwn-check) 20%,var(--cwn-bg))!important;}
+html.cwn-active body #qr--bar.cwn-script-panel .qr--button:active {background:color-mix(in srgb,var(--cwn-check) 28%,var(--cwn-bg))!important;}

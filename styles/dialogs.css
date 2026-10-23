@@ -1,4 +1,24 @@
-/* Shared styling for theme-owned confirmation and editing dialogs only. */
+/* Shared styling for theme-owned confirmation and editing dialogs. */
+/* Tavern Helper Popup.vue uses a div, not SillyTavern's native dialog.
+   Limit this adapter to its normal-width popups; full-screen editors keep their layout. */
+html.cwn-active .TH-popup .popup[role="dialog"][class~="w-[500px]"] {
+ width:min(var(--cwn-dialog-width),calc(100vw - 32px))!important;min-width:0!important;max-height:calc(100dvh - 32px);padding:var(--cwn-dialog-padding)!important;
+ border:1px solid var(--cwn-line)!important;border-radius:var(--cwn-radius-dialog)!important;background:var(--cwn-bg)!important;color:var(--cwn-ink)!important;box-shadow:var(--cwn-shadow-dialog)!important;
+ text-align:left!important;font:400 15px/1.6 var(--cwn-type-ui-family)!important;
+ & * {text-shadow:none!important;box-sizing:border-box;}
+ & > div:first-child {height:auto!important;min-height:0;max-height:65dvh;overflow-y:auto;text-align:left!important;}
+ & :is(h2,h3,h4) {margin:0 0 var(--cwn-space-2)!important;color:var(--cwn-ink)!important;font:var(--cwn-font-dialog)!important;text-align:left!important;}
+ & :is(p,small) {display:block;margin:0!important;color:var(--cwn-muted)!important;font:400 14px/1.6 var(--cwn-type-ui-family)!important;text-align:left!important;}
+ & > div:last-child:has(> button) {display:flex!important;flex-wrap:wrap;justify-content:flex-end!important;gap:10px!important;margin:var(--cwn-space-6) 0 0!important;padding:var(--cwn-space-5) 0 0!important;border-top:1px solid var(--cwn-line);}
+ & > div:last-child > button {display:inline-flex!important;align-items:center;justify-content:center;min-width:var(--cwn-dialog-action-width)!important;min-height:var(--cwn-control-height)!important;margin:0!important;padding:var(--cwn-dialog-action-padding)!important;border:1px solid var(--cwn-line)!important;border-radius:var(--cwn-radius-control)!important;background:transparent!important;color:var(--cwn-ink)!important;font:400 14px/20px var(--cwn-type-ui-family)!important;box-shadow:none!important;}
+ & > div:last-child > .popup-button-ok {order:1;background:var(--cwn-check)!important;color:var(--cwn-on-accent)!important;border-color:var(--cwn-check)!important;}
+}
+@media(max-width:700px){
+ html.cwn-active .TH-popup .popup[role="dialog"][class~="w-[500px]"] {
+  padding:var(--cwn-dialog-padding-mobile)!important;border-radius:var(--cwn-radius-dialog-mobile)!important;
+  & > div:last-child > button {flex:1!important;min-width:0!important;}
+ }
+}
 .cwn-import-dialog-heading {display:flex;align-items:center;justify-content:space-between;gap:var(--cwn-space-3);margin-bottom:var(--cwn-space-5)}
 .cwn-import-dialog-heading button {display:grid;place-items:center;flex:none;width:32px;height:32px;padding:6px;border:0;border-radius:var(--cwn-radius-sm);background:transparent;color:var(--cwn-muted);cursor:pointer}
 .cwn-import-dialog-heading button:hover {background:var(--cwn-hover)}
