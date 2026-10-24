@@ -20,6 +20,13 @@ export function createCharacterData({request, refresh, isBusy}) {
     return saved;
   }
   return {read,
+    async rename(avatar,name) {
+      const trimmed=String(name??'').trim();
+      if(!trimmed)throw new Error('角色名称不能为空');
+      const saved=await update(avatar,{name:trimmed,data:{name:trimmed}});
+      if(saved.name!==trimmed||saved.data?.name!==trimmed)throw new Error('角色名称未保存，请重新检查');
+      return saved;
+    },
     async save(avatar,draft,expected) {
       const fields={description:draft.description,first_mes:draft.openings[0] || '',alternate_greetings:draft.openings.slice(1)};
       const saved=await update(avatar,{...fields,data:fields},expected);

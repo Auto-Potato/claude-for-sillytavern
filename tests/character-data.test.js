@@ -5,7 +5,7 @@ function setup(){
  let card={name:'Test',avatar:'test.png',data:{description:'old',first_mes:'first',alternate_greetings:['second','third'],extensions:{world:'Book',other:{keep:true}}}},busy=false,writes=0;
  const api=createCharacterData({isBusy:()=>busy,refresh:async()=>{},request:async(url,body)=>{
   if(url.endsWith('/get'))return {ok:true,json:async()=>structuredClone(card)};
-  writes++;assert.equal(body.avatar,'test.png');card.data={...card.data,...body.data,extensions:{...card.data.extensions,...body.data.extensions}};
+  writes++;assert.equal(body.avatar,'test.png');if(Object.hasOwn(body,'name'))card.name=body.name;card.data={...card.data,...body.data,extensions:{...card.data.extensions,...body.data.extensions}};
   return {ok:true};
  }});
  return {api,card:()=>card,writes:()=>writes,busy:()=>busy=true};
@@ -22,4 +22,12 @@ test('reject stale edits and block writes during generation',async()=>{
 });
 test('bind and unbind preserve card description, greetings and unrelated extensions',async()=>{
  const x=setup(),base=characterFields(x.card());await x.api.bind('test.png','Other');assert.equal(x.card().data.extensions.world,'Other');await x.api.bind('test.png','');assert.deepEqual(characterFields(x.card()),base);assert.equal(x.card().data.extensions.other.keep,true);
+});
+test('rename preserves avatar identity and card fields, rejecting blank or busy updates',async()=>{
+ const x=setup(),before=characterFields(x.card());
+ await assert.rejects(x.api.rename('test.png','  '),/不能为空/);assert.equal(x.writes(),0);
+ const saved=await x.api.rename('test.png',' 新名字 ');
+ assert.equal(saved.name,'新名字');assert.equal(saved.data.name,'新名字');assert.equal(saved.avatar,'test.png');
+ assert.deepEqual(characterFields(saved),before);assert.equal(saved.data.extensions.world,'Book');
+ x.busy();await assert.rejects(x.api.rename('test.png','不能保存'),/等待/);assert.equal(x.writes(),1);
 });
