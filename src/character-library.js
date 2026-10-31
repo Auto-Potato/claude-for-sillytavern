@@ -68,7 +68,7 @@ export function mountCharacterLibrary(doc,win,host) {
     try{const height=Number(win.localStorage.getItem(heightKey()));if(Number.isFinite(height)&&height>=120&&height<=4000)editor.style.height=`${height}px`;}catch{}
     editorResize.observe(editor);
   }
-  function responsive(){pane.classList.toggle('phone',win.innerWidth<=700);restoreHeight();}
+  function responsive(){const mobile=win.innerWidth<=700;pane.classList.toggle('phone',mobile);if(card&&listPage){listPage.inert=mobile;listPage.toggleAttribute('aria-hidden',mobile);}restoreHeight();}
   responsive();win.addEventListener('resize',responsive,{signal:abort.signal});
   function confirm(title,body){const content=doc.createElement('div'),heading=doc.createElement('h3');heading.textContent=title;content.append(heading);if(typeof body==='string'&&body){const p=doc.createElement('p');p.textContent=body;content.append(p);}else if(body)content.append(body);const popup=new Popup(content,POPUP_TYPE.CONFIRM,'',{okButton:'确定',cancelButton:'取消'});popup.dlg.classList.add('cwn-character-dialog');return popup.show();}
   pane.cwnNavigation={isDetail:()=>!!card,back:backToList};
@@ -91,14 +91,14 @@ export function mountCharacterLibrary(doc,win,host) {
   const cardMarkup=new WeakMap();
   function drawCards(){
     const rows=sortCharacters(st.characters.filter(c=>(c.name||'').toLocaleLowerCase().includes(query.toLocaleLowerCase())),sortMode);
-    const grid=page.querySelector('.library-grid');
+    const grid=listPage.querySelector('.library-grid');
     const markup=rows.map(c=>`<button type="button" class="library-card" data-avatar="${esc(c.avatar)}"><img src="${esc(image(c.avatar))}" alt="" loading="lazy"><span class="cwn-type-item">${esc(c.name)}</span></button>`).join('')||'<p class="library-muted">没有匹配的角色卡</p>';
     if(cardMarkup.get(grid)!==markup){grid.innerHTML=markup;cardMarkup.set(grid,markup);}
-    page.querySelector('.library-count').textContent=`角色卡 · ${rows.length}`;
+    listPage.querySelector('.library-count').textContent=`角色卡 · ${rows.length}`;
   }
   function closeSort({focus=false}={}){
-    const trigger=page?.querySelector('[data-action="sort"]');
-    page?.querySelector('.library-sort-pop')?.setAttribute('hidden','');
+    const trigger=listPage?.querySelector('[data-action="sort"]');
+    listPage?.querySelector('.library-sort-pop')?.setAttribute('hidden','');
     trigger?.setAttribute('aria-expanded','false');
     if(focus)trigger?.focus();
   }
@@ -134,9 +134,11 @@ export function mountCharacterLibrary(doc,win,host) {
     const target=page;
     if(disposed||!motionAllowed()||!target.animate)return;
     target.inert=true;
-    const hidden=win.innerWidth<=700?'translateX(-100%)':'translateX(100%)';
+    const mobile=win.innerWidth<=700;
+    const hidden=mobile?{transform:'translateX(-100%)'}:{translate:'-100% 0',clipPath:'inset(0 0 0 100%)'};
+    const visible=mobile?{transform:'translateX(0)'}:{translate:'0 0',clipPath:'inset(0)'};
     const animation=target.animate(
-      [{transform:entering?hidden:'translateX(0)'},{transform:entering?'translateX(0)':hidden}],
+      entering?[hidden,visible]:[visible,hidden],
       {duration:300,easing:'cubic-bezier(.22,.61,.36,1)',fill:'both'},
     );
     pageAnimation=animation;
@@ -163,21 +165,27 @@ export function mountCharacterLibrary(doc,win,host) {
     return left;
   }
   async function open(key){
+    if(card&&avatar===key)return;
+    if(card&&!await canLeave())return;
     closeSort();
+    const switching=!!card;
     const stamp=++revision,loaded=await data.read(key);
     if(disposed||stamp!==revision)return;
     avatar=key;card=loaded;opening=0;draft=null;
-    listPage=page;listPage.inert=true;listPage.setAttribute('aria-hidden','true');
-    page=doc.createElement('div');page.className='cwn-library-page';pane.append(page);
-    render();await slideDetail(true);
+    if(!switching){
+      listPage=page;
+      page=doc.createElement('div');page.className='cwn-library-page cwn-library-detail';pane.append(page);
+    }
+    listPage.inert=win.innerWidth<=700;listPage.toggleAttribute('aria-hidden',win.innerWidth<=700);
+    render();page.scrollTop=0;if(!switching)await slideDetail(true);
   }
   pane.addEventListener('input',event=>{const el=event.target;if(el.matches('.library-search')){query=el.value;drawCards();}if(el.dataset.field){beginDraft();if(el.dataset.field==='description')draft.description=el.value;if(el.dataset.field==='opening'){if(opening<draft.openings.length||el.value)draft.openings[opening]=el.value;}editActions();controls();}},{signal:abort.signal});
   pane.addEventListener('change',event=>{
     if(!event.target.matches('input[name="cwn-character-sort"]'))return;
     sortMode=normalizeCharacterSort(event.target.value);accountStorage.setItem(sortKey,sortMode);
     drawCards();closeSort();
-    const wrap=page.querySelector('.library-sort-wrap');wrap.outerHTML=sortControl();
-    page.querySelector('[data-action="sort"]').focus();
+    const wrap=listPage.querySelector('.library-sort-wrap');wrap.outerHTML=sortControl();
+    listPage.querySelector('[data-action="sort"]').focus();
   },{signal:abort.signal});
   function closeCardMenu({focus=false}={}){
     const menu=page?.querySelector('.detail-menu'),trigger=page?.querySelector('[data-action="card-menu"]');
@@ -206,7 +214,7 @@ export function mountCharacterLibrary(doc,win,host) {
     if(action==='sort'){
       const expanded=button.getAttribute('aria-expanded')==='true';
       button.setAttribute('aria-expanded',String(!expanded));
-      page.querySelector('.library-sort-pop').hidden=expanded;return;
+      listPage.querySelector('.library-sort-pop').hidden=expanded;return;
     }
     if(action==='import'){if(win.innerWidth<=700)void importDialog.open();else doc.getElementById('character_import_file')?.click();}
     if(action==='menu')drawer.querySelector('.cwn-panel-back')?.click();

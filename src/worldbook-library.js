@@ -20,6 +20,7 @@ export function mountWorldbookLibrary(doc,win) {
   let screen='library',name='',book=null,uid=null,baseline=null,busy=false,disposed=false,query='',editing=false;
   const pagePositions=new Map();
   let renderedPage=null;
+  const parentViews=new Map();
   const checkedSources=new Set();
   const request=(url,body)=>fetch(url,{method:'POST',headers:st.getRequestHeaders(),body:JSON.stringify(body)});
   const data=createWorldbookData({request,changed:async(n,saved)=>{wi.worldInfoCache.set(n,saved);await st.eventSource.emit(st.event_types.WORLDINFO_UPDATED,n,saved);await wi.reloadEditor(n);}});
@@ -55,6 +56,18 @@ export function mountWorldbookLibrary(doc,win) {
     if(disposed)return;
     // Read the outgoing DOM, not the already-changed route/query variables.
     const previousBody=pane.querySelector('.wb-scroll');
+    const oldDepth=Number(pane.dataset.depth||0);
+    const newDepth=screen==='entry'?2:screen==='book'?1:0;
+    const routeChanged=renderedPage!==JSON.stringify([screen,screen==='library'?'':name,screen==='entry'?uid:null]);
+    if(newDepth>oldDepth&&previousBody){
+      const view=doc.createElement('div');view.className='wb-parent-view';
+      view.append(pane.querySelector('.wb-nav').cloneNode(true),previousBody.cloneNode(true));
+      view.inert=win.innerWidth<=700;
+      view.querySelectorAll('button:not([data-book]):not([data-entry]),input,select,textarea').forEach(el=>el.disabled=true);
+      view.querySelectorAll('[id]').forEach(el=>el.removeAttribute('id'));
+      parentViews.set(newDepth,{view,top:previousBody.scrollTop});
+    }
+    pane.querySelector('.wb-parent-view')?.remove();
     if(previousBody&&renderedPage!==null){
       pagePositions.set(renderedPage,{top:previousBody.scrollTop,query:previousBody.querySelector('[data-search]')?.value??''});
     }
@@ -64,7 +77,7 @@ export function mountWorldbookLibrary(doc,win) {
     renderedPage=pageKey;
     pane.dataset.depth=String(screen==='entry'?2:screen==='book'?1:0);pane.classList.toggle('phone',win.innerWidth<=700);
     if(screen==='library'&&pane.querySelector('.book-grid')){drawBooks();void discoverCovers();return;}
-    pane.innerHTML=`<div class="wb-nav ${screen==='library'?'wb-library-nav':''}">${iconButton('back',screen==='library'?'返回导航':'返回上一页',icons.back)}</div><div class="wb-scroll"></div>`;
+    pane.innerHTML=`<div class="wb-current-view"><div class="wb-nav ${screen==='library'?'wb-library-nav':''}">${iconButton('back',screen==='library'?'返回导航':'返回上一页',icons.back)}</div><div class="wb-scroll"></div></div>`;
     const body=pane.querySelector('.wb-scroll');
     if(screen==='library'){
       body.innerHTML=`<div class="heading"><h1 class="cwn-type-title">世界书</h1>${button('import','导入','solid mobile-import',icons.plus)}</div><button type="button" class="cwn-import-zone" id="cwn-worldbook-import-zone" data-action="import">${importZoneContent('世界书')}</button><input class="search" data-search placeholder="搜索世界书" aria-label="搜索世界书" value="${esc(query)}"><div class="summary"><span>世界书 · ${wi.world_names.length}</span><span>已启用 ${wi.selected_world_info.length} 本</span></div><div class="book-grid"></div>`;
@@ -80,6 +93,13 @@ export function mountWorldbookLibrary(doc,win) {
       body.dataset.light=e.vectorized?'vector':e.constant?'blue':'green';
     }
     body.scrollTop=position?.top??0;
+    const parent=parentViews.get(newDepth);
+    if(newDepth&&parent){
+      pane.append(parent.view);parent.view.querySelector('.wb-scroll').scrollTop=parent.top;
+    }
+    if(newDepth>oldDepth&&routeChanged&&win.innerWidth>700&&!win.matchMedia('(prefers-reduced-motion: reduce)').matches){
+      pane.querySelector('.wb-current-view').animate?.([{translate:'-100% 0',clipPath:'inset(0 0 0 100%)'},{translate:'0 0',clipPath:'inset(0)'}],{duration:300,easing:'cubic-bezier(.22,.61,.36,1)'});
+    }
   }
   const bookMarkup=new WeakMap();
   function drawBooks(){
@@ -109,7 +129,29 @@ export function mountWorldbookLibrary(doc,win) {
   }
   function dirty(){try{return Object.keys(draftPatch()).length>0;}catch{return true;}}
   async function canLeave(){return screen!=='entry'||!dirty()||await confirm('是否舍弃当前修改？');}
-  async function back(){if(busy)return false;if(!await canLeave())return false;if(screen==='entry'){const fresh=await data.read(name);book=fresh;screen='book';}else if(screen==='book'){await wi.updateWorldInfoList();screen='library';}else {drawer.querySelector('.cwn-panel-back')?.click();return true;}query='';render();return true;}
+  async function back(){
+    if(busy)return false;
+    busy=true;
+    let animation;
+    try{
+      if(!await canLeave())return false;
+      if(screen==='library'){drawer.querySelector('.cwn-panel-back')?.click();return true;}
+      // Resolve data before moving; never expose the exited page during a fetch.
+      const fresh=screen==='entry'?await data.read(name):null;
+      if(screen==='book')await wi.updateWorldInfoList();
+      if(disposed)return false;
+      pane.inert=true;
+      if(win.innerWidth>700&&!win.matchMedia('(prefers-reduced-motion: reduce)').matches){
+        animation=pane.querySelector('.wb-current-view').animate?.(
+          [{translate:'0 0',clipPath:'inset(0)'},{translate:'-100% 0',clipPath:'inset(0 0 0 100%)'}],
+          {duration:300,easing:'cubic-bezier(.22,.61,.36,1)',fill:'forwards'});
+        if(animation)try{await animation.finished;}catch{}
+      }
+      if(disposed)return false;
+      if(screen==='entry'){book=fresh;screen='book';}else screen='library';
+      query='';render();return true;
+    }finally{animation?.cancel();busy=false;pane.inert=false;}
+  }
   pane.cwnNavigation={depth:()=>screen==='entry'?2:screen==='book'?1:0,back};
   async function active(n,enabled){await ensureExists(n);const selected=new Set(wi.selected_world_info);enabled?selected.add(n):selected.delete(n);wi.updateWorldInfoSettings({},[...selected]);for(const option of doc.querySelectorAll('#world_info option'))option.selected=selected.has(wi.world_names[Number(option.value)]);win.jQuery('#world_info').trigger('change.select2');await st.eventSource.emit(st.event_types.WORLDINFO_SETTINGS_UPDATED);}
   async function freshBook(){await ensureExists(name);book=await data.read(name);}
@@ -151,7 +193,20 @@ export function mountWorldbookLibrary(doc,win) {
     if(target.dataset.action==='more'){const menu=pane.querySelector('.book-more-menu');menu.hidden=!menu.hidden;target.setAttribute('aria-expanded',String(!menu.hidden));return;}
     if(target.dataset.action==='back'){void back().catch(e=>win.toastr.error(e.message));return;}
     if(target.dataset.light){pane.querySelector('.wb-scroll').dataset.light=target.dataset.light;pane.querySelectorAll('[data-light]').forEach(b=>b.setAttribute('aria-pressed',String(b===target)));pane.querySelector('.keyword-field').hidden=target.dataset.light!=='green';return;}
-    void run(async()=>{if(target.dataset.book){name=target.dataset.book;await freshBook();screen='book';query='';render();}else if(target.dataset.entry){uid=Number(target.dataset.entry);await freshBook();if(!book.entries[uid])throw new Error('条目已不存在');screen='entry';render();}else if(target.dataset.action)await action(target.dataset.action,target);});
+    void run(async()=>{
+      if(target.dataset.book){
+        const next=target.dataset.book;if(screen==='book'&&next===name)return;
+        if(!await canLeave())return;
+        await ensureExists(next);const fresh=await data.read(next);
+        name=next;book=fresh;screen='book';query='';render();
+      }else if(target.dataset.entry){
+        const next=Number(target.dataset.entry);if(screen==='entry'&&next===uid)return;
+        if(!await canLeave())return;
+        await ensureExists(name);const fresh=await data.read(name);
+        if(!fresh.entries[next])throw new Error('条目已不存在');
+        uid=next;book=fresh;screen='entry';render();
+      }else if(target.dataset.action)await action(target.dataset.action,target);
+    });
   },{signal});
   pane.addEventListener('input',event=>{if(event.target.matches('[data-search]')){query=event.target.value;screen==='library'?drawBooks():drawEntries();}},{signal});
   pane.addEventListener('change',event=>{const target=event.target;if(target.hasAttribute('data-mode')){editing=target.checked;pane.querySelector('.entry-list').classList.toggle('editing',editing);}else if(target.hasAttribute('data-active'))void run(async()=>{try{await active(target.dataset.active,target.checked);}finally{render();}});else if(target.hasAttribute('data-enabled'))void run(async()=>{try{await ensureExists(name);book=await data.update(name,Number(target.dataset.enabled),{disable:!target.checked});}finally{drawEntries();}});},{signal});
@@ -170,7 +225,7 @@ export function mountWorldbookLibrary(doc,win) {
     if(type==='drop'&&allowed){const files=[...event.dataTransfer.files];void run(()=>importFiles(files));}
   },{capture:true,signal});
   win.addEventListener('dragend',()=>pane.querySelector('#cwn-worldbook-import-zone')?.classList.remove('cwn-drag-over'),{signal});
-  const resize=()=>pane.classList.toggle('phone',win.innerWidth<=700);win.addEventListener('resize',resize,{signal});
+  const resize=()=>{const mobile=win.innerWidth<=700;pane.classList.toggle('phone',mobile);const parent=pane.querySelector('.wb-parent-view');if(parent)parent.inert=mobile;};win.addEventListener('resize',resize,{signal});
   let outsidePress=null;
   const outside=event=>!event.target.closest('dialog')&&!event.composedPath().includes(doc.getElementById('top-settings-holder'));
   doc.addEventListener('pointerdown',event=>{outsidePress=event.isPrimary&&event.button===0&&win.innerWidth>700&&drawer.classList.contains('openDrawer')&&outside(event)?{id:event.pointerId,x:event.clientX,y:event.clientY}:null;},{capture:true,signal});

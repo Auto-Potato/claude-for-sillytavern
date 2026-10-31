@@ -62,3 +62,13 @@ test('disposal cancels motion and prevents subsequent completion callbacks',asyn
   const count=paints.length;motions[0].finish();await flush();controller.select('worldbook');
   assert.equal(paints.length,count);assert.equal(motions[0].cancelled,true);
 });
+
+test('returning to the original panel during entry never paints an empty stage',async()=>{
+  const {controller,paints,motions}=fixture('characters');
+  controller.select('worldbook');controller.select('characters');
+  motions[0].finish();await flush();
+  assert.deepEqual(paints.at(-1),['worldbook','characters',true]);
+  motions[1].finish();await flush();
+  assert.deepEqual(paints.at(-1),['characters',null,false]);
+  assert.ok(paints.every(([from,to])=>from||to));
+});
