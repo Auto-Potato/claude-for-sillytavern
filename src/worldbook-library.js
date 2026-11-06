@@ -7,6 +7,7 @@ import { createWorldbookData, appendEntry, removeEntry } from './worldbook-data.
 import { worldbookSource, recordWorldbookSource } from './worldbook-sources.js';
 import { importZoneContent } from './import-zone.js';
 import { createImportDialog } from './import-dialog.js';
+import { confirmUnsaved } from './leave-guard.js';
 
 const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const svg=path=>`<svg viewBox="0 0 24 24" aria-hidden="true"><path d="${path}"/></svg>`;
@@ -153,6 +154,40 @@ export function mountWorldbookLibrary(doc,win) {
     }finally{animation?.cancel();busy=false;pane.inert=false;}
   }
   pane.cwnNavigation={depth:()=>screen==='entry'?2:screen==='book'?1:0,back};
+  // Desktop panel motion: the open book / entry (second level) folds back to
+  // the shelf whenever this page leaves the stage. Unsaved edits are kept.
+  let folding=null;
+  const keepsDraft=()=>screen==='entry'&&dirty();
+  function collapse({animate=true}={}){
+    if(disposed||screen==='library'||keepsDraft())return;
+    if(folding){if(!animate)folding.finish();return;}
+    if(busy)return;
+    const finish=()=>{screen='library';query='';render();};
+    const view=pane.querySelector('.wb-current-view');
+    if(!animate||win.innerWidth<=700||win.matchMedia('(prefers-reduced-motion: reduce)').matches||!view?.animate){finish();return;}
+    pane.inert=true;
+    const animation=view.animate([{translate:'0 0',clipPath:'inset(0)'},{translate:'-100% 0',clipPath:'inset(0 0 0 100%)'}],{duration:300,easing:'cubic-bezier(.22,.61,.36,1)',fill:'forwards'});
+    folding=animation;
+    animation.finished.catch(()=>{}).then(()=>{
+      if(folding!==animation)return;
+      folding=null;pane.inert=false;
+      // Replace the folded view before releasing its final frame.
+      if(!disposed&&screen!=='library'&&!keepsDraft())finish();
+      animation.cancel();
+    });
+  }
+  async function prepareLeave(){
+    if(busy)return false;
+    if(!keepsDraft())return true;
+    const choice=await confirmUnsaved({Popup,POPUP_TYPE,POPUP_RESULT,doc,title:'保存修改？',body:`「${book?.entries?.[uid]?.comment||'未命名条目'}」有未保存的修改。`});
+    if(choice==='cancel'||disposed)return false;
+    // Re-rendering the entry restores its stored values.
+    if(choice==='discard'){render();return true;}
+    let saved=false;
+    await run(async()=>{await save();saved=true;});
+    return saved;
+  }
+  drawer.cwnLevels={prepareLeave:()=>keepsDraft()?prepareLeave():true,collapse,dirty:keepsDraft};
   async function active(n,enabled){await ensureExists(n);const selected=new Set(wi.selected_world_info);enabled?selected.add(n):selected.delete(n);wi.updateWorldInfoSettings({},[...selected]);for(const option of doc.querySelectorAll('#world_info option'))option.selected=selected.has(wi.world_names[Number(option.value)]);win.jQuery('#world_info').trigger('change.select2');await st.eventSource.emit(st.event_types.WORLDINFO_SETTINGS_UPDATED);}
   async function freshBook(){await ensureExists(name);book=await data.read(name);}
   async function save(){await ensureExists(name);book=await data.update(name,uid,draftPatch(),baseline);render();win.toastr.success('修改已保存');}
@@ -232,11 +267,13 @@ export function mountWorldbookLibrary(doc,win) {
   doc.addEventListener('pointermove',event=>{if(outsidePress&&Math.hypot(event.clientX-outsidePress.x,event.clientY-outsidePress.y)>6)outsidePress=null;},{capture:true,signal});
   doc.addEventListener('pointercancel',()=>outsidePress=null,{capture:true,signal});
   win.addEventListener('blur',()=>outsidePress=null,{signal});
-  doc.addEventListener('click',event=>{const press=outsidePress;outsidePress=null;if(press&&!busy&&outside(event)&&Math.hypot(event.clientX-press.x,event.clientY-press.y)<=6)void run(async()=>{if(await canLeave())doc.querySelector('#WI-SP-button > .drawer-toggle')?.click();});},{signal});
+  // Unsaved edits are resolved by the shared panel leave guard.
+  // The host usually closes the drawer on mousedown already; only act if it is still open.
+  doc.addEventListener('click',event=>{const press=outsidePress;outsidePress=null;if(press&&!busy&&drawer.classList.contains('openDrawer')&&outside(event)&&Math.hypot(event.clientX-press.x,event.clientY-press.y)<=6)doc.querySelector('#WI-SP-button > .drawer-toggle')?.click();},{signal});
   let opened=drawer.classList.contains('openDrawer');
-  const observer=new win.MutationObserver(()=>{const now=drawer.classList.contains('openDrawer');if(now&&!opened)void run(async()=>{await wi.updateWorldInfoList();if(screen!=='entry'){if(screen==='book'&&wi.world_names.includes(name))book=await data.read(name);else screen='library';render();}});opened=now;});observer.observe(drawer,{attributes:true,attributeFilter:['class']});
+  const observer=new win.MutationObserver(()=>{const now=drawer.classList.contains('openDrawer');if(now&&!opened){collapse({animate:false});void run(async()=>{await wi.updateWorldInfoList();if(screen!=='entry'){if(screen==='book'&&wi.world_names.includes(name))book=await data.read(name);else screen='library';render();}});}opened=now;});observer.observe(drawer,{attributes:true,attributeFilter:['class']});
   // Refresh a visible shelf when another native importer changes available books.
   const namesObserver=new win.MutationObserver(()=>{if(!busy&&screen==='library'&&!disposed)render();});const selector=doc.getElementById('world_editor_select');if(selector)namesObserver.observe(selector,{childList:true});
   render();
-  return()=>{importDialog.dispose();disposed=true;abort.abort();observer.disconnect();namesObserver.disconnect();pane.remove();file.remove();drawer.classList.remove('cwn-worldbook-mounted');};
+  return()=>{importDialog.dispose();disposed=true;folding?.cancel();folding=null;delete drawer.cwnLevels;abort.abort();observer.disconnect();namesObserver.disconnect();pane.remove();file.remove();drawer.classList.remove('cwn-worldbook-mounted');};
 }

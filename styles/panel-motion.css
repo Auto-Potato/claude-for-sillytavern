@@ -1,9 +1,17 @@
 /* One visibility/stacking owner for every native sidebar panel. */
+/* Registered so panel motion can animate them beneath the !important owners. */
+@property --cwn-panel-dim{syntax:'<number>';inherits:false;initial-value:0;}
+@property --cwn-panel-shadow{syntax:'<number>';inherits:false;initial-value:0;}
 html.cwn-active body #top-settings-holder.cwn-panels-managed .drawer > .drawer-content[data-cwn-panel-layer="hidden"]{display:none!important;}
 html.cwn-active body #top-settings-holder.cwn-panels-managed .drawer > .drawer-content[data-cwn-panel-layer="base"],
 html.cwn-active body #top-settings-holder.cwn-panels-managed .drawer > .drawer-content[data-cwn-panel-layer="front"]{display:block!important;visibility:visible!important;opacity:1!important;z-index:1100!important;}
 html.cwn-active body #top-settings-holder.cwn-panels-managed .drawer > .drawer-content[data-cwn-panel-layer="front"]{z-index:1101!important;}
 html.cwn-active body #top-settings-holder.cwn-panel-in-motion .drawer > .drawer-content{pointer-events:none;}
+/* The entering page's leading edge separates it from the page it covers. */
+@media(min-width:701px){
+  html.cwn-active body #top-settings-holder.cwn-panel-in-motion .drawer > :is(#right-nav-panel,#WorldInfo,.drawer-content)[data-cwn-panel-layer="front"]{box-shadow:6px 0 28px -6px rgb(0 0 0 / calc(var(--cwn-panel-shadow) * .22))!important;}
+  html.cwn-active body #top-settings-holder.cwn-panel-in-motion .drawer > .drawer-content[data-cwn-panel-layer="base"]{filter:brightness(calc(1 - var(--cwn-panel-dim) * .05))!important;}
+}
 /* The mobile rail remains the underlying page during its panel's exit. */
 @media(max-width:700px){
   html.cwn-active body #top-settings-holder.cwn-panel-in-motion{transition:none!important;transform:none!important;}

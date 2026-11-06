@@ -65,7 +65,7 @@ export function mountRegexPanel(doc,win,container,{button,icon}){
         const from=groupOf(row),body=doc.createElement('div');body.className='ce-move-picker';
         const title=doc.createElement('h3');title.textContent='移动规则';body.append(title);
         const name=doc.createElement('p');name.textContent=row.querySelector('.regex_script_name').textContent;body.append(name);
-        const popup=new Popup(body,POPUP_TYPE.TEXT,'',{okButton:'取消'});
+        const popup=new Popup(body,POPUP_TYPE.TEXT,'',{okButton:false,cancelButton:'取消'});popup.dlg.classList.add('cwn-character-dialog','cwn-picker-dialog');
         for(const group of groups){const btn=doc.createElement('button');btn.type='button';btn.className='ce-move-choice';btn.textContent=group.title+(group===from?' · 当前位置':'');btn.disabled=group===from;
             btn.addEventListener('click',async()=>{await popup.completeCancelled();await moveTo(row,group);});body.append(btn);}
         const exportButton=doc.createElement('button');exportButton.type='button';exportButton.className='ce-move-choice';exportButton.textContent='导出此规则';exportButton.addEventListener('click',async()=>{await popup.completeCancelled();row.querySelector('.export_regex')?.click();});body.append(exportButton);
@@ -95,7 +95,7 @@ export function mountRegexPanel(doc,win,container,{button,icon}){
         const group=groups.find(g=>action==='regex-new-'+g.key);if(group)doc.getElementById(group.create)?.click();
         if(action==='regex-tools'){
             const body=doc.createElement('div');body.className='ce-move-picker';body.innerHTML='<h3>正则操作</h3>';
-            const popup=new Popup(body,POPUP_TYPE.TEXT,'',{okButton:'关闭'});
+            const popup=new Popup(body,POPUP_TYPE.TEXT,'',{okButton:false,cancelButton:'关闭'});popup.dlg.classList.add('cwn-character-dialog','cwn-picker-dialog');
             for(const [label,id] of [['调试器','open_regex_debugger'],['批量操作','regex_bulk_edit']]){const b=doc.createElement('button');b.className='ce-move-choice';b.textContent=label;b.onclick=async()=>{await popup.completeCancelled();doc.getElementById(id)?.click();};body.append(b);}await popup.show();
         }
     },{signal:abort.signal});

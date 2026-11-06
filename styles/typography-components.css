@@ -50,7 +50,7 @@ html.cwn-active body {
   #cwn-worldbook-library :is(.quiet,.solid,.outline,.lights button,.book-more-menu button),
   #cwn-preset-panel .cp-button,
   #cwn-extensions-panel :is(.ce-button,.ce-auto-label),
-  dialog:is(.cwn-character-dialog,#cwn-chat-dialog,.cwn-resource-dialog) :is(.popup-button-ok,.popup-button-cancel,.cwn-dialog-buttons button) {
+  dialog:is(.cwn-character-dialog,#cwn-chat-dialog,.cwn-resource-dialog) :is(.popup-button-ok,.popup-button-cancel,.popup-button-custom,.cwn-dialog-buttons button) {
     font:var(--cwn-font-button)!important;
   }
 

@@ -6,9 +6,9 @@ function fixture(initial='characters', reduced=()=>false) {
   const paints=[], motions=[];
   const controller=createPanelTransition({initial,reduced,
     paint:(...state)=>paints.push(state),
-    animate:(panel,entering)=>{
+    animate:(panel,entering,from)=>{
       let finish;
-      const motion={panel,entering,cancelled:false,finished:new Promise(resolve=>{finish=resolve;}),
+      const motion={panel,entering,from,cancelled:false,finished:new Promise(resolve=>{finish=resolve;}),
         finish:()=>finish(),cancel(){this.cancelled=true;}};
       motions.push(motion);return motion;
     },
@@ -71,4 +71,13 @@ test('returning to the original panel during entry never paints an empty stage',
   motions[1].finish();await flush();
   assert.deepEqual(paints.at(-1),['characters',null,false]);
   assert.ok(paints.every(([from,to])=>from||to));
+});
+
+test('each motion knows the page it covers so that page can fold its second level',async()=>{
+  const {controller,motions}=fixture('characters');
+  controller.select('worldbook');
+  assert.deepEqual([motions[0].panel,motions[0].entering,motions[0].from],['worldbook',true,'characters']);
+  motions[0].finish();await flush();
+  controller.select(null);
+  assert.deepEqual([motions[1].panel,motions[1].entering,motions[1].from],['worldbook',false,'worldbook']);
 });

@@ -2,7 +2,7 @@
 
 SillyTavern 的 Claude 风格主题扩展，提供桌面与手机布局、暖纸日间/夜间配色，以及原生聊天控件的界面整合。
 
-当前发布版本 **0.5.7**，以 SillyTavern 1.19.0 为本次验证宿主。
+当前发布版本 **1.0.0**，以 SillyTavern 1.19.0 为本次验证宿主。
 
 ## 功能
 
@@ -15,23 +15,24 @@ SillyTavern 的 Claude 风格主题扩展，提供桌面与手机布局、暖纸
 - 时间戳去掉年份、单行右对齐。
 - 输入栏菜单、重新生成、扩展入口及断线反馈。
 - 螃蟹入口收纳脚本操作按钮；具体脚本仍由其原扩展执行。
+- API 连接页面：常用 Google 服务商卡片、完整服务商列表与 Vertex AI 验证。
 - 扩展首页、酒馆助手适配、管理与安装入口；正则按全局、角色、预设分组，支持拖动、移动、复制、删除和原位编辑。
 - 保留原生生成、消息编辑及头像查看功能。
 
 ## 安装
 
-将本仓库放入酒馆的 `public/scripts/extensions/third-party/claude-theme-next/`，确保 `manifest.json` 直接位于该目录内。刷新酒馆并启用扩展。为避免样式互相覆盖，关闭其他会重写整套界面的主题扩展。
+将本仓库放入酒馆的 `public/scripts/extensions/third-party/claude-for-sillytavern/`，确保 `manifest.json` 直接位于该目录内。刷新酒馆并启用扩展。为避免样式互相覆盖，关闭其他会重写整套界面的主题扩展。
 
 发布到 GitHub 后，也可以在酒馆扩展安装界面输入仓库地址。当前无需构建步骤，也不需要安装主题运行时依赖。
 
 ## 开发与预览
 
-使用 Node.js 24+ 在仓库根目录执行 `npm test`。当前 62 项 Node 测试通过；这不代表所有第三方脚本和真机键盘场景均已覆盖。
+使用 Node.js 24+ 在仓库根目录执行 `npm test`。当前 86 项 Node 测试通过；这不代表所有第三方脚本和真机键盘场景均已覆盖。
 
 主题加载后访问：
 
-- `/scripts/extensions/third-party/claude-theme-next/preview.html`：480 × 1040 手机预览。
-- `/scripts/extensions/third-party/claude-theme-next/preview-desktop.html`：1280 × 800 桌面预览。
+- `/scripts/extensions/third-party/claude-for-sillytavern/preview.html`：480 × 1040 手机预览。
+- `/scripts/extensions/third-party/claude-for-sillytavern/preview-desktop.html`：1280 × 800 桌面预览。
 
 预览页用于检查手机和桌面布局。浏览器测试页面位于 `tests/`。
 

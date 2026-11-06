@@ -49,3 +49,10 @@ html:is(.cwn-active,.cwn-design)[data-cwn-theme="dark"] {
   --cwn-check:#b65534;
   --cwn-check-border:#a8a192;
 }
+
+/* Native dropdown lists follow the active day/night palette instead of the
+   host's fixed dark tints. color-scheme (set per theme) styles the popup frame. */
+html.cwn-active body select :is(option,optgroup) {background-color:var(--cwn-surface)!important;color:var(--cwn-ink)!important;}
+html.cwn-active body select optgroup {color:var(--cwn-muted)!important;font-weight:500;}
+html.cwn-active body select option:checked {background-color:color-mix(in srgb,var(--cwn-accent) 16%,var(--cwn-surface))!important;color:var(--cwn-ink)!important;}
+html.cwn-active body select option:disabled {color:var(--cwn-muted)!important;}

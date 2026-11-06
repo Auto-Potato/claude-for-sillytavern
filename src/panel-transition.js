@@ -13,7 +13,8 @@ export function createPanelTransition({initial=null, paint, animate, reduced=()=
     if(reduced()){settle();return;}
     const from=shown,to=wanted,stamp=++revision;
     paint(from,to,true);
-    const motion=animate(to||from,!!to);running=motion;
+    // The outgoing surface is passed along so it can retract its own levels.
+    const motion=animate(to||from,!!to,from);running=motion;
     motion.finished.catch(()=>{}).then(()=>{
       if(disposed||stamp!==revision)return;
       // Set final visibility before cancelling the animation's filled frame.

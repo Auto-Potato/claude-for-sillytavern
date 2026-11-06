@@ -2,7 +2,8 @@ import { importCharacterResources } from './character-resources.js';
 import { createImportDialog } from './import-dialog.js';
 import * as st from '../../../../../script.js';
 import { world_names, updateWorldInfoList } from '../../../../world-info.js';
-import { Popup, POPUP_TYPE } from '../../../../popup.js';
+import { Popup, POPUP_TYPE, POPUP_RESULT } from '../../../../popup.js';
+import { confirmUnsaved } from './leave-guard.js';
 import { characterFields, createCharacterData } from './character-data.js';
 import { accountStorage } from '../../../../util/AccountStorage.js';
 import { characterSortOptions, normalizeCharacterSort, sortCharacters } from './character-sort.js';
@@ -154,16 +155,48 @@ export function mountCharacterLibrary(doc,win,host) {
     await run(async()=>{
       if(!await canLeave()||disposed)return;
       await slideDetail(false);
-      if(!disposed){
-        rememberHeight();editorResize.disconnect();page.remove();
-        page=listPage;page.inert=false;page.removeAttribute('aria-hidden');
-        card=null;draft=null;revision++;
-        const y=page.scrollTop;drawCards();page.scrollTop=y;
-        left=true;
-      }
+      if(!disposed){resetToList();left=true;}
     },{disable:false});
     return left;
   }
+  // Return to the list page without motion; the caller owns any animation.
+  function resetToList(){
+    if(!card||!listPage)return;
+    rememberHeight();editorResize.disconnect();page.remove();
+    page=listPage;page.inert=false;page.removeAttribute('aria-hidden');
+    card=null;draft=null;revision++;
+    const y=page.scrollTop;drawCards();page.scrollTop=y;
+  }
+  // Desktop panel motion: the detail (second level) folds back under the list
+  // whenever this page leaves the stage. Unsaved edits are never discarded.
+  let folding=null;
+  function collapse({animate=true}={}){
+    if(disposed||!card||changed())return;
+    if(folding){if(!animate)folding.finish();return;}
+    if(busy)return;
+    if(!animate||!motionAllowed()||!page.animate){resetToList();return;}
+    const target=page;target.inert=true;
+    const animation=target.animate([{translate:'0 0',clipPath:'inset(0)'},{translate:'-100% 0',clipPath:'inset(0 0 0 100%)'}],{duration:300,easing:'cubic-bezier(.22,.61,.36,1)',fill:'forwards'});
+    folding=animation;
+    animation.finished.catch(()=>{}).then(()=>{
+      if(folding!==animation)return;
+      folding=null;
+      // Remove the folded page before releasing its final frame.
+      if(!disposed&&page===target&&!changed())resetToList();
+      animation.cancel();target.inert=false;
+    });
+  }
+  async function prepareLeave(){
+    if(busy)return false;
+    if(!changed())return true;
+    const choice=await confirmUnsaved({Popup,POPUP_TYPE,POPUP_RESULT,doc,title:'保存修改？',body:`「${card.name||card.data?.name||'角色卡'}」有未保存的修改。`});
+    if(choice==='cancel'||disposed)return false;
+    if(choice==='discard'){discard();render();return true;}
+    let saved=false;
+    await run(async()=>{if(!changed()){saved=true;return;}card=await data.save(avatar,draft,baseline);discard();render();win.toastr.success('角色详情已保存');saved=true;});
+    return saved;
+  }
+  drawer.cwnLevels={prepareLeave:()=>changed()?prepareLeave():true,collapse,dirty:changed};
   async function open(key){
     if(card&&avatar===key)return;
     if(card&&!await canLeave())return;
@@ -263,6 +296,8 @@ export function mountCharacterLibrary(doc,win,host) {
     if(disposed||isOpen===drawerOpen)return;
     drawerOpen=isOpen;
     if(isOpen&&!card)list();
+    // An unmodified detail never survives leaving the page; edits are kept.
+    else if(isOpen)collapse({animate:false});
   });observer.observe(drawer,{attributes:true,attributeFilter:['class']});
   const refresh=()=>{if(!disposed&&!card&&!busy)list();};
   for(const type of ['CHARACTER_EDITED','CHARACTER_DELETED','CHARACTER_DUPLICATED','CHARACTER_RENAMED'])st.eventSource.on(st.event_types[type],refresh);
@@ -283,8 +318,9 @@ export function mountCharacterLibrary(doc,win,host) {
   win.addEventListener('blur',()=>{outsidePress=null;},{signal:abort.signal});
   const outside=event=>{
     const press=outsidePress;outsidePress=null;
-    if(press&&event.button===0&&Math.hypot(event.clientX-press.x,event.clientY-press.y)<=6&&win.innerWidth>700&&drawer.classList.contains('openDrawer')&&!busy&&!changed()&&isOutside(event))doc.querySelector('#rightNavHolder > .drawer-toggle')?.click();
+    // Unsaved edits are resolved by the shared panel leave guard.
+    if(press&&event.button===0&&Math.hypot(event.clientX-press.x,event.clientY-press.y)<=6&&win.innerWidth>700&&drawer.classList.contains('openDrawer')&&!busy&&isOutside(event))doc.querySelector('#rightNavHolder > .drawer-toggle')?.click();
   };
   doc.addEventListener('click',outside,{signal:abort.signal});list();
-  return()=>{importDialog.dispose();rememberHeight();editorResize.disconnect();disposed=true;revision++;pageAnimation?.cancel();abort.abort();observer.disconnect();imports.disconnect();for(const type of ['CHARACTER_EDITED','CHARACTER_DELETED','CHARACTER_DUPLICATED','CHARACTER_RENAMED'])st.eventSource.removeListener(st.event_types[type],refresh);if(zone&&home)home.insertBefore(zone,next?.parentNode===home?next:null);pane.remove();drawer.classList.remove('cwn-library-mounted');};
+  return()=>{importDialog.dispose();rememberHeight();editorResize.disconnect();disposed=true;revision++;pageAnimation?.cancel();folding?.cancel();folding=null;delete drawer.cwnLevels;abort.abort();observer.disconnect();imports.disconnect();for(const type of ['CHARACTER_EDITED','CHARACTER_DELETED','CHARACTER_DUPLICATED','CHARACTER_RENAMED'])st.eventSource.removeListener(st.event_types[type],refresh);if(zone&&home)home.insertBefore(zone,next?.parentNode===home?next:null);pane.remove();drawer.classList.remove('cwn-library-mounted');};
 }

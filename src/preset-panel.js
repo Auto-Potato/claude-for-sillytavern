@@ -1,6 +1,7 @@
 import { mountPresetEntryEditor } from './preset-entry-editor.js';
 import { importZoneContent, mountPresetDrop } from './import-zone.js';
 import { createImportDialog } from './import-dialog.js';
+import { labelNextDialog } from './dialog-style.js';
 import { eventSource, event_types, saveSettingsDebounced } from '../../../../../script.js';
 import { oai_settings } from '../../../../openai.js';
 
@@ -165,6 +166,8 @@ export function mountPresetPanel(doc, win) {
                 menuButton.setAttribute('aria-expanded', String(!menu.hidden));
             } else {
                 closeMenu();
+                // The host's delete confirm has only a sentence and Yes/No labels.
+                if (action === 'delete') labelNextDialog({title:'删除预设', cancel:'取消'});
                 if (targets[action]) panel.querySelector(targets[action])?.click();
             }
         };

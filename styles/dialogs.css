@@ -13,10 +13,12 @@ html.cwn-active body :is(dialog.cwn-character-dialog,dialog#cwn-chat-dialog,.TH-
  & label {font:var(--cwn-font-guide)!important;color:var(--cwn-ink);}
  & :is(.popup-controls,.cwn-dialog-buttons),
  & > div:last-child:has(> button) {display:flex!important;flex-wrap:wrap;align-self:stretch!important;align-items:center;justify-content:flex-end!important;width:100%!important;gap:10px!important;margin:var(--cwn-space-6) 0 0!important;padding:var(--cwn-space-5) 0 0!important;border-top:1px solid var(--cwn-line);}
- & :is(.popup-button-ok,.popup-button-cancel,.cwn-dialog-buttons button),
+ & :is(.popup-button-ok,.popup-button-cancel,.popup-button-custom,.cwn-dialog-buttons button),
  & > div:last-child > button {display:inline-flex!important;align-items:center;justify-content:center;min-width:var(--cwn-dialog-action-width)!important;height:var(--cwn-control-height)!important;min-height:var(--cwn-control-height)!important;margin:0!important;padding:var(--cwn-dialog-action-padding)!important;border:1px solid var(--cwn-line)!important;border-radius:var(--cwn-radius-control)!important;background:transparent!important;color:var(--cwn-ink)!important;font:var(--cwn-font-button)!important;box-shadow:none!important;}
  & :is(.popup-button-ok.popup-button-ok,.cwn-dialog-buttons .cwn-primary.cwn-primary) {order:1;background:var(--cwn-check)!important;color:var(--cwn-on-accent)!important;border-color:var(--cwn-check)!important;}
  & .popup-button-cancel {order:0;}
+ /* Save / discard / stay: discard sits between cancel and the primary save. */
+ & .popup-button-custom {order:1;}
  & .cwn-danger.cwn-danger {order:1;background:var(--cwn-danger-bg)!important;color:var(--cwn-on-accent)!important;border-color:var(--cwn-danger-bg)!important;}
 }
 /* Only the content-container adapters differ between the two popup hosts. */
@@ -27,10 +29,25 @@ html.cwn-active body dialog.cwn-character-dialog :is(.popup-body,.popup-content)
 html.cwn-active body dialog:is(.cwn-character-dialog,#cwn-chat-dialog) :is(input:not([type=checkbox]),select) {width:100%;min-height:var(--cwn-touch-size);margin-top:var(--cwn-space-4)!important;padding:10px var(--cwn-space-3)!important;border:1px solid var(--cwn-line)!important;border-radius:var(--cwn-radius-control)!important;background:var(--cwn-surface)!important;color:var(--cwn-ink)!important;font:var(--cwn-font-body)!important;}
 html.cwn-active body dialog:is(.cwn-character-dialog,#cwn-chat-dialog) label select {margin-top:var(--cwn-space-2)!important;}
 html.cwn-active body dialog:is(.cwn-character-dialog,#cwn-chat-dialog) .cwn-delete-name {display:block;margin:22px 0 18px!important;padding:14px var(--cwn-space-4)!important;border:1px solid var(--cwn-line);border-radius:var(--cwn-radius-md);background:var(--cwn-surface);font:var(--cwn-font-body)!important;}
+/* Native input popups: same field as theme inputs; the action row closes the dialog. */
+html.cwn-active body dialog.cwn-character-dialog textarea.popup-input {width:100%;min-height:var(--cwn-touch-size);margin:var(--cwn-space-4) 0 0!important;padding:10px var(--cwn-space-3)!important;border:1px solid var(--cwn-line)!important;border-radius:var(--cwn-radius-control)!important;background:var(--cwn-surface)!important;color:var(--cwn-ink)!important;font:var(--cwn-font-body)!important;resize:vertical;}
+html.cwn-active body dialog.cwn-character-dialog .popup-inputs {margin-top:var(--cwn-space-4)!important;text-align:left!important;}
+html.cwn-active body dialog.cwn-character-dialog .popup-inputs .checkbox_label {justify-content:flex-start!important;font:var(--cwn-font-guide)!important;}
+html.cwn-active body dialog.cwn-character-dialog .popup-button-close {display:none!important;}
+/* Native sentences without a <p> read as body copy beneath the title. */
+html.cwn-active body dialog.cwn-native-dialog .popup-content {color:var(--cwn-muted)!important;font:var(--cwn-font-guide)!important;}
+/* Native popups hide unused actions with an inline style; keep them hidden. */
+html.cwn-active body :is(dialog.cwn-character-dialog,dialog#cwn-chat-dialog,.TH-popup .popup[role="dialog"][class~="w-[500px]"]) .popup-controls > :is(.popup-button-ok,.popup-button-cancel,.popup-button-custom)[style*="display: none"] {display:none!important;}
+/* Choice lists (move, tools) sit between the title and the action row. */
+html.cwn-active body dialog.cwn-picker-dialog .ce-move-picker {margin:0!important;}
+html.cwn-active body dialog.cwn-picker-dialog .ce-move-picker > p {margin:0 0 var(--cwn-space-3)!important;}
+html.cwn-active body dialog.cwn-picker-dialog .ce-move-choice {display:flex!important;align-items:center;width:100%;min-height:var(--cwn-touch-size);padding:var(--cwn-space-3) var(--cwn-space-2)!important;border:0!important;border-bottom:1px solid var(--cwn-line)!important;border-radius:0!important;background:transparent!important;color:var(--cwn-ink)!important;font:var(--cwn-font-body)!important;text-align:left;cursor:pointer;}
+html.cwn-active body dialog.cwn-picker-dialog .ce-move-choice:hover:not(:disabled) {background:var(--cwn-hover)!important;}
+html.cwn-active body dialog.cwn-picker-dialog .ce-move-choice:disabled {color:var(--cwn-muted)!important;opacity:var(--cwn-opacity-disabled);cursor:default;}
 @media(max-width:700px){
  html.cwn-active body :is(dialog.cwn-character-dialog,dialog#cwn-chat-dialog,.TH-popup .popup[role="dialog"][class~="w-[500px]"]) {
   padding:var(--cwn-dialog-padding-mobile)!important;border-radius:var(--cwn-radius-dialog-mobile)!important;
-  & :is(.popup-button-ok,.popup-button-cancel,.cwn-dialog-buttons button),
+  & :is(.popup-button-ok,.popup-button-cancel,.popup-button-custom,.cwn-dialog-buttons button),
   & > div:last-child > button {flex:1!important;min-width:0!important;}
  }
 }
