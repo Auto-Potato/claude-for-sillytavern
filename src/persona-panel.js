@@ -212,7 +212,7 @@ export function mountPersonaPanel(doc, win) {
     root.addEventListener('click', event => {
         const target = event.target.closest('[data-pp]');
         const action = target?.dataset.pp;
-        if (action === 'close') { drawer.querySelector('.cwn-panel-actions button:not(.cwn-panel-back)')?.click(); return; }
+        if (action === 'close') { drawer.querySelector('.cwn-panel-back')?.click(); return; }
         if (action === 'rename') { renameInline(target); return; }
         if (action === 'avatar') { changeAvatar(); return; }
         if (action === 'pick') { switchTo(people.find(p => p.avatar === target.dataset.avatar)); return; }
