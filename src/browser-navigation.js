@@ -17,6 +17,7 @@ export function mountBrowserNavigation(doc,win) {
     return (chatOpen()?1:0)+(railOpen()||p?1:0)+(p?1:0)+(p?.id==='right-nav-panel'&&library?.cwnNavigation?.isDetail()?1:0)+(p?.id==='WorldInfo'?(worldbook?.cwnNavigation?.depth()||0):0)+(p?.id==='rm_extensions_block'?(extensions?.cwnNavigation?.depth()||0):0)+popups().length;
   };
   const controller=createMenuHistory({history:win.history,read,
+    protectRoot:()=>win.innerWidth<=700,
     dismissPopup:async()=>{await popups().at(-1)?.completeCancelled();},
     listen:fn=>{win.addEventListener('popstate',fn);return()=>win.removeEventListener('popstate',fn);},
     onError:error=>{console.error('[Claude navigation]',error);win.toastr.error('返回未完成，请重试');},

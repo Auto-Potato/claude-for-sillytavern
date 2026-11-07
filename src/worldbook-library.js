@@ -60,7 +60,7 @@ export function mountWorldbookLibrary(doc,win) {
     const oldDepth=Number(pane.dataset.depth||0);
     const newDepth=screen==='entry'?2:screen==='book'?1:0;
     const routeChanged=renderedPage!==JSON.stringify([screen,screen==='library'?'':name,screen==='entry'?uid:null]);
-    if(newDepth>oldDepth&&previousBody){
+    if(newDepth>oldDepth&&previousBody&&win.innerWidth>700){
       const view=doc.createElement('div');view.className='wb-parent-view';
       view.append(pane.querySelector('.wb-nav').cloneNode(true),previousBody.cloneNode(true));
       view.inert=win.innerWidth<=700;
@@ -137,9 +137,8 @@ export function mountWorldbookLibrary(doc,win) {
     try{
       if(!await canLeave())return false;
       if(screen==='library'){drawer.querySelector('.cwn-panel-back')?.click();return true;}
-      // Resolve data before moving; never expose the exited page during a fetch.
-      const fresh=screen==='entry'?await data.read(name):null;
-      if(screen==='book')await wi.updateWorldInfoList();
+      // Returning uses the already-loaded book/shelf. Drafts live in the form,
+      // and writes replace `book`; opening an item still reads fresh data.
       if(disposed)return false;
       pane.inert=true;
       if(win.innerWidth>700&&!win.matchMedia('(prefers-reduced-motion: reduce)').matches){
@@ -149,7 +148,7 @@ export function mountWorldbookLibrary(doc,win) {
         if(animation)try{await animation.finished;}catch{}
       }
       if(disposed)return false;
-      if(screen==='entry'){book=fresh;screen='book';}else screen='library';
+      if(screen==='entry')screen='book';else screen='library';
       query='';render();return true;
     }finally{animation?.cancel();busy=false;pane.inert=false;}
   }

@@ -26,3 +26,40 @@ test('a blocked return to welcome preserves the chat back entry',async()=>{
  const s=setup(1);s.guard(false);await s.back();assert.equal(s.ui,1);assert.equal(s.index,1);
  s.guard(true);await s.back();assert.equal(s.ui,0);assert.equal(s.index,0);
 });
+
+test('rapid back during a slow close stays in document and drains queued layers',async()=>{
+ let ui=3,index=0,callback,finish,exited=false,calls=0;
+ const entries=[{}],tick=()=>new Promise(r=>setImmediate(r));
+ const history={get state(){return entries[index]},replaceState(s){entries[index]=s},pushState(s){entries.splice(++index);entries.push(s)},go(n){index+=n;if(index<0){exited=true;return;}queueMicrotask(()=>callback({state:entries[index]}));}};
+ createMenuHistory({history,read:()=>ui,closeOne:async()=>{calls++;if(calls===1)await new Promise(r=>finish=r);ui--;return true;},listen:fn=>{callback=fn;return()=>{}},onError:e=>{throw e;}});
+ history.go(-1);await tick();
+ for(let i=0;i<5;i++){history.go(-1);await tick();}
+ assert.equal(exited,false);assert.equal(ui,3);assert.equal(calls,1);
+ finish();await tick();await tick();
+ assert.equal(ui,0);assert.equal(index,0);assert.equal(calls,3);
+ history.go(-1);assert.equal(exited,true); // Welcome still permits normal browser Back.
+});
+
+test('failed asynchronous close restores usable local history',async()=>{
+ let ui=2,index=0,callback,reject,reported=0;
+ const entries=[{}],tick=()=>new Promise(r=>setImmediate(r));
+ const history={get state(){return entries[index]},replaceState(s){entries[index]=s},pushState(s){entries.splice(++index);entries.push(s)},go(n){index+=n;queueMicrotask(()=>callback({state:entries[index]}));}};
+ createMenuHistory({history,read:()=>ui,closeOne:()=>new Promise((_,r)=>reject=r),listen:fn=>{callback=fn;return()=>{}},onError:()=>reported++});
+ history.go(-1);await tick();history.go(-1);await tick();
+ reject(new Error('load failed'));await tick();
+ assert.equal(ui,2);assert.equal(index,2);assert.equal(reported,1);
+});
+
+test('mobile welcome back stays on page without accumulating guard entries',async()=>{
+ let ui=0,index=0,callback,exited=false;
+ const entries=[{}],tick=()=>new Promise(r=>setImmediate(r));
+ const history={get state(){return entries[index]},replaceState(s){entries[index]=s},pushState(s){entries.splice(++index);entries.push(s)},go(n){index+=n;if(index<0){exited=true;return;}queueMicrotask(()=>callback({state:entries[index]}));}};
+ const mount=()=>createMenuHistory({history,read:()=>ui,protectRoot:()=>true,closeOne:async()=>{ui--;return true;},listen:fn=>{callback=fn;return()=>{}},onError:e=>{throw e;}});
+ let c=mount();assert.equal(index,1);
+ for(let i=0;i<6;i++){history.go(-1);await tick();assert.equal(ui,0);assert.equal(index,1);assert.equal(entries.length,2);}
+ c.dispose();c=mount();assert.equal(entries.length,2);
+ ui=3;c.sync();
+ for(const n of [2,1,0]){history.go(-1);await tick();assert.equal(ui,n);}
+ history.go(-1);await tick();assert.equal(ui,0);assert.equal(exited,false);assert.equal(index,1);
+ c.dispose();
+});
