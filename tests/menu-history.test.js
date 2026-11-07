@@ -92,7 +92,24 @@ test('mobile manual worldbook close and rapid back never schedule a bulk travers
  assert.equal(s.exited,false);assert.equal(s.ui,2);
  resolve();await s.tick();await s.tick();
  assert.equal(s.ui,0);assert.equal(s.index,1);assert.equal(s.entries.length,2);
- assert.deepEqual(s.moves,[-1,-1,-1,-1,-1]);
+ assert.deepEqual(s.moves,[-1,1,-1,1,-1,1,-1,1,-1,1]);
  await s.back();assert.equal(s.exited,false);assert.equal(s.ui,0);
  s.controller.dispose();
+});
+
+test('Chrome UI Back does not skip all entries after the first detail return',async()=>{
+ let ui=4,index=0,callback,activated=true,skippable=false,exited=false,pushes=0;
+ const entries=[{}],tick=()=>new Promise(r=>setImmediate(r));
+ const history={get state(){return entries[index]},replaceState(s){entries[index]=s},pushState(s){if(!activated)skippable=true;pushes++;entries.splice(++index);entries.push(s)},go(n){queueMicrotask(()=>{activated=false;index+=n;if(index<0){exited=true;return;}void callback({state:entries[index]});});}};
+ const c=createMenuHistory({history,read:()=>ui,protectRoot:()=>true,closeOne:async()=>{ui--;return true;},listen:fn=>{callback=fn;return()=>{}},onError:e=>{throw e;}});
+ const initialPushes=pushes;
+ // Browser chrome Back skips script-created history; history.back() tests don't.
+ for(const expected of [3,2,1,0,0,0]){
+  if(skippable)exited=true;else history.go(-1);
+  await tick();
+  assert.equal(exited,false);assert.equal(skippable,false);
+  assert.equal(ui,expected);assert.equal(index,1);
+  assert.equal(pushes,initialPushes,'Back must not create a new history entry');
+ }
+ c.dispose();
 });

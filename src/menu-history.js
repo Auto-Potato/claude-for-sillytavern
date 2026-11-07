@@ -6,6 +6,7 @@ export function createMenuHistory({history, read, closeOne, dismissPopup, listen
   let depth=Number.isInteger(history.state?.[key])?history.state[key]:0;
   let moving=false, applying=false, disposed=false;
   let requested=0;
+  let restoring=false;
   const state=n=>({...history.state,[key]:n});
   if(!Number.isInteger(history.state?.[key]))history.replaceState(state(0),'');
   function grow(target){while(depth<target)history.pushState(state(++depth),'');}
@@ -18,7 +19,7 @@ export function createMenuHistory({history, read, closeOne, dismissPopup, listen
     history.pushState({...state(depth),[guardKey]:'fixed-v2'},'');
   }
   function sync(){
-    if(disposed||moving||applying)return;
+    if(disposed||moving||applying||restoring)return;
     ensureRoot();
     const target=read();
     if(protectRoot()){
@@ -33,10 +34,15 @@ export function createMenuHistory({history, read, closeOne, dismissPopup, listen
     const steps=Math.max(0,depth-target);
     depth=target;
     if(protectRoot()){
-      // Restore the active entry synchronously, before awaiting a close or
-      // discard prompt. UI closing never schedules a browser history.go().
+      if(restoring&&target>=0){
+        restoring=false;
+        if(!applying)sync();
+        return;
+      }
+      // Reuse the existing active entry. pushState here makes Chromium mark
+      // ALL same-document entries skippable after Back (crbug.com/1248529).
       depth=read();
-      history.pushState({...state(depth),[guardKey]:'fixed-v2'},'');
+      if(!restoring){restoring=true;history.go(1);}
       if(applying){
         requested=Math.max(0,requested-1);
         try{await dismissPopup?.();}catch(error){onError(error);}
@@ -49,7 +55,7 @@ export function createMenuHistory({history, read, closeOne, dismissPopup, listen
           if(!await closeOne()||read()>=previous)break;
         }
       }catch(error){onError(error);}
-      finally{applying=false;if(!disposed){depth=read();history.replaceState(state(depth),'');}}
+      finally{applying=false;if(!disposed&&!restoring){depth=read();history.replaceState(state(depth),'');}}
       return;
     }
     if(moving){moving=false;sync();return;}
