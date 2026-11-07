@@ -8,6 +8,7 @@ import { worldbookSource, recordWorldbookSource } from './worldbook-sources.js';
 import { importZoneContent } from './import-zone.js';
 import { createImportDialog } from './import-dialog.js';
 import { confirmUnsaved } from './leave-guard.js';
+import { diagnosticStep, diagnosticFrame } from './performance-diagnostics.js';
 
 const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const svg=path=>`<svg viewBox="0 0 24 24" aria-hidden="true"><path d="${path}"/></svg>`;
@@ -231,14 +232,25 @@ export function mountWorldbookLibrary(doc,win) {
       if(target.dataset.book){
         const next=target.dataset.book;if(screen==='book'&&next===name)return;
         if(!await canLeave())return;
-        await ensureExists(next);const fresh=await data.read(next);
-        name=next;book=fresh;screen='book';query='';render();
+        const total=diagnosticStep('worldbook.open');
+        try{
+          const directory=diagnosticStep('worldbook.directory');await ensureExists(next);directory();
+          const read=diagnosticStep('worldbook.read');const fresh=await data.read(next);read();
+          name=next;book=fresh;screen='book';query='';
+          const draw=diagnosticStep('worldbook.render',{entries:Object.keys(book.entries).length});render();draw();
+          diagnosticFrame('worldbook.next-frame');
+        }finally{total();}
       }else if(target.dataset.entry){
         const next=Number(target.dataset.entry);if(screen==='entry'&&next===uid)return;
         if(!await canLeave())return;
-        await ensureExists(name);const fresh=await data.read(name);
-        if(!fresh.entries[next])throw new Error('条目已不存在');
-        uid=next;book=fresh;screen='entry';render();
+        const total=diagnosticStep('worldbook.entry.open');
+        try{
+          const directory=diagnosticStep('worldbook.entry.directory');await ensureExists(name);directory();
+          const read=diagnosticStep('worldbook.entry.read');const fresh=await data.read(name);read();
+          if(!fresh.entries[next])throw new Error('条目已不存在');
+          uid=next;book=fresh;screen='entry';
+          const draw=diagnosticStep('worldbook.entry.render');render();draw();diagnosticFrame('worldbook.entry.next-frame');
+        }finally{total();}
       }else if(target.dataset.action)await action(target.dataset.action,target);
     });
   },{signal});

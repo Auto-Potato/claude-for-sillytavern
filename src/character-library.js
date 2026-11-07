@@ -1,3 +1,4 @@
+import { diagnosticStep, diagnosticFrame } from './performance-diagnostics.js';
 import { importCharacterResources } from './character-resources.js';
 import { createImportDialog } from './import-dialog.js';
 import * as st from '../../../../../script.js';
@@ -202,15 +203,20 @@ export function mountCharacterLibrary(doc,win,host) {
     if(card&&!await canLeave())return;
     closeSort();
     const switching=!!card;
-    const stamp=++revision,loaded=await data.read(key);
-    if(disposed||stamp!==revision)return;
-    avatar=key;card=loaded;opening=0;draft=null;
-    if(!switching){
-      listPage=page;
-      page=doc.createElement('div');page.className='cwn-library-page cwn-library-detail';pane.append(page);
-    }
-    listPage.inert=win.innerWidth<=700;listPage.toggleAttribute('aria-hidden',win.innerWidth<=700);
-    render();page.scrollTop=0;if(!switching)await slideDetail(true);
+    const total=diagnosticStep('character.open');
+    try{
+      const read=diagnosticStep('character.read');
+      const stamp=++revision,loaded=await data.read(key);read();
+      if(disposed||stamp!==revision)return;
+      avatar=key;card=loaded;opening=0;draft=null;
+      if(!switching){
+        listPage=page;
+        page=doc.createElement('div');page.className='cwn-library-page cwn-library-detail';pane.append(page);
+      }
+      listPage.inert=win.innerWidth<=700;listPage.toggleAttribute('aria-hidden',win.innerWidth<=700);
+      const draw=diagnosticStep('character.render');render();page.scrollTop=0;draw();diagnosticFrame('character.next-frame');
+      if(!switching){const motion=diagnosticStep('character.animation');await slideDetail(true);motion();}
+    }finally{total();}
   }
   pane.addEventListener('input',event=>{const el=event.target;if(el.matches('.library-search')){query=el.value;drawCards();}if(el.dataset.field){beginDraft();if(el.dataset.field==='description')draft.description=el.value;if(el.dataset.field==='opening'){if(opening<draft.openings.length||el.value)draft.openings[opening]=el.value;}editActions();controls();}},{signal:abort.signal});
   pane.addEventListener('change',event=>{

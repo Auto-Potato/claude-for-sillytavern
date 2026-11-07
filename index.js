@@ -22,6 +22,7 @@ import { mountMessages } from './src/messages.js';
 import { mountDialogStyle } from './src/dialog-style.js';
 import { mountApiPanel } from './src/api-panel.js';
 import { mountPersonaPanel } from './src/persona-panel.js';
+import { mountPerformanceDiagnostics } from './src/performance-diagnostics.js';
 
 // The host initializes its widgets first. No polling, DOM-wide observer or reload.
 let dispose;
@@ -53,6 +54,7 @@ function start() {
   const disposeApi = mountApiPanel(document, window);
   const disposePersona = mountPersonaPanel(document, window);
   const disposeExtensions = mountExtensionsPanel(document, window);
+  const disposeDiagnostics = mountPerformanceDiagnostics(document, window);
   const disposeWorldOption = mountEmbeddedWorldOption({
     Popup, confirmType: POPUP_TYPE.CONFIRM, affirmative: POPUP_RESULT.AFFIRMATIVE, doc: document,
     getCharacter: () => characters[window.jQuery('#import_character_info').data('chid')],
@@ -83,7 +85,7 @@ function start() {
   });
   const disposeBrowserNavigation = mountBrowserNavigation(document, window);
   startToasts();
-  dispose = () => { disposeBrowserNavigation(); disposeWorldOption(); disposeExtensions(); disposeApi(); disposePersona(); disposePreset(); disposeWorldbook(); disposeLibrary(); disposeImport(); disposeDialogStyle(); disposeIcons(); stopToasts(); disposeMessages(); disposeComposer(); disposeAppearance(); disposeHome(); disposeShell(); };
+  dispose = () => { disposeDiagnostics(); disposeBrowserNavigation(); disposeWorldOption(); disposeExtensions(); disposeApi(); disposePersona(); disposePreset(); disposeWorldbook(); disposeLibrary(); disposeImport(); disposeDialogStyle(); disposeIcons(); stopToasts(); disposeMessages(); disposeComposer(); disposeAppearance(); disposeHome(); disposeShell(); };
 }
 eventSource.once(event_types.APP_READY, () => {
   const settings = extension_settings.claude_for_sillytavern ??= { enabled: true };

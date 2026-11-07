@@ -1,0 +1,12 @@
+html.cwn-active .cwn-diagnostic-bar {
+  position:fixed;top:58px;left:12px;right:12px;z-index:20000;
+  display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:10px 12px;
+  background:var(--cwn-bg);color:var(--cwn-ink);border:1px solid var(--cwn-line);
+  border-radius:12px;box-shadow:0 3px 12px #0002;font:13px/1.5 sans-serif;
+}
+html.cwn-active .cwn-diagnostic-bar[hidden]{display:none;}
+html.cwn-active .cwn-diagnostic-bar span{flex:1;min-width:150px;}
+html.cwn-active .cwn-diagnostic-bar button{
+  min-height:40px;padding:6px 12px;border:1px solid var(--cwn-line);
+  border-radius:8px;background:var(--cwn-surface);color:var(--cwn-ink);font:inherit;
+}
