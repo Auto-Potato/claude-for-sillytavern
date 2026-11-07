@@ -1,0 +1,137 @@
+/* User persona panel. Mobile: contact page + swipe switcher. Desktop: identity card + face wall. */
+html.cwn-active #PersonaManagement.cwn-persona-mounted {padding:0!important;overflow:hidden!important}
+html.cwn-active #PersonaManagement.cwn-persona-mounted > :not(#cwn-persona-panel) {display:none!important}
+#cwn-persona-panel {position:absolute;inset:0;display:flex;flex-direction:column;background:var(--cwn-bg);color:var(--cwn-ink);overflow:hidden;font:var(--cwn-font-body)}
+#PersonaManagement #cwn-persona-panel {
+  * {box-sizing:border-box}
+  h1,h2,p {margin:0}
+  svg {width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;flex:none}
+  button,input,textarea {font-family:var(--cwn-type-ui-family);color:inherit;filter:none!important;text-shadow:none!important}
+  button {cursor:pointer}
+  :is(button,input,textarea):focus-visible {outline:2px solid var(--cwn-accent);outline-offset:3px}
+  &.pp-busy :is(.pp-scroll) {cursor:progress}
+
+  .pp-head {display:flex;align-items:center;justify-content:space-between;flex:none;padding:var(--cwn-space-6) var(--cwn-panel-padding) 0}
+  .pp-title {font:var(--cwn-font-title)}
+  .pp-icon {display:grid;place-items:center;width:var(--cwn-touch-size);height:var(--cwn-touch-size);margin-right:-10px;padding:0;border:0;border-radius:var(--cwn-radius-control);background:transparent;color:var(--cwn-muted)}
+  .pp-icon:hover {background:var(--cwn-hover);color:var(--cwn-ink)}
+  .pp-scroll {flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;scrollbar-width:none;padding:var(--cwn-space-6) var(--cwn-panel-padding) var(--cwn-space-8)}
+  .pp-scroll::-webkit-scrollbar {display:none}
+
+  .pp-av,.pp-initial {display:block;width:100%;height:100%;border-radius:50%;object-fit:cover}
+  .pp-initial {display:grid;place-items:center;background:var(--cwn-surface);color:var(--cwn-muted);font-family:var(--cwn-type-title-family);font-style:normal;box-shadow:inset 0 0 0 1px var(--cwn-line)}
+  .pp-cam {position:absolute;display:grid;place-items:center;border-radius:50%}
+  .pp-status {display:inline-flex;align-items:center;gap:7px;font:var(--cwn-font-caption);color:var(--cwn-muted)}
+  .pp-status i {flex:none;width:7px;height:7px;border-radius:50%;background:#6f8a5c}
+  .pp-status.other i {background:var(--cwn-line)}
+  &.pp-empty .pp-status i {background:var(--cwn-line)}
+
+  .pp-name-slot {display:flex;justify-content:center;width:100%;min-width:0}
+  .pp-name {position:relative;display:inline-block;max-width:calc(100% - 24px);margin:0;padding:0 4px;border:0;border-radius:8px;background:transparent;font:400 30px/1.3 var(--cwn-type-title-family)!important;color:var(--cwn-ink);text-align:inherit;overflow-wrap:anywhere;cursor:text}
+  .pp-name .pp-pen {position:absolute;top:-2px;right:-20px;width:15px;height:15px;color:var(--cwn-muted)}
+  button.pp-name:hover {background:var(--cwn-hover)}
+  .pp-name-static {cursor:default}
+  .pp-name-input {width:min(280px,100%);margin:0;padding:0 8px;border:0!important;border-bottom:1.5px solid var(--cwn-accent)!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;font:400 30px/1.3 var(--cwn-type-title-family)!important;color:var(--cwn-ink);text-align:inherit;outline:none}
+
+  /* Description: a quiet, centred bio that edits in place. */
+  .pp-bio {display:flex;flex-direction:column;align-items:center;padding:4px 12px 0}
+  .pp-rule {width:28px;height:1px;margin-bottom:18px;background:var(--cwn-line)}
+  .pp-bio-text {display:block;width:100%;max-width:340px;min-height:0;field-sizing:content;margin:0;padding:8px 12px;border:0;border-radius:12px;background:transparent;
+    font:400 15px/1.85 var(--cwn-type-ui-family)!important;color:var(--cwn-muted)!important;text-align:center;resize:none;outline:none;overflow:hidden;box-shadow:none!important;transition:background .15s,color .15s,box-shadow .15s}
+  .pp-bio-text,.pp-bio-text:not(:hover):not(:focus) {background:transparent!important;border:0!important}
+  .pp-bio-text::placeholder {color:var(--cwn-muted);opacity:.7}
+  .pp-bio-text:hover {background:var(--cwn-hover)!important}
+  .pp-bio-text:focus {background:var(--cwn-surface)!important;color:var(--cwn-ink)!important;box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--cwn-accent) 40%,var(--cwn-line))!important}
+
+  .pp-pill {display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:40px;padding:8px 18px;border:1px solid var(--cwn-line);border-radius:999px;background:transparent;font:var(--cwn-font-button);color:var(--cwn-ink);transition:background .15s}
+  .pp-pill svg {width:16px;height:16px}
+  .pp-pill:hover {background:var(--cwn-hover)}
+  .pp-pill.solid {border-color:var(--cwn-accent);background:var(--cwn-accent);color:var(--cwn-on-accent)}
+  .pp-pill.quiet {border-color:transparent;color:var(--cwn-muted)}
+  .pp-tick {position:absolute;right:-2px;bottom:-2px;display:grid;place-items:center;width:22px;height:22px;border-radius:50%;background:var(--cwn-accent);color:var(--cwn-on-accent);box-shadow:0 0 0 3px var(--cwn-bg)}
+  .pp-tick svg {width:13px;height:13px;stroke-width:2.4}
+}
+
+/* ===== Desktop: identity card + face wall ===== */
+@media(min-width:701px) {
+  #PersonaManagement #cwn-persona-panel {
+    .pp-strip,.pp-info,.pp-cta {display:none}
+    .pp-hero {display:grid;grid-template-columns:168px minmax(0,1fr);gap:var(--cwn-space-7);align-items:center;padding:var(--cwn-space-7);border:1px solid var(--cwn-line);border-radius:18px;background:linear-gradient(160deg,color-mix(in srgb,var(--cwn-accent) 7%,var(--cwn-surface)),var(--cwn-surface) 60%)}
+    .pp-portrait {position:relative;width:168px;height:168px;padding:0;border:0;border-radius:50%;background:none}
+    .pp-pic {display:block;width:100%;height:100%;border-radius:50%;box-shadow:0 0 0 4px var(--cwn-bg),0 0 0 5px var(--cwn-line),0 14px 34px #23221926}
+    .pp-pic .pp-initial {font-size:60px}
+    .pp-portrait .pp-cam {inset:0;background:#23221966;color:#fff;opacity:0;transition:opacity .15s}
+    .pp-portrait .pp-cam svg {width:26px;height:26px}
+    .pp-portrait:hover .pp-cam,.pp-portrait:focus-visible .pp-cam {opacity:1}
+    .pp-hero-text {display:flex;flex-direction:column;align-items:flex-start;gap:8px;min-width:0}
+    .pp-hero-text .pp-name-slot {align-self:stretch;justify-content:flex-start;text-align:left}
+    .pp-hero-text .pp-name {margin-left:-4px;font-size:34px!important}
+    .pp-wall-section {margin-top:var(--cwn-space-8)}
+    .pp-wall-head {display:flex;align-items:baseline;justify-content:space-between;margin-bottom:14px}
+    .pp-wall-head small {font:var(--cwn-font-caption);color:var(--cwn-muted)}
+    .pp-wall {display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:var(--cwn-space-4) 10px}
+    .pp-face {position:relative}
+    .pp-face-main {display:flex;flex-direction:column;align-items:center;gap:8px;width:100%;padding:12px 4px 10px;border:0;border-radius:14px;background:transparent;text-align:center}
+    .pp-face-main:hover {background:var(--cwn-hover)}
+    .pp-ring {position:relative;display:block;width:68px;height:68px;border-radius:50%}
+    .pp-ring .pp-initial {font-size:26px}
+    .pp-face.current .pp-ring {box-shadow:0 0 0 2px var(--cwn-bg),0 0 0 4px var(--cwn-accent)}
+    .pp-face-name {max-width:100%;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;font:var(--cwn-font-guide)}
+    .pp-face.current .pp-face-name {font-weight:500}
+    .pp-face.add .pp-ring {display:grid;place-items:center;border:1.5px dashed var(--cwn-line);color:var(--cwn-accent)}
+    .pp-face.add .pp-face-name {color:var(--cwn-muted)}
+    .pp-face-del {position:absolute;top:6px;right:calc(50% - 44px);display:grid;place-items:center;width:26px;height:26px;padding:0;border:0;border-radius:50%;background:var(--cwn-bg);color:var(--cwn-danger);box-shadow:0 0 0 1px var(--cwn-line),0 2px 8px #23221922;opacity:0;transform:scale(.7);transition:opacity .15s,transform .15s}
+    .pp-face-del svg {width:13px;height:13px;stroke-width:2.2}
+    .pp-face:hover .pp-face-del,.pp-face-del:focus-visible {opacity:1;transform:none}
+    &.pp-single .pp-face-del {display:none}
+    .pp-bio {margin-top:var(--cwn-space-8)}
+  }
+}
+
+/* ===== Mobile: contact page with swipe switcher ===== */
+@media(max-width:700px) {
+  html.cwn-active #PersonaManagement.cwn-persona-mounted {border:0!important;box-shadow:none!important}
+  #PersonaManagement #cwn-persona-panel {
+    .pp-hero,.pp-wall-section,.pp-title {display:none}
+    .pp-head {justify-content:flex-end;padding:var(--cwn-space-2) var(--cwn-space-3) 0}
+    .pp-icon {margin-right:0}
+    /* The identity group sits in the optical centre of the page. */
+    .pp-scroll {display:flex;flex-direction:column;padding:0 0 56px}
+    .pp-strip {margin-top:auto}
+    .pp-bio {margin-bottom:auto;padding:0 32px}
+    .pp-strip {display:flex;flex:none;overflow-x:hidden;scroll-snap-type:x mandatory;scrollbar-width:none;padding:24px 0 48px;margin-bottom:-42px;touch-action:pan-y}
+    .pp-strip::-webkit-scrollbar {display:none}
+    &.pp-switching .pp-strip {overflow-x:auto;touch-action:pan-x pan-y}
+    .pp-slide {flex:0 0 52%;scroll-snap-align:center;display:flex;justify-content:center}
+    .pp-slide:first-child {margin-left:24%}
+    .pp-slide:last-child {margin-right:24%}
+    .pp-face-big {position:relative;width:164px;height:164px;border-radius:50%;transform:scale(var(--s,1));opacity:var(--o,1);cursor:pointer}
+    .pp-big-pic {display:block;width:100%;height:100%;border-radius:50%;box-shadow:0 0 0 4px var(--cwn-bg),0 0 0 5px var(--cwn-line),0 16px 36px #23221926}
+    .pp-big-pic .pp-initial {font-size:58px}
+    .pp-slide.add .pp-big-pic {display:grid;place-items:center;border:2px dashed var(--cwn-line);box-shadow:none;color:var(--cwn-accent)}
+    .pp-slide.add .pp-big-pic svg {width:42px;height:42px}
+    .pp-face-big .pp-cam {right:6px;bottom:8px;width:34px;height:34px;background:var(--cwn-bg);color:var(--cwn-ink);box-shadow:0 0 0 1px var(--cwn-line),0 2px 8px #23221922;transition:opacity .2s,transform .2s}
+    .pp-face-big .pp-cam svg {width:16px;height:16px}
+    &.pp-switching .pp-cam {opacity:0;transform:scale(.6);pointer-events:none}
+    .pp-del {position:absolute;top:6px;right:6px;display:grid;place-items:center;width:30px;height:30px;padding:0;border:0;border-radius:50%;background:var(--cwn-bg);color:var(--cwn-danger);box-shadow:0 0 0 1px var(--cwn-line),0 2px 8px #23221922;opacity:0;transform:scale(.6);pointer-events:none;transition:opacity .2s,transform .2s}
+    .pp-del svg {width:14px;height:14px;stroke-width:2.2}
+    &.pp-switching .pp-slide.centre .pp-del {opacity:1;transform:none;pointer-events:auto}
+    &.pp-single .pp-del {display:none}
+    /* At rest only the active face is visible and full size. */
+    &:not(.pp-switching) .pp-slide:not(.active) .pp-face-big {--s:.45;--o:0;pointer-events:none}
+    &.pp-animating .pp-face-big {transition:transform .38s cubic-bezier(.22,.61,.36,1),opacity .3s ease}
+    .pp-info {display:flex;flex-direction:column;align-items:center;gap:8px;padding:18px 28px 0;text-align:center}
+    .pp-dots {display:flex;gap:6px;height:6px;opacity:0;transition:opacity .2s}
+    &.pp-switching .pp-dots {opacity:1}
+    .pp-dots i {width:6px;height:6px;border-radius:50%;background:var(--cwn-line);cursor:pointer;transition:width .2s,background .2s}
+    .pp-dots i.on {width:16px;border-radius:3px;background:var(--cwn-accent)}
+    .pp-status-mobile {max-width:100%}
+    .pp-status-mobile > span {overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+    .pp-cta {display:flex;justify-content:center;gap:10px;min-height:40px;margin:22px 0 30px}
+    .pp-bio {transition:opacity .25s}
+    &.pp-switching .pp-bio {opacity:.35;pointer-events:none}
+  }
+}
+@media(prefers-reduced-motion:reduce) {
+  #PersonaManagement #cwn-persona-panel .pp-face-big {transition:none!important}
+}
