@@ -10,15 +10,20 @@ export function createMenuHistory({history, read, closeOne, dismissPopup, listen
   if(!Number.isInteger(history.state?.[key]))history.replaceState(state(0),'');
   function grow(target){while(depth<target)history.pushState(state(++depth),'');}
   function ensureRoot(){
-    if(!protectRoot()||depth!==0||history.state?.[guardKey])return;
-    // One anchor below welcome. Reuse it on reload rather than stacking guards.
-    history.replaceState({...state(-1),[guardKey]:true},'');
-    history.pushState({...state(0),[guardKey]:true},'');
+    if(!protectRoot()||(history.state?.[guardKey]==='fixed-v2'&&depth>=0))return;
+    // Migrate even when a reload left an old nonzero logical depth behind.
+    // Mobile keeps an anchor and one active entry, independent of UI depth.
+    history.replaceState({...state(-1),[guardKey]:'fixed-v2'},'');
+    depth=read();
+    history.pushState({...state(depth),[guardKey]:'fixed-v2'},'');
   }
   function sync(){
     if(disposed||moving||applying)return;
     ensureRoot();
     const target=read();
+    if(protectRoot()){
+      depth=target;history.replaceState(state(depth),'');return;
+    }
     if(target<depth){moving=true;history.go(target-depth);}
     else grow(target);
   }
@@ -27,6 +32,26 @@ export function createMenuHistory({history, read, closeOne, dismissPopup, listen
     const target=Number.isInteger(event.state?.[key])?event.state[key]:0;
     const steps=Math.max(0,depth-target);
     depth=target;
+    if(protectRoot()){
+      // Restore the active entry synchronously, before awaiting a close or
+      // discard prompt. UI closing never schedules a browser history.go().
+      depth=read();
+      history.pushState({...state(depth),[guardKey]:'fixed-v2'},'');
+      if(applying){
+        requested=Math.max(0,requested-1);
+        try{await dismissPopup?.();}catch(error){onError(error);}
+        return;
+      }
+      applying=true;requested=Math.max(0,read()-1);
+      try{
+        while(!disposed&&read()>requested){
+          const previous=read();
+          if(!await closeOne()||read()>=previous)break;
+        }
+      }catch(error){onError(error);}
+      finally{applying=false;if(!disposed){depth=read();history.replaceState(state(depth),'');}}
+      return;
+    }
     if(moving){moving=false;sync();return;}
     if(applying){
       requested=Math.max(0,requested-steps);

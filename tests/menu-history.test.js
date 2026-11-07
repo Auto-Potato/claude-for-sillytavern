@@ -63,3 +63,36 @@ test('mobile welcome back stays on page without accumulating guard entries',asyn
  history.go(-1);await tick();assert.equal(ui,0);assert.equal(exited,false);assert.equal(index,1);
  c.dispose();
 });
+
+function mobileHistory(initialState,initialUI){
+ let ui=initialUI,index=0,callback,exited=false,slow=null;
+ const entries=[initialState],moves=[];
+ const history={get state(){return entries[index]},replaceState(s){entries[index]=s},pushState(s){entries.splice(++index);entries.push(s)},go(n){moves.push(n);queueMicrotask(()=>{index+=n;if(index<0){exited=true;return;}void callback({state:entries[index]});});}};
+ const mount=()=>createMenuHistory({history,read:()=>ui,protectRoot:()=>true,closeOne:async()=>{if(slow)await slow;ui--;return true;},listen:fn=>{callback=fn;return()=>{}},onError:e=>{throw e;}});
+ const controller=mount(),tick=()=>new Promise(r=>setImmediate(r));
+ return {entries,moves,controller,mount,history,tick,get ui(){return ui},get exited(){return exited},get index(){return index},setUI(n){ui=n;controller.sync()},delay(p){slow=p},async back(){history.go(-1);await tick()}};
+}
+
+test('mobile migrates old nonzero history after reload before any back gesture',async()=>{
+ for(const state of [{cwnMenuDepth:4},{cwnMenuDepth:4,cwnMenuRootGuard:true},{cwnMenuDepth:-1,cwnMenuRootGuard:'fixed-v2'}]){
+  const s=mobileHistory(state,3);
+  assert.equal(s.moves.length,0);assert.equal(s.index,1);
+  for(const n of [2,1,0,0,0]){await s.back();assert.equal(s.ui,n);assert.equal(s.exited,false);}
+  assert.equal(s.entries.length,2);
+  s.controller.dispose();
+ }
+});
+
+test('mobile manual worldbook close and rapid back never schedule a bulk traversal',async()=>{
+ const s=mobileHistory({},4); // entry, book, shelf, rail
+ s.setUI(2); // UI Back twice, without browser Back
+ assert.deepEqual(s.moves,[]);
+ let resolve;s.delay(new Promise(r=>resolve=r));
+ for(let i=0;i<5;i++)await s.back();
+ assert.equal(s.exited,false);assert.equal(s.ui,2);
+ resolve();await s.tick();await s.tick();
+ assert.equal(s.ui,0);assert.equal(s.index,1);assert.equal(s.entries.length,2);
+ assert.deepEqual(s.moves,[-1,-1,-1,-1,-1]);
+ await s.back();assert.equal(s.exited,false);assert.equal(s.ui,0);
+ s.controller.dispose();
+});
