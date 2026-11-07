@@ -9,6 +9,7 @@ import { importZoneContent } from './import-zone.js';
 import { createImportDialog } from './import-dialog.js';
 import { confirmUnsaved } from './leave-guard.js';
 import { diagnosticStep, diagnosticFrame } from './performance-diagnostics.js';
+import { entryPreview } from './worldbook-preview.js';
 
 const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const svg=path=>`<svg viewBox="0 0 24 24" aria-hidden="true"><path d="${path}"/></svg>`;
@@ -82,7 +83,7 @@ export function mountWorldbookLibrary(doc,win) {
     pane.innerHTML=`<div class="wb-current-view"><div class="wb-nav ${screen==='library'?'wb-library-nav':''}">${iconButton('back',screen==='library'?'返回导航':'返回上一页',icons.back)}</div><div class="wb-scroll"></div></div>`;
     const body=pane.querySelector('.wb-scroll');
     if(screen==='library'){
-      body.innerHTML=`<div class="heading"><h1 class="cwn-type-title">世界书</h1>${button('import','导入','solid mobile-import',icons.plus)}</div><button type="button" class="cwn-import-zone" id="cwn-worldbook-import-zone" data-action="import">${importZoneContent('世界书')}</button><input class="search" data-search placeholder="搜索世界书" aria-label="搜索世界书" value="${esc(query)}"><div class="summary"><span>世界书 · ${wi.world_names.length}</span><span>已启用 ${wi.selected_world_info.length} 本</span></div><div class="book-grid"></div>`;
+      body.innerHTML=`<div class="heading"><h1 class="cwn-type-title">世界书</h1>${button('import','导入','solid mobile-import',icons.plus)}</div><button type="button" class="cwn-import-zone" id="cwn-worldbook-import-zone" data-action="import">${importZoneContent('世界书')}</button><input class="search" data-search placeholder="搜索世界书" aria-label="搜索世界书" value="${esc(query)}"><div class="summary"><span>世界书 · ${wi.world_names.length}</span><span>已启用 ${wi.selected_world_info.length} 本</span>${button('refresh-library','刷新列表','quiet')}</div><div class="book-grid"></div>`;
       drawBooks();void discoverCovers();
     }else if(screen==='book'){
       const source=worldbookSource(name);
@@ -112,7 +113,7 @@ export function mountWorldbookLibrary(doc,win) {
     if(summary[0])summary[0].textContent=`世界书 · ${wi.world_names.length}`;
     if(summary[1])summary[1].textContent=`已启用 ${wi.selected_world_info.length} 本`;
   }
-  function drawEntries(){pane.querySelector('.entry-list').innerHTML=Object.values(book.entries).sort((a,b)=>(a.displayIndex??a.uid)-(b.displayIndex??b.uid)).filter(e=>(e.comment||'').includes(query)||(e.content||'').includes(query)).map(e=>`<div class="entry-row" data-uid="${esc(e.uid)}"><button type="button" class="entry-open" data-entry="${esc(e.uid)}"><span class="dot ${e.constant?'':'green'}"></span><span><strong>${esc(e.comment||'未命名条目')}</strong><small>${esc(e.content||'暂无内容')}</small></span></button><input type="checkbox" class="toggle entry-enabled" data-enabled="${esc(e.uid)}" aria-label="启用条目${esc(e.comment||e.uid)}" ${!e.disable?'checked':''}><div class="row-actions">${iconButton('copy-entry','复制条目',icons.copy)}${iconButton('delete-entry','删除条目',icons.trash,'danger')}</div></div>`).join('')||'<p class="empty">没有找到条目</p>';}
+  function drawEntries(){pane.querySelector('.entry-list').innerHTML=Object.values(book.entries).sort((a,b)=>(a.displayIndex??a.uid)-(b.displayIndex??b.uid)).filter(e=>(e.comment||'').includes(query)||(e.content||'').includes(query)).map(e=>`<div class="entry-row" data-uid="${esc(e.uid)}"><button type="button" class="entry-open" data-entry="${esc(e.uid)}"><span class="dot ${e.constant?'':'green'}"></span><span><strong>${esc(e.comment||'未命名条目')}</strong><small>${esc(entryPreview(e.content))}</small></span></button><input type="checkbox" class="toggle entry-enabled" data-enabled="${esc(e.uid)}" aria-label="启用条目${esc(e.comment||e.uid)}" ${!e.disable?'checked':''}><div class="row-actions">${iconButton('copy-entry','复制条目',icons.copy)}${iconButton('delete-entry','删除条目',icons.trash,'danger')}</div></div>`).join('')||'<p class="empty">没有找到条目</p>';}
   function draftPatch(){
     if(screen!=='entry')return {};
     const patch={},fields=pane.querySelectorAll('[data-field]');
@@ -194,6 +195,7 @@ export function mountWorldbookLibrary(doc,win) {
   async function askName(title,initial){const result=await popup(title,'',POPUP_TYPE.INPUT,initial);if(typeof result!=='string'||!result.trim())return null;const next=result.trim();const sanitized=await getSanitizedFilename(next+'.json');if(sanitized!==next+'.json')throw new Error('名称含有不支持的字符');await wi.updateWorldInfoList();if(wi.world_names.some(n=>n.localeCompare(next,undefined,{sensitivity:'base'})===0))throw new Error('已存在同名世界书，请换一个名称');return next;}
   async function importFiles(files){for(const f of files){const parsed=JSON.parse(await f.text());let contents=parsed;if(Array.isArray(parsed.entries))contents=wi.convertCharacterBook(parsed);if(!contents?.entries||Array.isArray(contents.entries))throw new Error(`${f.name} 不是支持的世界书 JSON`);const n=(await getSanitizedFilename(f.name)).replace(/\.json$/i,'');if(!n)throw new Error('世界书名称不能为空');await wi.updateWorldInfoList();if(wi.world_names.includes(n)&&!await confirm('覆盖同名世界书？',n))continue;await data.write(n,contents);recordWorldbookSource(n,null);}await wi.updateWorldInfoList();screen='library';query='';render();}
   async function action(action,target){
+    if(action==='refresh-library'){await wi.updateWorldInfoList();render();return;}
     const row=target.closest('[data-uid]');const selectedUid=row?Number(row.dataset.uid):uid;
     if(action==='import'){if(win.innerWidth<=700)void importDialog.open();else file.click();return;}
     if(action==='save'){await save();return;}
@@ -234,7 +236,6 @@ export function mountWorldbookLibrary(doc,win) {
         if(!await canLeave())return;
         const total=diagnosticStep('worldbook.open');
         try{
-          const directory=diagnosticStep('worldbook.directory');await ensureExists(next);directory();
           const read=diagnosticStep('worldbook.read');const fresh=await data.read(next);read();
           name=next;book=fresh;screen='book';query='';
           const draw=diagnosticStep('worldbook.render',{entries:Object.keys(book.entries).length});render();draw();
@@ -245,10 +246,8 @@ export function mountWorldbookLibrary(doc,win) {
         if(!await canLeave())return;
         const total=diagnosticStep('worldbook.entry.open');
         try{
-          const directory=diagnosticStep('worldbook.entry.directory');await ensureExists(name);directory();
-          const read=diagnosticStep('worldbook.entry.read');const fresh=await data.read(name);read();
-          if(!fresh.entries[next])throw new Error('条目已不存在');
-          uid=next;book=fresh;screen='entry';
+          if(!book?.entries[next])throw new Error('条目已不存在，请返回书架重新打开');
+          uid=next;screen='entry';
           const draw=diagnosticStep('worldbook.entry.render');render();draw();diagnosticFrame('worldbook.entry.next-frame');
         }finally{total();}
       }else if(target.dataset.action)await action(target.dataset.action,target);
@@ -282,7 +281,7 @@ export function mountWorldbookLibrary(doc,win) {
   // The host usually closes the drawer on mousedown already; only act if it is still open.
   doc.addEventListener('click',event=>{const press=outsidePress;outsidePress=null;if(press&&!busy&&drawer.classList.contains('openDrawer')&&outside(event)&&Math.hypot(event.clientX-press.x,event.clientY-press.y)<=6)doc.querySelector('#WI-SP-button > .drawer-toggle')?.click();},{signal});
   let opened=drawer.classList.contains('openDrawer');
-  const observer=new win.MutationObserver(()=>{const now=drawer.classList.contains('openDrawer');if(now&&!opened){collapse({animate:false});void run(async()=>{await wi.updateWorldInfoList();if(screen!=='entry'){if(screen==='book'&&wi.world_names.includes(name))book=await data.read(name);else screen='library';render();}});}opened=now;});observer.observe(drawer,{attributes:true,attributeFilter:['class']});
+  const observer=new win.MutationObserver(()=>{const now=drawer.classList.contains('openDrawer');if(now&&!opened){if(screen==='library')render();else collapse({animate:false});}opened=now;});observer.observe(drawer,{attributes:true,attributeFilter:['class']});
   // Refresh a visible shelf when another native importer changes available books.
   const namesObserver=new win.MutationObserver(()=>{if(!busy&&screen==='library'&&!disposed)render();});const selector=doc.getElementById('world_editor_select');if(selector)namesObserver.observe(selector,{childList:true});
   render();
