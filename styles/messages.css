@@ -1,4 +1,16 @@
 /* Reading layout. Keep native message controls and avatar handlers intact. */
+html.cwn-active body > #cwn-chat-bottom {
+  position:fixed;z-index:119;display:grid;place-items:center;
+  width:44px;height:44px;margin:0;padding:0;border:1px solid var(--cwn-line);
+  border-radius:50%;background:var(--cwn-surface);color:var(--cwn-ink);
+  box-shadow:0 3px 12px #00000014;cursor:pointer;text-shadow:none;filter:none;
+}
+html.cwn-active body > #cwn-chat-bottom svg {width:21px;height:21px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
+html.cwn-active body > #cwn-chat-bottom:hover {background:var(--cwn-hover);color:var(--cwn-accent);}
+html.cwn-active body > #cwn-chat-bottom:focus-visible {outline:2px solid var(--cwn-accent);outline-offset:3px;}
+html.cwn-active body > #cwn-chat-bottom[hidden],
+html.cwn-active.cwn-menu-open body > #cwn-chat-bottom,
+html.cwn-active body:has(.cwn-home-active,.drawer-content.openDrawer) > #cwn-chat-bottom {display:none;}
 html.cwn-active body #chat > .mes:is([is_user="false"],[is_user="true"]) > .mesAvatarWrapper {position:absolute!important;top:12px;left:0;}
 html.cwn-active body #chat > .mes:is([is_user="false"],[is_user="true"]) > .mesAvatarWrapper .avatar,
 html.cwn-active body #chat > .mes:is([is_user="false"],[is_user="true"]) > .mesAvatarWrapper .avatar img {width:42px!important;height:42px!important;}

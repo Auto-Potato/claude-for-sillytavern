@@ -1,7 +1,10 @@
+import { mountChatBottom } from './chat-bottom.js';
+
 // Format only the native timestamp; preserve its model tooltip and message data.
 export function mountMessages(doc, host) {
   const chat = doc.getElementById('chat');
   if (!chat) return () => {};
+  const disposeBottom = mountChatBottom(doc, doc.defaultView);
   const avatarShade=doc.createElement('button');
   avatarShade.id='cwn-avatar-shade';
   avatarShade.type='button';
@@ -188,6 +191,7 @@ export function mountMessages(doc, host) {
   observer.observe(chat, { childList: true, subtree: true, characterData: true });
   update();
   return () => {
+    disposeBottom();
     observer.disconnect();
     for (const [node, anchor] of metadataOrigins) {
       if (anchor.parentNode) anchor.replaceWith(node);
