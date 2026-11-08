@@ -6,6 +6,6 @@
   "js": "index.js",
   "css": "styles/theme.css",
   "author": "Local development",
-  "version": "1.2.1",
+  "version": "1.2.2",
   "auto_update": false
 }

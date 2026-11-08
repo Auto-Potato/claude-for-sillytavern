@@ -24,7 +24,8 @@ import { mountApiPanel } from './src/api-panel.js';
 import { mountPersonaPanel } from './src/persona-panel.js';
 import { mountPerformanceDiagnostics } from './src/performance-diagnostics.js';
 
-// The host initializes its widgets first. No polling, DOM-wide observer or reload.
+// Mount after host widgets initialize, while its startup overlay still covers
+// the native layout. APP_READY runs after that overlay has already disappeared.
 let dispose;
 let disposeToasts;
 function startToasts() {
@@ -87,7 +88,7 @@ function start() {
   startToasts();
   dispose = () => { disposeDiagnostics(); disposeBrowserNavigation(); disposeWorldOption(); disposeExtensions(); disposeApi(); disposePersona(); disposePreset(); disposeWorldbook(); disposeLibrary(); disposeImport(); disposeDialogStyle(); disposeIcons(); stopToasts(); disposeMessages(); disposeComposer(); disposeAppearance(); disposeHome(); disposeShell(); };
 }
-eventSource.once(event_types.APP_READY, () => {
+eventSource.once(event_types.APP_INITIALIZED || event_types.APP_READY, () => {
   const settings = extension_settings.claude_for_sillytavern ??= { enabled: true };
   const container = document.getElementById('extensions_settings2') || document.getElementById('extensions_settings');
   if (container && !document.getElementById('cwn-extension-settings')) {
