@@ -10,7 +10,8 @@ export function mountBrowserNavigation(doc,win) {
   const chatOpen=()=>win.innerWidth<=700&&!!shell?.cwnNavigation?.isChat();
   const panels=[...rail.querySelectorAll('.drawer > .drawer-content')];
   const panel=()=>panels.find(p=>p.classList.contains('openDrawer'));
-  const popups=()=>Popup.util.popups.filter(p=>p.dlg.open&&!p.dlg.hasAttribute('closing'));
+  const closable=p=>!(p.buttonControls?.style.display==='none'&&p.closeButton?.style.display==='none');
+  const popups=()=>Popup.util.popups.filter(p=>p.dlg.open&&!p.dlg.hasAttribute('closing')&&closable(p));
   const railOpen=()=>win.innerWidth<=700?root.classList.contains('cwn-menu-open'):!root.classList.contains('cwn-rail-hidden');
   const read=()=>{
     const p=panel();
@@ -28,7 +29,7 @@ export function mountBrowserNavigation(doc,win) {
       if(p?.id==='right-nav-panel'&&library?.cwnNavigation?.isDetail())return library.cwnNavigation.back();
       if(p?.id==='WorldInfo'&&worldbook?.cwnNavigation?.depth())return worldbook.cwnNavigation.back();
       if(p?.id==='rm_extensions_block'&&extensions?.cwnNavigation?.depth())return extensions.cwnNavigation.back();
-      if(p){p.querySelector('.cwn-panel-back')?.click();return true;}
+      if(p){p.querySelector('.cwn-panel-back')?.click();if(win.innerWidth<=700)rail.cwnSettlePanel?.();return true;}
       if(railOpen()){doc.getElementById(win.innerWidth<=700?'cwn-menu':'cwn-desktop-rail-icon')?.click();return true;}
       if(chatOpen())return shell.cwnNavigation.back();
       return false;

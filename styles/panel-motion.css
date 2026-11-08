@@ -14,7 +14,7 @@ html.cwn-active body #top-settings-holder.cwn-panel-in-motion .drawer > .drawer-
 }
 /* The mobile rail remains the underlying page during its panel's exit. */
 @media(max-width:700px){
-  html.cwn-active body #top-settings-holder.cwn-panel-in-motion{transition:none!important;transform:none!important;}
+  html.cwn-active body #top-settings-holder.cwn-panel-in-motion{transition:none!important;transform:none!important;pointer-events:none;}
   html.cwn-active:has(#top-settings-holder.cwn-panel-in-motion) body #cwn-menu{display:none!important;}
 }
 /* Page backgrounds belong to the moving surfaces, not their shared stage. */

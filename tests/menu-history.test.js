@@ -76,23 +76,22 @@ function mobileHistory(initialState,initialUI){
 test('mobile migrates old nonzero history after reload before any back gesture',async()=>{
  for(const state of [{cwnMenuDepth:4},{cwnMenuDepth:4,cwnMenuRootGuard:true},{cwnMenuDepth:-1,cwnMenuRootGuard:'fixed-v2'}]){
   const s=mobileHistory(state,3);
-  assert.equal(s.moves.length,0);assert.equal(s.index,1);
+  assert.equal(s.moves.length,0);assert.equal(s.index,4);
   for(const n of [2,1,0,0,0]){await s.back();assert.equal(s.ui,n);assert.equal(s.exited,false);}
-  assert.equal(s.entries.length,2);
+  assert.equal(s.index,1);
   s.controller.dispose();
  }
 });
 
 test('mobile manual worldbook close and rapid back never schedule a bulk traversal',async()=>{
  const s=mobileHistory({},4); // entry, book, shelf, rail
- s.setUI(2); // UI Back twice, without browser Back
- assert.deepEqual(s.moves,[]);
+ s.setUI(2);await s.tick(); // UI Back twice, without browser Back
+ assert.deepEqual(s.moves,[-2]);assert.equal(s.index,3);
  let resolve;s.delay(new Promise(r=>resolve=r));
  for(let i=0;i<5;i++)await s.back();
  assert.equal(s.exited,false);assert.equal(s.ui,2);
  resolve();await s.tick();await s.tick();
- assert.equal(s.ui,0);assert.equal(s.index,1);assert.equal(s.entries.length,2);
- assert.deepEqual(s.moves,[-1,1,-1,1,-1,1,-1,1,-1,1]);
+ assert.equal(s.ui,0);assert.equal(s.index,1);
  await s.back();assert.equal(s.exited,false);assert.equal(s.ui,0);
  s.controller.dispose();
 });
@@ -108,8 +107,36 @@ test('Chrome UI Back does not skip all entries after the first detail return',as
   if(skippable)exited=true;else history.go(-1);
   await tick();
   assert.equal(exited,false);assert.equal(skippable,false);
-  assert.equal(ui,expected);assert.equal(index,1);
+  assert.equal(ui,expected);assert.equal(index,expected+1);
   assert.equal(pushes,initialPushes,'Back must not create a new history entry');
  }
+ c.dispose();
+});
+
+test('mobile predictive back preview reflects the parent layer after switching panels',async()=>{
+ const stack=['welcome'];
+ let index=0,callback;
+ const entries=[{}],screenshots=[],tick=()=>new Promise(r=>setImmediate(r));
+ const history={
+  get state(){return entries[index]},
+  replaceState(s){entries[index]=s},
+  pushState(s){screenshots[index]=stack.at(-2)??stack.at(-1);entries.splice(++index);entries.push(s);delete screenshots[index];},
+  go(n){const from=index;queueMicrotask(()=>{if(n>0)screenshots[from]=stack.at(-1);index+=n;void callback({state:entries[index]});});},
+ };
+ const c=createMenuHistory({history,read:()=>stack.length-1,protectRoot:()=>true,closeOne:async()=>{stack.pop();return true;},listen:fn=>{callback=fn;return()=>{}},onError:e=>{throw e;}});
+ stack.push('rail');c.sync();
+ stack.push('api');c.sync();
+ assert.equal(screenshots[index-1],'rail');
+ // Exit API via mobile back gesture, then open Presets.
+ history.go(-1);await tick();
+ assert.deepEqual(stack,['welcome','rail']);
+ stack.push('preset');c.sync();
+ assert.equal(screenshots[index-1],'rail','Back from Presets must preview the rail, not the previous API panel');
+ // Exit Presets via in-page back button, then open Worldbook and a book.
+ stack.pop();c.sync();await tick();
+ stack.push('worldbook');c.sync();
+ assert.equal(screenshots[index-1],'rail');
+ stack.push('book');c.sync();
+ assert.equal(screenshots[index-1],'worldbook');
  c.dispose();
 });

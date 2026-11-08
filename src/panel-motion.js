@@ -57,7 +57,9 @@ export function mountPanelMotion({doc,win,rail,drawers,media,toggleDrawer}) {
   });
   // Close native state synchronously before opening the next drawer, so the
   // host sees no outgoing drawer to delay on. Visual state is owned above.
+  rail.cwnSettlePanel=()=>{transition.select(opened());transition.settle();};
   function commit(entry){
+    if(!desktop())transition.settle();
     const closing=entry.panel.classList.contains('openDrawer');
     if(!closing)for(const other of drawers)if(other!==entry&&other.panel.classList.contains('openDrawer'))void toggleDrawer(other.toggle);
     void toggleDrawer(entry.toggle);
@@ -96,5 +98,5 @@ export function mountPanelMotion({doc,win,rail,drawers,media,toggleDrawer}) {
   for(const {panel} of drawers)observer.observe(panel,{attributes:true,attributeFilter:['class']});
   win.addEventListener('resize',()=>transition.settle(),{signal});
   reduced.addEventListener('change',()=>transition.settle(),{signal});
-  return()=>{abort.abort();observer.disconnect();transition.dispose();rail.classList.remove('cwn-panels-managed','cwn-panel-in-motion');for(const {panel} of drawers){delete panel.dataset.cwnPanelLayer;panel.inert=previous.get(panel);}};
+  return()=>{abort.abort();observer.disconnect();transition.dispose();delete rail.cwnSettlePanel;rail.classList.remove('cwn-panels-managed','cwn-panel-in-motion');for(const {panel} of drawers){delete panel.dataset.cwnPanelLayer;panel.inert=previous.get(panel);}};
 }

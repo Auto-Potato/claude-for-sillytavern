@@ -72,7 +72,7 @@ export function mountCharacterLibrary(doc,win,host) {
   function responsive(){const mobile=win.innerWidth<=700;pane.classList.toggle('phone',mobile);if(card&&listPage){listPage.inert=mobile;listPage.toggleAttribute('aria-hidden',mobile);}restoreHeight();}
   responsive();win.addEventListener('resize',responsive,{signal:abort.signal});
   function confirm(title,body){const content=doc.createElement('div'),heading=doc.createElement('h3');heading.textContent=title;content.append(heading);if(typeof body==='string'&&body){const p=doc.createElement('p');p.textContent=body;content.append(p);}else if(body)content.append(body);const popup=new Popup(content,POPUP_TYPE.CONFIRM,'',{okButton:'确定',cancelButton:'取消'});popup.dlg.classList.add('cwn-character-dialog');return popup.show();}
-  pane.cwnNavigation={isDetail:()=>!!card,back:backToList};
+  pane.cwnNavigation={isDetail:()=>!!card,back:()=>backToList({animate:win.innerWidth>700})};
   const image=key=>`/characters/${encodeURIComponent(key)}`;
   function changed(){return !!draft&&JSON.stringify(draft)!==JSON.stringify(baseline);}
   function editActions(){const row=page?.querySelector('.library-edit');if(row)row.hidden=!changed();}
@@ -149,12 +149,12 @@ export function mountCharacterLibrary(doc,win,host) {
       target.inert=false;
     }
   }
-  async function backToList(){
+  async function backToList({animate=true}={}){
     if(busy)return false;
     let left=false;
     await run(async()=>{
       if(!await canLeave()||disposed)return;
-      await slideDetail(false);
+      if(animate)await slideDetail(false);
       if(!disposed){resetToList();left=true;}
     },{disable:false});
     return left;
