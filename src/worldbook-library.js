@@ -12,7 +12,7 @@ import { entryPreview } from './worldbook-preview.js';
 
 const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const svg=path=>`<svg viewBox="0 0 24 24" aria-hidden="true"><path d="${path}"/></svg>`;
-const icons={refresh:svg('M3 4v6h6M3 10a9 9 0 1 1 1 8'),pencil:svg('m4 16 12-12 4 4-12 12H4zM14 6l4 4'),back:svg('m15 5-7 7 7 7'),menu:svg('M4 6h16M4 12h16M4 18h16'),plus:svg('M12 5v14M5 12h14'),copy:svg('M9 9h11v11H9zM15 5V3H3v12h2'),trash:svg('M4 7h16M9 7V4h6v3M7 7l1 13h8l1-13M10 10v7M14 10v7'),move:svg('M5 12h14m-5-5 5 5-5 5')};
+const icons={pencil:svg('m4 16 12-12 4 4-12 12H4zM14 6l4 4'),back:svg('m15 5-7 7 7 7'),menu:svg('M4 6h16M4 12h16M4 18h16'),plus:svg('M12 5v14M5 12h14'),copy:svg('M9 9h11v11H9zM15 5V3H3v12h2'),trash:svg('M4 7h16M9 7V4h6v3M7 7l1 13h8l1-13M10 10v7M14 10v7'),move:svg('M5 12h14m-5-5 5 5-5 5')};
 const positions=[['0','角色定义之前'],['1','角色定义之后'],['4:0','指定深度 · 系统'],['4:1','指定深度 · 用户'],['4:2','指定深度 · 助手'],['5','示例消息之前'],['6','示例消息之后'],['2','作者注释之前'],['3','作者注释之后'],['7','指定出口']];
 
 export function mountWorldbookLibrary(doc,win) {
@@ -82,7 +82,7 @@ export function mountWorldbookLibrary(doc,win) {
     pane.innerHTML=`<div class="wb-current-view"><div class="wb-nav ${screen==='library'?'wb-library-nav':''}">${iconButton('back',screen==='library'?'返回导航':'返回上一页',icons.back)}</div><div class="wb-scroll"></div></div>`;
     const body=pane.querySelector('.wb-scroll');
     if(screen==='library'){
-      body.innerHTML=`<div class="heading"><div class="book-heading-title"><h1 class="cwn-type-title">世界书</h1>${iconButton('refresh-library','刷新世界书列表',icons.refresh,'book-refresh')}</div>${button('import','导入','solid mobile-import',icons.plus)}</div><button type="button" class="cwn-import-zone" id="cwn-worldbook-import-zone" data-action="import">${importZoneContent('世界书')}</button><input class="search" data-search placeholder="搜索世界书" aria-label="搜索世界书" value="${esc(query)}"><div class="summary"><span>世界书 · ${wi.world_names.length}</span><span>已启用 ${wi.selected_world_info.length} 本</span></div><div class="book-grid"></div>`;
+      body.innerHTML=`<div class="heading"><h1 class="cwn-type-title">世界书</h1>${button('import','导入','solid mobile-import',icons.plus)}</div><button type="button" class="cwn-import-zone" id="cwn-worldbook-import-zone" data-action="import">${importZoneContent('世界书')}</button><input class="search" data-search placeholder="搜索世界书" aria-label="搜索世界书" value="${esc(query)}"><div class="summary"><span>世界书 · ${wi.world_names.length}</span><span>已启用 ${wi.selected_world_info.length} 本</span></div><div class="book-grid"></div>`;
       drawBooks();void discoverCovers();
     }else if(screen==='book'){
       const source=worldbookSource(name);
@@ -194,7 +194,6 @@ export function mountWorldbookLibrary(doc,win) {
   async function askName(title,initial){const result=await popup(title,'',POPUP_TYPE.INPUT,initial);if(typeof result!=='string'||!result.trim())return null;const next=result.trim();const sanitized=await getSanitizedFilename(next+'.json');if(sanitized!==next+'.json')throw new Error('名称含有不支持的字符');await wi.updateWorldInfoList();if(wi.world_names.some(n=>n.localeCompare(next,undefined,{sensitivity:'base'})===0))throw new Error('已存在同名世界书，请换一个名称');return next;}
   async function importFiles(files){for(const f of files){const parsed=JSON.parse(await f.text());let contents=parsed;if(Array.isArray(parsed.entries))contents=wi.convertCharacterBook(parsed);if(!contents?.entries||Array.isArray(contents.entries))throw new Error(`${f.name} 不是支持的世界书 JSON`);const n=(await getSanitizedFilename(f.name)).replace(/\.json$/i,'');if(!n)throw new Error('世界书名称不能为空');await wi.updateWorldInfoList();if(wi.world_names.includes(n)&&!await confirm('覆盖同名世界书？',n))continue;await data.write(n,contents);recordWorldbookSource(n,null);}await wi.updateWorldInfoList();screen='library';query='';render();}
   async function action(action,target){
-    if(action==='refresh-library'){await wi.updateWorldInfoList();render();return;}
     const row=target.closest('[data-uid]');const selectedUid=row?Number(row.dataset.uid):uid;
     if(action==='import'){if(win.innerWidth<=700)void importDialog.open();else file.click();return;}
     if(action==='save'){await save();return;}
