@@ -6,6 +6,7 @@ html.cwn-active body #chat > .mes:is([is_user="false"],[is_user="true"]) > .mes_
 html.cwn-active body #chat > .mes {
   position:relative!important; border:0!important; background:transparent!important;
   padding:12px 0 22px!important; box-shadow:none!important;
+  border-radius:0!important;margin-bottom:0!important;
 }
 /* Confirmed timestamp style for user and character messages on both layouts. */
 html.cwn-active body #sheld #chat > .mes .timestamp {
@@ -23,7 +24,7 @@ html.cwn-active body #chat > .mes .ch_name > .flex1 {min-width:0;}
 html.cwn-active body #chat > .mes .ch_name > .flex1 > .alignItemsBaseline {width:100%;align-items:flex-start!important;flex-wrap:nowrap!important;}
 html.cwn-active body #chat > .mes .timestamp {margin-left:auto!important;padding-left:12px;white-space:pre!important;text-align:right!important;flex:0 0 auto;}
 html.cwn-active body #chat > .mes :is(.mes_text,.mes_reasoning) {
-  font-family:var(--cwn-font-reading)!important; font-size:calc(.94em * var(--fontScale,1))!important;
+  font-family:var(--cwn-font-reading)!important; font-size:var(--cwn-reading-size,calc(.94em * var(--fontScale,1)))!important;
   line-height:1.76!important; font-weight:430!important; letter-spacing:0!important;
   font-optical-sizing:auto; font-kerning:normal;
   color:var(--cwn-ink)!important; padding:0!important; text-wrap:wrap;
@@ -44,7 +45,7 @@ html.cwn-active body #chat > .mes .mes_button {
 }
 html.cwn-active body #chat > .mes:has(.edit_textarea) > .mes_block {padding-bottom:0!important;}
 @media(max-width:700px) {
-  html.cwn-active body #chat > .mes :is(.mes_text,.mes_reasoning) {font-size:calc(.9rem * var(--fontScale,1))!important;}
+  html.cwn-active body #chat > .mes :is(.mes_text,.mes_reasoning) {font-size:var(--cwn-reading-size,calc(.9rem * var(--fontScale,1)))!important;}
   html.cwn-active body #chat > .mes:is([is_user="false"],[is_user="true"]) > .mesAvatarWrapper {position:absolute!important;top:12px;left:0;}
   html.cwn-active body #chat > .mes:is([is_user="false"],[is_user="true"]) > .mesAvatarWrapper .avatar,
   html.cwn-active body #chat > .mes:is([is_user="false"],[is_user="true"]) > .mesAvatarWrapper .avatar img {width:42px!important;height:42px!important;}
@@ -318,10 +319,19 @@ html.cwn-active body .cwn-readonly-bar button svg {
   stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;
 }
 html.cwn-active body .cwn-readonly-bar button:hover {color:var(--cwn-ink);background:var(--cwn-hover);}
-/* Hide avatar metadata on both layouts: message index and generation duration. */
-html.cwn-active body #chat .mes :is(.mesIDDisplay,.mes_timer) {
-  display:none!important;
+/* Native preference classes remain the authority for optional metadata. */
+html.cwn-active body #chat .cwn-message-metadata {
+  display:flex;flex-wrap:wrap;gap:4px 12px;margin-top:8px;
+  color:var(--cwn-muted);font:400 12px/1.5 var(--cwn-font-ui);
 }
+html.cwn-active body #chat .cwn-message-metadata > * {
+  color:inherit!important;font:inherit!important;opacity:1!important;text-align:left;
+}
+html.cwn-active body #chat .cwn-message-metadata > :empty {display:none!important;}
+html.cwn-active body.no-mesIDDisplay #chat .mesIDDisplay,
+html.cwn-active body.no-timer #chat .mes_timer,
+html.cwn-active body.no-tokenCount #chat .tokenCounterDisplay {display:none!important;}
+html.cwn-active body.no-mesIDDisplay.no-timer.no-tokenCount #chat .cwn-message-metadata {display:none;}
 
 /* A single viewport layer prevents transformed messages and native right-button
    offsets from moving mobile candidate controls independently. */

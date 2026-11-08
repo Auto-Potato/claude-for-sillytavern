@@ -22,6 +22,9 @@ import { mountMessages } from './src/messages.js';
 import { mountDialogStyle } from './src/dialog-style.js';
 import { mountApiPanel } from './src/api-panel.js';
 import { mountPersonaPanel } from './src/persona-panel.js';
+import { power_user } from '../../../power-user.js';
+import { initializeMessagePreferences } from './src/message-preferences.js';
+import { mountPreferencesPanel } from './src/preferences-panel.js';
 
 // Mount after host widgets initialize, while its startup overlay still covers
 // the native layout. APP_READY runs after that overlay has already disappeared.
@@ -40,11 +43,13 @@ function stopToasts() {
 if (extension_settings.claude_for_sillytavern?.enabled !== false) startToasts();
 function start() {
   dispose?.();
+  initializeMessagePreferences(extension_settings.claude_for_sillytavern ??= {}, power_user, document, saveSettingsDebounced);
   const disposeIcons = mountSiteIcons(document);
   const disposeDialogStyle = mountDialogStyle({ Popup, POPUP_TYPE });
   const disposeShell = mountShell(document, window, toggle => doNavbarIconClick.call(toggle));
   const disposeHome = mountHome(document, window, host);
   const disposeAppearance = mountAppearance(document, window);
+  const disposePreferences = mountPreferencesPanel(document, window, extension_settings.claude_for_sillytavern, saveSettingsDebounced);
   const disposeComposer = mountComposer(document, host);
   const disposeMessages = mountMessages(document, host);
   const disposeImport = mountCharacterImport(document, window, processDroppedFiles);
@@ -84,7 +89,7 @@ function start() {
   });
   const disposeBrowserNavigation = mountBrowserNavigation(document, window);
   startToasts();
-  dispose = () => { disposeBrowserNavigation(); disposeWorldOption(); disposeExtensions(); disposeApi(); disposePersona(); disposePreset(); disposeWorldbook(); disposeLibrary(); disposeImport(); disposeDialogStyle(); disposeIcons(); stopToasts(); disposeMessages(); disposeComposer(); disposeAppearance(); disposeHome(); disposeShell(); };
+  dispose = () => { disposeBrowserNavigation(); disposeWorldOption(); disposeExtensions(); disposeApi(); disposePersona(); disposePreset(); disposeWorldbook(); disposeLibrary(); disposeImport(); disposeDialogStyle(); disposeIcons(); stopToasts(); disposeMessages(); disposeComposer(); disposePreferences(); disposeAppearance(); disposeHome(); disposeShell(); };
 }
 eventSource.once(event_types.APP_INITIALIZED || event_types.APP_READY, () => {
   const settings = extension_settings.claude_for_sillytavern ??= { enabled: true };

@@ -15,6 +15,26 @@ export function mountMessages(doc, host) {
   }
   doc.addEventListener('click',closeAvatarOutside,true);
   const originals = new Map();
+  const metadataOrigins = new Map();
+  function placeMetadata(message) {
+    const block = message.querySelector(':scope > .mes_block');
+    const avatar = message.querySelector(':scope > .mesAvatarWrapper');
+    if (!block || !avatar) return;
+    const nodes = avatar.querySelectorAll('.mesIDDisplay,.mes_timer,.tokenCounterDisplay');
+    if (!nodes.length) return;
+    let row = block.querySelector(':scope > .cwn-message-metadata');
+    if (!row) {
+      row = doc.createElement('div');
+      row.className = 'cwn-message-metadata';
+      block.append(row);
+    }
+    for (const node of nodes) {
+      const anchor = doc.createComment('cwn-metadata-origin');
+      node.before(anchor);
+      metadataOrigins.set(node, anchor);
+      row.append(node);
+    }
+  }
   const win = doc.defaultView;
   // Keep mobile controls outside transformed message ancestors.
   const mobileArrows=doc.createElement('div');
@@ -129,6 +149,7 @@ export function mountMessages(doc, host) {
       if(!chat.contains(message))continue;
       if(!message.querySelector('.edit_textarea') && editAnchor?.message!==message)readingPositions.delete(message);
       refreshCodeBars(message);
+      placeMetadata(message);
       message.classList.toggle('cwn-has-candidates',host.candidateCount(Number(message.getAttribute('mesid')))>1);
     message.querySelectorAll('.timestamp').forEach(element => {
       const text = element.textContent;
@@ -158,6 +179,7 @@ export function mountMessages(doc, host) {
     }
     if(removed){
       for(const element of originals.keys())if(!chat.contains(element))originals.delete(element);
+      for(const [node,anchor] of metadataOrigins)if(!chat.contains(node)){anchor.remove();metadataOrigins.delete(node);}
       if(editAnchor && !chat.contains(editAnchor.message))editAnchor=null;
       if(cancelledMessage && !chat.contains(cancelledMessage))cancelledMessage=null;
     }
@@ -167,6 +189,11 @@ export function mountMessages(doc, host) {
   update();
   return () => {
     observer.disconnect();
+    for (const [node, anchor] of metadataOrigins) {
+      if (anchor.parentNode) anchor.replaceWith(node);
+    }
+    metadataOrigins.clear();
+    chat.querySelectorAll('.cwn-message-metadata').forEach(row => row.remove());
     chat.querySelectorAll('.cwn-code-bar').forEach(bar=>bar.remove());
     doc.removeEventListener('click',closeAvatarOutside,true);
     avatarShade.remove();

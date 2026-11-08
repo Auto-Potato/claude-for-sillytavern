@@ -14,7 +14,15 @@ html.cwn-active[data-cwn-theme="dark"] {
 html.cwn-active body #sheld #send_form {background:var(--cwn-surface)!important;border-color:var(--cwn-line)!important;}
 html.cwn-active body #sheld #rightSendForm :is(#send_but,#mes_stop) {background:var(--cwn-accent)!important;}
 html.cwn-active body .cwn-api-notice {color:var(--cwn-composer-muted);}
-html.cwn-active body {--SmartThemeBodyColor:var(--cwn-ink);--SmartThemeBlurTintColor:var(--cwn-bg);--SmartThemeChatTintColor:var(--cwn-bg);--SmartThemeBorderColor:var(--cwn-line);}
+html.cwn-active body {
+  --SmartThemeBodyColor:var(--cwn-ink);--SmartThemeBlurTintColor:var(--cwn-bg);--SmartThemeChatTintColor:var(--cwn-bg);--SmartThemeBorderColor:var(--cwn-line);
+  --SmartThemeEmColor:var(--cwn-muted)!important;
+  --SmartThemeUnderlineColor:var(--cwn-ink)!important;
+  --SmartThemeQuoteColor:var(--cwn-quote)!important;
+  --SmartThemeShadowColor:transparent!important;
+  --shadowWidth:0!important;
+  text-shadow:none!important;
+}
 
 /* Native disabled prompts use translucent white, unsuitable for warm paper. */
 html.cwn-active body #completion_prompt_manager #completion_prompt_manager_list .completion_prompt_manager_prompt_name,
